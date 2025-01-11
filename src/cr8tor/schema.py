@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class CrateMeta(StrEnum):
@@ -11,12 +11,13 @@ class CrateMeta(StrEnum):
 
 class Project(BaseModel):
     """
-    The project that the request is sent on behalf of, typically related to permission to use a TRE, MUST be indicated from the root dataset using sourceOrganization to a Project. The responsible project SHOULD be referenced from the requesting agent’s memberOf.
+    The project that the request is sent on behalf of, typically related to permission to use a TRE,
+    MUST be indicated from the root dataset using sourceOrganization to a Project. The responsible
+    project SHOULD be referenced from the requesting agent’s memberOf.
 
     https://trefx.uk/5s-crate/0.5-DRAFT/#responsible-project
 
     https://schema.org/Project
-
     """
 
     name: str
@@ -26,10 +27,11 @@ class Project(BaseModel):
 
 class RequestingAgent(BaseModel):
     """
-    The individual person who is requesting the run MUST be indicated as an `agent` from the `CreateAction`, which SHOULD have an `affiliation` to the organisation they are representing for access control purposes
+    The individual person who is requesting the run MUST be indicated as an `agent` from the
+    `CreateAction`, which SHOULD have an `affiliation` to the organisation they are representing
+    for access control purposes
 
     https://trefx.uk/5s-crate/0.5-DRAFT/#requesting-agent
-
     """
 
     name: str
@@ -50,7 +52,6 @@ class TableMetadata(BaseModel):
 
 
 class DatasetMetadata(BaseModel):
-    type_: str = Field(default="Dataset")
     name: str
     description: str
     catalog: str
