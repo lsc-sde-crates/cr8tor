@@ -5,7 +5,12 @@ description = "Python package to create 5s-Crates for LSC SDE"
 readme = "README.md"
 authors = [{ name = "vvcb", email = "vvcb.n1@gmail.com" }]
 requires-python = ">=3.13"
-dependencies = ["pydantic>=2.10.4", "rocrate>=0.13.0", "typer>=0.15.1"]
+dependencies = [
+    "bagit>=1.8.1",
+    "pydantic>=2.10.4",
+    "rocrate>=0.13.0",
+    "typer>=0.15.1",
+]
 
 [project.scripts]
 cr8tor = "cr8tor.cli:app"

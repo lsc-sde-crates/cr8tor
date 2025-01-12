@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class CrateMeta(StrEnum):
@@ -57,3 +57,10 @@ class DatasetMetadata(BaseModel):
     catalog: str
     table_schema: str
     tables: List[TableMetadata]
+
+
+class BagitInfo(BaseModel):
+    source_organization: str = Field(alias="Source-Organization")
+    organization_address: str = Field(alias="Organization-Address")
+    contact_name: str = Field(alias="Contact-Name")
+    contact_email: str = Field(alias="Contact-Email")
