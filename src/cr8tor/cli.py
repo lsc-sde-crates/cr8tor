@@ -3,12 +3,12 @@ import uuid
 from hashlib import md5
 from pathlib import Path
 from typing import Annotated
-import tomllib
 
 import bagit
 import rich
 import rich.panel
 import rocrate.model as m
+import tomllib
 import typer
 import yaml
 from pydantic import HttpUrl
@@ -132,7 +132,8 @@ def init_bag(project_id: str, bag_dir: Path, config: dict) -> bagit.Bag:
 
     bag: bagit.Bag = bagit.make_bag(bag_dir=bag_dir, checksums=["sha512"])
 
-    bag.info.update(s.BagitInfo(**config["bagit-info"]))
+    # bag.info.update(s.BagitInfo(**config["bagit-info"])) # ToDo: Fix serialisation alias issue
+    bag.info.update(**config["bagit-info"])
     bag.info["External-Identifier"] = make_uuid(project_id)
 
     return bag
