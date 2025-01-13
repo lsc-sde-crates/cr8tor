@@ -25,6 +25,15 @@ class Project(BaseModel):
     identifier: str
 
 
+class CodeRepository(BaseModel):
+    """
+    External Github repository used to manage this LSCSDE project
+    """
+    name: str
+    description: str
+    url: str
+
+
 class RequestingAgent(BaseModel):
     """
     The individual person who is requesting the run MUST be indicated as an `agent` from the

@@ -3,6 +3,11 @@ project:
   description: "This is a test project"
   identifier: "https://github.com/lsc-sde-crates/test-project"
 
+repository:
+  name: "Github Repo"
+  description: "This LSC-DIP RO-Crate is versioned and stored in a Git repository on GitHub."
+  url: "https://github.com/lsc-sde-crates/test-project"
+
 requesting_agent:
   name: "Prof. Jane Doe"
   affiliation: "Lancaster University"

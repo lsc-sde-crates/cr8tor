@@ -20,7 +20,6 @@ from cr8tor.exception import DirectoryNotFoundError
 
 app = typer.Typer()
 
-
 def make_uuid(
     project_id: str | HttpUrl,
 ) -> Annotated[str, "Unique URN:UUID identifier derived from MD5 hash of project id."]:
@@ -170,15 +169,38 @@ def create(
     if not resources_dir.exists():
         raise DirectoryNotFoundError(resources_dir)
 
+    
+    log.info(
+        f"[cyan]TEST[/cyan] - [bold magenta]TEST[/bold magenta]",
+    )
+    
     crate = ROCrate(gen_preview=True)
 
     # Load project information
     # ToDo: File paths are hard coded here and the contents should pass validation by pydantic.
     # Should there be more flexibility in what makes it into the RO-Crate?
 
+    # Add github repository information
+
     governance = yaml.safe_load(
         resources_dir.joinpath("governance", "project.yaml").read_text()
     )
+
+    
+    repo = s.CodeRepository(**governance["repository"])
+
+    repoEntity = m.ContextEntity(
+        crate=crate,
+        identifier="repo-12e3",
+        properties={
+            "@type": "SoftwareSourceCode",
+            "name": "GitHub Repository for LSC-DIP RO-Crate",
+            "description": "",
+            "codeRepository":repo.url
+        }
+    )
+    crate.add(repoEntity)
+    crate.metadata["isBasedOn"] = {"@id": "repo-123"}
 
     project = s.Project(**governance["project"])
 
@@ -191,14 +213,17 @@ def create(
         f"[cyan]Creating RO-Crate for[/cyan] - [bold magenta]{project.name}[/bold magenta]",
     )
 
+
     ro_project = m.ContextEntity(
         crate=crate,
         identifier=project.identifier,
         properties={
             "@type": "Project",
             "@id": project_id,
-        }.update(**project.model_dump()),
+            "name": "Study of type 2 diabetics"
+        },
     )
+
     crate.add(ro_project)
 
     # Add governance yaml file to crate
