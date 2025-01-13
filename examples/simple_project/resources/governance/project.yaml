@@ -1,7 +1,7 @@
 project:
   name: "Test Project"
   description: "This is a test project"
-  identifier: "https://github.com/lsc-sde-crates/test-project"
+  #identifier: "https://github.com/lsc-sde-crates/test-project"
 
 repository:
   name: "Github Repo"

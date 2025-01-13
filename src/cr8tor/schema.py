@@ -22,7 +22,7 @@ class Project(BaseModel):
 
     name: str
     description: str
-    identifier: str
+    #identifier: str
 
 
 class CodeRepository(BaseModel):

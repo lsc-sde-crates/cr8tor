@@ -176,22 +176,21 @@ def create(
     
     crate = ROCrate(gen_preview=True)
 
+    project_id = str(uuid.uuid4())
+
     # Load project information
     # ToDo: File paths are hard coded here and the contents should pass validation by pydantic.
     # Should there be more flexibility in what makes it into the RO-Crate?
-
-    # Add github repository information
 
     governance = yaml.safe_load(
         resources_dir.joinpath("governance", "project.yaml").read_text()
     )
 
-    
     repo = s.CodeRepository(**governance["repository"])
 
     repoEntity = m.ContextEntity(
         crate=crate,
-        identifier="repo-12e3",
+        identifier=f"repo-{project_id}",
         properties={
             "@type": "SoftwareSourceCode",
             "name": "GitHub Repository for LSC-DIP RO-Crate",
@@ -200,31 +199,30 @@ def create(
         }
     )
     crate.add(repoEntity)
-    crate.metadata["isBasedOn"] = {"@id": "repo-123"}
+    crate.metadata["isBasedOn"] = {"@id": f"repo-{project_id}"}
 
     project = s.Project(**governance["project"])
+
+    
 
     project_id: Annotated[
         str,
         "Unique Project Identifier should be the GitHub URL of the Project Crate Repo",
-    ] = os.getenv("PROJECT_IDENTIFIER", project.identifier)
+    ] = os.getenv("PROJECT_IDENTIFIER", project_id)
 
     log.info(
         f"[cyan]Creating RO-Crate for[/cyan] - [bold magenta]{project.name}[/bold magenta]",
     )
 
-
-    ro_project = m.ContextEntity(
+    projectEntity = m.ContextEntity(
         crate=crate,
-        identifier=project.identifier,
+        identifier="proj-" + project_id,
         properties={
             "@type": "Project",
-            "@id": project_id,
             "name": "Study of type 2 diabetics"
         },
     )
-
-    crate.add(ro_project)
+    crate.add(projectEntity)
 
     # Add governance yaml file to crate
 
@@ -270,7 +268,7 @@ def create(
             "url": "https://github.com/lsc-sde-crates",
         },
     )
-    crate.mainEntity = ro_project
+    crate.mainEntity = projectEntity
 
     # Create a new bagit dir or open existing one
     # Write the crate into the data dir of the bag
