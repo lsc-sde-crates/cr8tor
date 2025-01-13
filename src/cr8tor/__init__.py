@@ -8,7 +8,8 @@ from cr8tor.schema import (
     ColumnMetadata,
     DatasetMetadata,
     Project,
-    RequestingAgent,
+    Requester,
+    CodeRepository,
     TableMetadata,
 )
 

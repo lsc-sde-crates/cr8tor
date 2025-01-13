@@ -176,39 +176,19 @@ def create(
     
     crate = ROCrate(gen_preview=True)
 
-    project_id = str(uuid.uuid4())
-
-    # Load project information
-    # ToDo: File paths are hard coded here and the contents should pass validation by pydantic.
-    # Should there be more flexibility in what makes it into the RO-Crate?
-
     governance = yaml.safe_load(
         resources_dir.joinpath("governance", "project.yaml").read_text()
     )
 
-    repo = s.CodeRepository(**governance["repository"])
-
-    repoEntity = m.ContextEntity(
-        crate=crate,
-        identifier=f"repo-{project_id}",
-        properties={
-            "@type": "SoftwareSourceCode",
-            "name": "GitHub Repository for LSC-DIP RO-Crate",
-            "description": "",
-            "codeRepository":repo.url
-        }
-    )
-    crate.add(repoEntity)
-    crate.metadata["isBasedOn"] = {"@id": f"repo-{project_id}"}
-
+    #
+    # Project Conext Entity
+    #
     project = s.Project(**governance["project"])
-
-    
-
-    project_id: Annotated[
+    project_uuid = str(uuid.uuid4())
+    project_uuid: Annotated[
         str,
         "Unique Project Identifier should be the GitHub URL of the Project Crate Repo",
-    ] = os.getenv("PROJECT_IDENTIFIER", project_id)
+    ] = os.getenv("PROJECT_IDENTIFIER", project_uuid)
 
     log.info(
         f"[cyan]Creating RO-Crate for[/cyan] - [bold magenta]{project.name}[/bold magenta]",
@@ -216,13 +196,47 @@ def create(
 
     projectEntity = m.ContextEntity(
         crate=crate,
-        identifier="proj-" + project_id,
+        identifier="proj-" + project_uuid,
         properties={
             "@type": "Project",
-            "name": "Study of type 2 diabetics"
+            "name": project.name,
+            "identifier": project.identifier,
+            "member": [{"@id": f"requester-{project_uuid}"}]
         },
     )
     crate.add(projectEntity)
+
+    #
+    # Requester Context Entity
+    #
+    requester = s.Requester(**governance["requester"])
+
+    requesterEntity = m.Person(crate, 
+                f"requester-{project_uuid}", 
+                properties={
+        "name": requester.name,
+        "affiliation": requester.affiliation
+    })
+    crate.add(requesterEntity)
+
+    #
+    # Repository Conext Entity
+    #
+    repo = s.CodeRepository(**governance["repository"])
+
+    repoEntity = m.ContextEntity(
+        crate=crate,
+        identifier=f"repo-{project_uuid}",
+        properties={
+            "@type": "SoftwareSourceCode",
+            "name": repo.name,
+            "description": repo.description,
+            "codeRepository":repo.url
+        }
+    )
+    crate.add(repoEntity)
+    crate.metadata["isBasedOn"] = {"@id": f"repo-{project_uuid}"}
+
 
     # Add governance yaml file to crate
 

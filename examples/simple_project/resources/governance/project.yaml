@@ -1,14 +1,14 @@
 project:
   name: "Test Project"
   description: "This is a test project"
-  #identifier: "https://github.com/lsc-sde-crates/test-project"
+  identifier: "DAR-123"
 
 repository:
   name: "Github Repo"
   description: "This LSC-DIP RO-Crate is versioned and stored in a Git repository on GitHub."
   url: "https://github.com/lsc-sde-crates/test-project"
 
-requesting_agent:
+requester:
   name: "Prof. Jane Doe"
   affiliation: "Lancaster University"
 

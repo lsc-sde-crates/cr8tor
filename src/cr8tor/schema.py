@@ -22,7 +22,7 @@ class Project(BaseModel):
 
     name: str
     description: str
-    #identifier: str
+    identifier: str
 
 
 class CodeRepository(BaseModel):
@@ -34,7 +34,7 @@ class CodeRepository(BaseModel):
     url: str
 
 
-class RequestingAgent(BaseModel):
+class Requester(BaseModel):
     """
     The individual person who is requesting the run MUST be indicated as an `agent` from the
     `CreateAction`, which SHOULD have an `affiliation` to the organisation they are representing
@@ -45,7 +45,7 @@ class RequestingAgent(BaseModel):
 
     name: str
     affiliation: str
-    memberOf: List[str]
+    #memberOf: List[str]
 
 
 class ColumnMetadata(BaseModel):
