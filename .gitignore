@@ -1,3 +1,6 @@
+# Ignore generated bagit
+/examples/simple_project/bagit/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
