@@ -34,7 +34,7 @@ jobs:
           cd projects/${{ inputs.resources_target }}
           cr8tor create
       
-      - name: Parse generated ro-crate metadata for project id
+      - name: Parse generated ro-crate metadata for project uuid
         run: |
           cd projects/${{ inputs.resources_target }}/bagit/data
           PROJ_UUID=$(jq -r '.["@graph"][] | select(."@type" == "Project")["@id"]' ro-crate-metadata.json)
@@ -42,7 +42,6 @@ jobs:
 
       - name: init repo
         run: |
-          gh api -X DELETE "/repos/$ORG/$REPO_NAME"
           gh repo create "$ORG/$REPO_NAME" --private
       
       - name: Set id for git commit
