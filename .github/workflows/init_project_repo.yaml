@@ -17,6 +17,9 @@ on:
 jobs:
   init-project:
     runs-on: ubuntu-latest
+    env:
+        ORG: lsc-sde-crates
+        REPO_NAME: mph-test-project
 
     steps:
       - name: Checkout repository
@@ -35,24 +38,22 @@ jobs:
           cd examples/simple_project
           cr8tor create --dryrun
 
-    #   - name: config gh
-    #     uses: actions/setup-gh@v2
-    #     with:
-    #       token: ${{ secrets.MPH_PAT_TOKEN }}
+      - name: config gh
+        uses: actions/setup-gh@v2
+        with:
+          token: ${{ secrets.MPH_PAT_TOKEN }}
 
-    #   - name: init repo
-    #     run: |
-    #       REPO_NAME="test project" # get local project id
-    #       ORG="lsc-sde-crates"
-    #       gh repo create "$ORG/$REPO_NAME" --private --confirm
+      - name: init repo
+        run: |
+          gh repo create "$ORG/$REPO_NAME" --private --confirm
 
-    #   - name: Push files to the new repository
-    #     run: |
-    #       mv examples/repo/* new-repo/
-    #       cd new-repo
-    #       git init
-    #       git remote add origin "https://github.com/$ORG/$REPO_NAME.git"
-    #       git add .
-    #       git commit -m "Auto init and commit"
-    #       git branch -M main
-    #       git push -u origin main
+      - name: Push generated lscsde DAR project
+        run: |
+          mv examples/simple_project/* generated-proj/
+          cd generated-proj
+          git init
+          git remote add origin "https://github.com/$ORG/$REPO_NAME.git"
+          git add .
+          git commit -m "GA auto init and commit project"
+          git branch -M main
+          git push -u origin main

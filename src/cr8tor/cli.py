@@ -168,11 +168,6 @@ def create(
     # Raise exception if resources directory is not found.
     if not resources_dir.exists():
         raise DirectoryNotFoundError(resources_dir)
-
-    
-    log.info(
-        f"[cyan]TEST[/cyan] - [bold magenta]TEST[/bold magenta]",
-    )
     
     crate = ROCrate(gen_preview=True)
 
