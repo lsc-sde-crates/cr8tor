@@ -176,8 +176,8 @@ def create(
     
     crate = ROCrate(gen_preview=True)
 
-
-    crate.add_action()
+    # TODO: Define CreateAction
+    # crate.add_action()
 
     governance = yaml.safe_load(
         resources_dir.joinpath("governance", "project.yaml").read_text()
