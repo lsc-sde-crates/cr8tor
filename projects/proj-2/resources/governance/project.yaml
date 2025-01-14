@@ -6,7 +6,7 @@ project:
 repository:
   name: "Github Repo"
   description: "This LSC-DIP RO-Crate is versioned and stored in a Git repository on GitHub."
-  url: "httpshttps://github.com/lsc-sde-crates/"
+  url: "https://github.com/lsc-sde-crates/"
 
 requester:
   name: "Dr. Joe Bloggs"
