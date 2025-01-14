@@ -41,6 +41,7 @@ jobs:
 
       - name: init repo
         run: |
+          gh api -X DELETE "/repos/$ORG/$REPO_NAME"
           gh repo create "$ORG/$REPO_NAME" --private
 
       - name: Push generated lscsde DAR project
@@ -49,7 +50,7 @@ jobs:
           mv examples/simple_project/* generated-proj/
           cd generated-proj
           git init
-          git remote add origin "https://github.com/$ORG/$REPO_NAME.git"
+          git remote add origin "https://$GH_TOKEN@github.com/$ORG/$REPO_NAME.git"
           git add .
           git commit -m "GA auto init and commit project"
           git branch -M main
