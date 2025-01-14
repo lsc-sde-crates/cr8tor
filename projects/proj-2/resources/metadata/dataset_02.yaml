@@ -1,0 +1,17 @@
+name: "vocab"
+description: "OMOP conformant vocabulary data"
+catalog: "name of database"
+table_schema: "vocab"
+tables:
+  - name: concept
+    description: Contains Athena concepts
+    columns:
+      - name: concept_id
+        description: Unique concept identifier
+        datatype: int
+      - name: concept_name
+        description: Canonical name of concept
+        datatype: text
+      - name: vocabulary_id
+        description: Vocabulary id. e.g. SNOMED, LOINC, etc.
+        datatype: text

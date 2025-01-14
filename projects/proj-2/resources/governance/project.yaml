@@ -1,0 +1,18 @@
+project:
+  name: "Test Project"
+  description: "This is a test project"
+  identifier: "lscsde-ref-2"
+
+repository:
+  name: "Github Repo"
+  description: "This LSC-DIP RO-Crate is versioned and stored in a Git repository on GitHub."
+  url: "httpshttps://github.com/lsc-sde-crates/"
+
+requester:
+  name: "Dr. Joe Bloggs"
+  affiliation:
+    name: "University of Manchester"
+    url: "https://www.manchester.ac.uk"
+
+metadata_sources:
+  - metadata/dataset_01.yaml

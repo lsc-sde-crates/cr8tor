@@ -6,5 +6,10 @@ jobs:
     proj-1:
         uses: ./.github/workflows/init_project_repo.yaml
         with:
-            resources_target: 1-proj
+            resources_target: proj-1
+        secrets: inherit
+    proj-2:
+        uses: ./.github/workflows/init_project_repo.yaml
+        with:
+            resources_target: proj-2
         secrets: inherit

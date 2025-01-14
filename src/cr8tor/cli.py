@@ -243,7 +243,7 @@ def create(
             "@type": "SoftwareSourceCode",
             "name": repo.name,
             "description": repo.description,
-            "codeRepository":repo.url
+            "codeRepository":f"{repo.url}proj-{project_uuid}" 
         }
     )
     crate.add(repoEntity)
