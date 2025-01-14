@@ -310,7 +310,7 @@ def create(
             bag.info.update(**config["bagit-info"])
             log.info("Loaded existing bag")
         else:
-            bag = init_bag(project_id=project_id, bag_dir=bag_dir, config=config)
+            bag = init_bag(project_id=project_uuid, bag_dir=bag_dir, config=config)
 
         crate.write(bag_dir / "data")
         bag.save(manifests=True)
