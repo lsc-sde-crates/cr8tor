@@ -20,6 +20,7 @@ jobs:
     env:
         ORG: lsc-sde-crates
         REPO_NAME: mph-test-project
+        GH_TOKEN: ${{ secrets.MPH_PAT_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -37,11 +38,6 @@ jobs:
           source .venv/bin/activate
           cd examples/simple_project
           cr8tor create --dryrun
-
-      - name: config gh
-        uses: actions/setup-gh@v2
-        with:
-          token: ${{ secrets.MPH_PAT_TOKEN }}
 
       - name: init repo
         run: |
