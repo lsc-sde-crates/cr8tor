@@ -1,7 +1,6 @@
 name: Init RO-Crate Project
 
 on:
-    push:
     workflow_call:
         inputs:
             governamce_yaml:
