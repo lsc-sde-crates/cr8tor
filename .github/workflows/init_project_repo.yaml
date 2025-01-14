@@ -43,6 +43,11 @@ jobs:
         run: |
           gh api -X DELETE "/repos/$ORG/$REPO_NAME"
           gh repo create "$ORG/$REPO_NAME" --private
+      
+      - name: Set id for git commit
+        run: |
+          git config --global user.name "LSCSDE Governance Action"
+          git config --global user.email "lscsde-actions@github.com"
 
       - name: Push generated lscsde DAR project
         run: |
