@@ -1,19 +1,20 @@
 name: Init RO-Crate Project
 
 on:
-  workflow_call:
-    inputs:
-        governamce_yaml:
-            description: path to user-defined governance inputs
-            type: string
-            required: true
-        metadata_yaml:
-            description: path to user-defined metadata inputs
-            type: string
-            required: true
-    secrets:
-        MPH_PAT_TOKEN:
-            required: true
+    push:
+    workflow_call:
+        inputs:
+            governamce_yaml:
+                description: path to user-defined governance inputs
+                type: string
+                required: true
+            metadata_yaml:
+                description: path to user-defined metadata inputs
+                type: string
+                required: true
+        secrets:
+            MPH_PAT_TOKEN:
+                required: true
 jobs:
   init-project:
     runs-on: ubuntu-latest
