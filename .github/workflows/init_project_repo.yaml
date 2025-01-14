@@ -41,10 +41,11 @@ jobs:
 
       - name: init repo
         run: |
-          gh repo create "$ORG/$REPO_NAME" --private --confirm
+          gh repo create "$ORG/$REPO_NAME" --private
 
       - name: Push generated lscsde DAR project
         run: |
+          mkdir generated-proj
           mv examples/simple_project/* generated-proj/
           cd generated-proj
           git init
