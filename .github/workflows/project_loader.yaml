@@ -1,7 +1,6 @@
 name: Project Loader
 on:
     workflow_dispatch:
-    push:
 jobs:
     projectFoo:
         uses: ./.github/workflows/init_project_repo.yaml
