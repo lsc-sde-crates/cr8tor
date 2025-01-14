@@ -1,0 +1,58 @@
+name: Init RO-Crate Project
+
+on:
+  workflow_call:
+    inputs:
+        governamce_yaml:
+            description: path to user-defined governance inputs
+            type: string
+            required: true
+        metadata_yaml:
+            description: path to user-defined metadata inputs
+            type: string
+            required: true
+    secrets:
+        MPH_PAT_TOKEN:
+            required: true
+jobs:
+  init-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.13
+
+      - name: Cr8tor Env
+        run: |
+          wget -qO- https://astral.sh/uv/install.sh | sh
+          uv sync
+          source .venv/bin/activate
+          cd examples/simple_project
+          cr8tor create --dryrun
+
+    #   - name: config gh
+    #     uses: actions/setup-gh@v2
+    #     with:
+    #       token: ${{ secrets.MPH_PAT_TOKEN }}
+
+    #   - name: init repo
+    #     run: |
+    #       REPO_NAME="test project" # get local project id
+    #       ORG="lsc-sde-crates"
+    #       gh repo create "$ORG/$REPO_NAME" --private --confirm
+
+    #   - name: Push files to the new repository
+    #     run: |
+    #       mv examples/repo/* new-repo/
+    #       cd new-repo
+    #       git init
+    #       git remote add origin "https://github.com/$ORG/$REPO_NAME.git"
+    #       git add .
+    #       git commit -m "Auto init and commit"
+    #       git branch -M main
+    #       git push -u origin main

@@ -10,7 +10,9 @@ repository:
 
 requester:
   name: "Prof. Jane Doe"
-  affiliation: "Lancaster University"
+  affiliation:
+    name: "Lancaster University"
+    url: "https://www.lancs.ac.uk"
 
 metadata_sources:
   - metadata/dataset_01.yaml

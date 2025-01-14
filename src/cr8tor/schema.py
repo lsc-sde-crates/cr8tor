@@ -33,6 +33,9 @@ class CodeRepository(BaseModel):
     description: str
     url: str
 
+class Affiliation(BaseModel):
+    name: str
+    url: str
 
 class Requester(BaseModel):
     """
@@ -44,8 +47,7 @@ class Requester(BaseModel):
     """
 
     name: str
-    affiliation: str
-    #memberOf: List[str]
+    affiliation: Affiliation
 
 
 class ColumnMetadata(BaseModel):

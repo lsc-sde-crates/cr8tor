@@ -176,6 +176,9 @@ def create(
     
     crate = ROCrate(gen_preview=True)
 
+
+    crate.add_action()
+
     governance = yaml.safe_load(
         resources_dir.joinpath("governance", "project.yaml").read_text()
     )
@@ -201,21 +204,35 @@ def create(
             "@type": "Project",
             "name": project.name,
             "identifier": project.identifier,
-            "member": [{"@id": f"requester-{project_uuid}"}]
-        },
+            "memberOf": [{"@id": f"requester-{project_uuid}"}]
+        }
     )
     crate.add(projectEntity)
+
+    requester = s.Requester(**governance["requester"])
+    #
+    # Requester Affiliation Context Entity
+    #
+    affEntity = m.ContextEntity(
+        crate, 
+        identifier=f"requester-org-{project_uuid}", 
+        properties={
+            "@type": "Organisation",
+            "name": requester.affiliation.name,
+            "url": requester.affiliation.url
+        }
+    )
+    crate.add(affEntity)
 
     #
     # Requester Context Entity
     #
-    requester = s.Requester(**governance["requester"])
-
+    
     requesterEntity = m.Person(crate, 
                 f"requester-{project_uuid}", 
                 properties={
         "name": requester.name,
-        "affiliation": requester.affiliation
+        "affiliation": {"@id": f"requester-org-{project_uuid}"}
     })
     crate.add(requesterEntity)
 
