@@ -6,6 +6,6 @@ jobs:
     projectFoo:
         uses: ./.github/workflows/init_project_repo.yaml
         with:
-            governamce_yaml: governance
-            metadata_yaml: metadata
+            governamce_yaml: governance/
+            metadata_yaml: metadata/
         secrets: inherit
