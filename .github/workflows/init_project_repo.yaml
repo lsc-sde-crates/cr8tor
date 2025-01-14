@@ -3,12 +3,8 @@ name: Init RO-Crate Project
 on:
     workflow_call:
         inputs:
-            governamce_yaml:
-                description: path to user-defined governance inputs
-                type: string
-                required: true
-            metadata_yaml:
-                description: path to user-defined metadata inputs
+            resources_target:
+                description: path to user-defined project yaml
                 type: string
                 required: true
         secrets:
@@ -19,7 +15,6 @@ jobs:
     runs-on: ubuntu-22.04
     env:
         ORG: lsc-sde-crates
-        REPO_NAME: mph-test-project
         GH_TOKEN: ${{ secrets.MPH_PAT_TOKEN }}
 
     steps:
@@ -36,8 +31,14 @@ jobs:
           wget -qO- https://astral.sh/uv/install.sh | sh
           uv sync
           source .venv/bin/activate
-          cd examples/simple_project
+          cd projects/${{ inputs.resources_target }}
           cr8tor create
+      
+      - name: Parse generated ro-crate metadata for project id
+        run: |
+          cd projects/${{ inputs.resources_target }}/bagit/data
+          PROJ_UUID=$(jq -r '.["@graph"][] | select(."@type" == "Project")["@id"]' ro-crate-metadata.json)
+          echo "REPO_NAME=$PROJ_UUID" >> $GITHUB_ENV
 
       - name: init repo
         run: |
@@ -46,13 +47,13 @@ jobs:
       
       - name: Set id for git commit
         run: |
-          git config --global user.name "LSCSDE Governance Action"
+          git config --global user.name "LSCSDE Governance Actions"
           git config --global user.email "lscsde-actions@github.com"
 
       - name: Push generated lscsde DAR project
         run: |
           mkdir generated-proj
-          mv examples/simple_project/* generated-proj/
+          mv projects/${{ inputs.resources_target }}/* generated-proj/
           cd generated-proj
           git init
           git remote add origin "https://$GH_TOKEN@github.com/$ORG/$REPO_NAME.git"

@@ -3,9 +3,8 @@ on:
     push:
     workflow_dispatch:
 jobs:
-    projectFoo:
+    1proj:
         uses: ./.github/workflows/init_project_repo.yaml
         with:
-            governamce_yaml: governance
-            metadata_yaml: metadata
+            resources_target: 1-proj
         secrets: inherit

@@ -1,7 +1,7 @@
 project:
   name: "Test Project"
   description: "This is a test project"
-  identifier: "dar-123-project"
+  identifier: "DAR-123"
 
 repository:
   name: "Github Repo"

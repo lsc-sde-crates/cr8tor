@@ -1,0 +1,17 @@
+name: "p_abx"
+description: "OMOP conformant data for antimicrobial stewarship"
+catalog: "name of database"
+table_schema: "name of schema"
+tables:
+  - name: person
+    description: Contains demographics
+    columns:
+      - name: age
+        description: Age of patient
+        datatype: int
+      - name: ethnicity
+        description: Ethnicity of patient
+        datatype: text
+      - name: location
+        description: LSOA of patient
+        datatype: text
