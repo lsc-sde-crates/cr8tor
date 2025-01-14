@@ -37,7 +37,7 @@ jobs:
           uv sync
           source .venv/bin/activate
           cd examples/simple_project
-          cr8tor create --dryrun
+          cr8tor create
 
       - name: init repo
         run: |
