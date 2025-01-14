@@ -3,7 +3,7 @@ on:
     push:
     workflow_dispatch:
 jobs:
-    1proj:
+    proj-1:
         uses: ./.github/workflows/init_project_repo.yaml
         with:
             resources_target: 1-proj
