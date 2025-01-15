@@ -3,6 +3,7 @@ import uuid
 from hashlib import md5
 from pathlib import Path
 from typing import Annotated
+from datetime import datetime
 
 import bagit
 import rich
@@ -13,12 +14,14 @@ import typer
 import yaml
 from pydantic import HttpUrl
 from rocrate.rocrate import ROCrate
+from cookiecutter.main import cookiecutter
 
 import cr8tor.schema as s
 from cr8tor import console, log
 from cr8tor.exception import DirectoryNotFoundError
 
 app = typer.Typer()
+
 
 def make_uuid(
     project_id: str | HttpUrl,
@@ -138,6 +141,43 @@ def init_bag(project_id: str, bag_dir: Path, config: dict) -> bagit.Bag:
     return bag
 
 
+@app.command(name="init")
+def init(
+    template_path: Annotated[
+        str,
+        typer.Option(
+            default="-t",
+            help="Github URL or relative path to cr8-cookiecutter template",
+            prompt=True,
+        ),
+    ],
+):
+    """
+    Initialize a new CR8 project using a specified cookiecutter template.
+    Args:
+        template_path (str): The GitHub URL or relative path to the cr8-cookiecutter template.
+                             This is prompted from the user if not provided.
+    The function generates a new project by applying the specified cookiecutter template.
+    It also adds a timestamp to the context used by the template.
+    The `template_path` argument is annotated with `typer.Option` to provide command-line
+    interface options such as default value, help message, and prompt.
+    Example:
+
+        `cr8tor init -t https://github.com/lsc-sde-crates/cr8-cookiecutter`)
+
+        or
+
+        `cr8tor init -t path-to-local-cr8-cookiecutter-dir`
+    """
+
+    extra_context = {
+        "__timestamp": datetime.now().isoformat(timespec="seconds"),
+        "__cr8_cc_template": template_path,
+    }
+
+    cookiecutter(template_path, extra_context=extra_context)
+
+
 @app.command(name="create")
 def create(
     resources_dir: Annotated[
@@ -168,7 +208,7 @@ def create(
     # Raise exception if resources directory is not found.
     if not resources_dir.exists():
         raise DirectoryNotFoundError(resources_dir)
-    
+
     crate = ROCrate(gen_preview=True)
 
     # TODO: Define CreateAction
@@ -199,8 +239,8 @@ def create(
             "@type": "Project",
             "name": project.name,
             "identifier": project.identifier,
-            "memberOf": [{"@id": f"requester-{project_uuid}"}]
-        }
+            "memberOf": [{"@id": f"requester-{project_uuid}"}],
+        },
     )
     crate.add(projectEntity)
 
@@ -209,26 +249,28 @@ def create(
     # Requester Affiliation Context Entity
     #
     affEntity = m.ContextEntity(
-        crate, 
-        identifier=f"requester-org-{project_uuid}", 
+        crate,
+        identifier=f"requester-org-{project_uuid}",
         properties={
             "@type": "Organisation",
             "name": requester.affiliation.name,
-            "url": requester.affiliation.url
-        }
+            "url": requester.affiliation.url,
+        },
     )
     crate.add(affEntity)
 
     #
     # Requester Context Entity
     #
-    
-    requesterEntity = m.Person(crate, 
-                f"requester-{project_uuid}", 
-                properties={
-        "name": requester.name,
-        "affiliation": {"@id": f"requester-org-{project_uuid}"}
-    })
+
+    requesterEntity = m.Person(
+        crate,
+        f"requester-{project_uuid}",
+        properties={
+            "name": requester.name,
+            "affiliation": {"@id": f"requester-org-{project_uuid}"},
+        },
+    )
     crate.add(requesterEntity)
 
     #
@@ -243,12 +285,11 @@ def create(
             "@type": "SoftwareSourceCode",
             "name": repo.name,
             "description": repo.description,
-            "codeRepository":f"{repo.url}proj-{project_uuid}" 
-        }
+            "codeRepository": f"{repo.url}proj-{project_uuid}",
+        },
     )
     crate.add(repoEntity)
     crate.metadata["isBasedOn"] = {"@id": f"repo-{project_uuid}"}
-
 
     # Add governance yaml file to crate
 
