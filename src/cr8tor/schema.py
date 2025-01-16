@@ -17,7 +17,6 @@ class DataSourceConnection(BaseModel):
 
 class DatabricksSourceConnection(DataSourceConnection):
     host_url: HttpUrl = Field(description="dbs workspace URL")
-    token: str = Field(description="Personal access token for authentication")
     port: int = Field(default=443, description="Port for the db cluster (defaults to 443)")
     catalog: str = Field(description="Unity catalog name")
     schema: str = Field(description="Schema name in UC")
