@@ -1,11 +1,99 @@
 from enum import StrEnum
 from typing import List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from datetime import datetime
 from typing import Optional
 
+  
+#
+# Classes to represent resources/toml defined information
+#
+
+#
+# User-defined data 'access' information from resources/access toml
+#
+class DataSourceConnection(BaseModel):
+    name: Optional[str] = None
+
+class DatabricksSourceConnection(DataSourceConnection):
+    host_url: HttpUrl = Field(description="dbs workspace URL")
+    token: str = Field(description="Personal access token for authentication")
+    port: int = Field(default=443, description="Port for the db cluster (defaults to 443)")
+    catalog: str = Field(description="Unity catalog name")
+    schema: str = Field(description="Schema name in UC")
+    table: str = Field(description="Target table name")
+
+class SourceAccessCredential(BaseModel):
+    provider: str = Field(description="Service providing the secrets e.g. KeyVault")
+    secret_name: str = Field(description="Key name in secrets provider to access token")   
+
+class DataAccessContract(BaseModel):
+    connection: DataSourceConnection = Field(description="db connection details definition")
+    credentials: SourceAccessCredential = Field(description="Auth provider and secrets key")
+
+#
+# User-defined governance information from resources/governance toml
+#
+
+class Project(BaseModel):
+
+    name: str = Field(description="The title of the data access project")
+    description: str = Field(description="Detailed description of the project")
+    identifier: str = Field(description="Internal/organisation project reference (not the UUID of the project).")
+
+class CodeRepository(BaseModel):
+ 
+    name: str = Field(description="Name given to project github repository")
+    description: str = Field(description="MIKE TO REMOVE: Not needed to be defined by user")
+    url: str = Field(description="Project github repository URL")
+
+class Affiliation(BaseModel):
+
+    name: str = Field(description="Name of affiliation e.g. Lancaster University")
+    url: str = Field(description="URL of affiliate organisation")
+
+class Requester(BaseModel):
+
+    name: str = Field(description="Name of requesting agent i.e. the researcher that raised the data request")
+    affiliation: Affiliation = Field(description="Affiliation of the requester")
+
+class Approver(BaseModel):
+
+    name: str = Field(description="Person/team responsible for approving/signing off on the request")
+    affiliation: Affiliation = Field(description="Affiliation of the approver")
+
+class DiscloureReviewer(BaseModel):
+    
+    name: str = Field(description="Person/team responsible for disclosure checks")
+    affiliation: Affiliation = Field(description="Affiliation of the approver")
+
+#
+# Metadata classes. TODO: revise these based on returned outputs from unity catalog
+#
+
+class ColumnMetadata(BaseModel):
+    name: str
+    description: str
+    datatype: str
+
+
+class TableMetadata(BaseModel):
+    name: str
+    description: str
+    columns: List[ColumnMetadata]
+
+
+class DatasetMetadata(BaseModel):
+    name: str
+    description: str
+    catalog: str
+    table_schema: str
+    tables: List[TableMetadata]
+
 #
 # Application managed data classes for entities not defined as classes in rocrate module 
+# TODO: These should really be extensions within the ro-crate py module, discuss whether event/action info should be
+# stored in the resources data or just in ro-crate metadata.json
 #
 
 class Organization(BaseModel):
@@ -40,90 +128,22 @@ class CreateAction(Action):
     result: List[str]
 
 class AssessAction(Action):
-    additional_type: str    
+    additional_type: str  
 
 #
-# Claases to model user-defined properties specified in resources TOML
+# Bagit classes
 #
-
-#
-# Data access
-#
-
-class DataContract(BaseModel):
-    source: str
-    url: str
-    service_principal_key: str # key vault key holding auth info
-    secret_provider: str # i.e. Key Vault
-
-
-class CrateMeta(StrEnum):
-    License: str = '<a href="https://opensource.org/license/mit">MIT License</a>'
-    Publisher: str = '<a href="https://github.com/lsc-sde-crates">LSC SDE</a>'
-
-
-class Project(BaseModel):
-    """
-    The project that the request is sent on behalf of, typically related to permission to use a TRE,
-    MUST be indicated from the root dataset using sourceOrganization to a Project. The responsible
-    project SHOULD be referenced from the requesting agent’s memberOf.
-
-    https://trefx.uk/5s-crate/0.5-DRAFT/#responsible-project
-
-    https://schema.org/Project
-    """
-
-    name: str
-    description: str
-    identifier: str
-
-
-class CodeRepository(BaseModel):
-    """
-    External Github repository used to manage this LSCSDE project
-    """
-    name: str
-    description: str
-    url: str
-
-class Affiliation(BaseModel):
-    name: str
-    url: str
-
-class Requester(BaseModel):
-    """
-    The individual person who is requesting the run MUST be indicated as an `agent` from the
-    `CreateAction`, which SHOULD have an `affiliation` to the organisation they are representing
-    for access control purposes
-
-    https://trefx.uk/5s-crate/0.5-DRAFT/#requesting-agent
-    """
-
-    name: str
-    affiliation: Affiliation
-
-
-class ColumnMetadata(BaseModel):
-    name: str
-    description: str
-    datatype: str
-
-
-class TableMetadata(BaseModel):
-    name: str
-    description: str
-    columns: List[ColumnMetadata]
-
-
-class DatasetMetadata(BaseModel):
-    name: str
-    description: str
-    catalog: str
-    table_schema: str
-    tables: List[TableMetadata]
 
 class BagitInfo(BaseModel):
     source_organization: str = Field(alias="Source-Organization")
     organization_address: str = Field(alias="Organization-Address")
     contact_name: str = Field(alias="Contact-Name")
     contact_email: str = Field(alias="Contact-Email")
+
+#
+# 
+#
+
+class CrateMeta(StrEnum):
+    License: str = '<a href="https://opensource.org/license/mit">MIT License</a>'
+    Publisher: str = '<a href="https://github.com/lsc-sde-crates">LSC SDE</a>'
