@@ -2,9 +2,8 @@ from enum import StrEnum
 from typing import List
 from pydantic import BaseModel, Field, HttpUrl
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Literal
 
-  
 #
 # Classes to represent resources/toml defined information
 #
@@ -75,12 +74,10 @@ class ColumnMetadata(BaseModel):
     description: str
     datatype: str
 
-
 class TableMetadata(BaseModel):
     name: str
     description: str
     columns: List[ColumnMetadata]
-
 
 class DatasetMetadata(BaseModel):
     name: str
@@ -90,10 +87,10 @@ class DatasetMetadata(BaseModel):
     tables: List[TableMetadata]
 
 #
-# Application managed data classes for entities not defined as classes in rocrate module 
+# Application managed data classes for entities not defined as classes in ro-crate module 
 # TODO: These should really be extensions within the ro-crate py module, discuss whether event/action info should be
 # stored in the resources data or just in ro-crate metadata.json
-#
+# Think we should define these as models for the properties of ro-crate entities  
 
 class Organization(BaseModel):
     name: str
@@ -107,6 +104,7 @@ class Agent(BaseModel):
 
 class Instrument(BaseModel):
     name: str
+    # tool: str
 
 class ActionStatusType(StrEnum):
     active_action_status: str = "ActiveActionStatus"
@@ -115,6 +113,7 @@ class ActionStatusType(StrEnum):
     potential_action_status: str = "PotentialActionStatus"
 
 class Action(BaseModel):
+    type: Literal["Action"]
     name: str
     end_time: datetime
     start_time: datetime
@@ -124,9 +123,11 @@ class Action(BaseModel):
     instrument: Optional[Instrument] = None
     
 class CreateAction(Action):
+    type: Literal["CreateAction"]
     result: List[str]
 
 class AssessAction(Action):
+    type: Literal["AssessAction"]
     additional_type: str  
 
 #
