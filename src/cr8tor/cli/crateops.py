@@ -1,20 +1,20 @@
+"""Functions to work with RO-Crate objects"""
+
 import os
 import uuid
 from pathlib import Path
 from typing import Annotated
-from datetime import datetime
 
 import bagit
 import rocrate.model as m
 import typer
 import yaml
 from rocrate.rocrate import ROCrate
-from cookiecutter.main import cookiecutter
 
-import cr8tor.schema as s
-from cr8tor import log
+import cr8tor.schema.schema as s
 from cr8tor.exception import DirectoryNotFoundError
-from cr8tor.utils import make_uuid, print_bagit, print_crate, get_config
+from cr8tor.utils import get_config, log, make_uuid
+from cr8tor.cli.display import print_crate
 
 app = typer.Typer()
 
@@ -42,43 +42,6 @@ def init_bag(project_id: str, bag_dir: Path, config: dict) -> bagit.Bag:
     bag.info["External-Identifier"] = make_uuid(project_id)
 
     return bag
-
-
-@app.command(name="init")
-def init(
-    template_path: Annotated[
-        str,
-        typer.Option(
-            default="-t",
-            help="Github URL or relative path to cr8-cookiecutter template",
-            prompt=True,
-        ),
-    ],
-):
-    """
-    Initialize a new CR8 project using a specified cookiecutter template.
-    Args:
-        template_path (str): The GitHub URL or relative path to the cr8-cookiecutter template.
-                             This is prompted from the user if not provided.
-    The function generates a new project by applying the specified cookiecutter template.
-    It also adds a timestamp to the context used by the template.
-    The `template_path` argument is annotated with `typer.Option` to provide command-line
-    interface options such as default value, help message, and prompt.
-    Example:
-
-        `cr8tor init -t https://github.com/lsc-sde-crates/cr8-cookiecutter`)
-
-        or
-
-        `cr8tor init -t path-to-local-cr8-cookiecutter-dir`
-    """
-
-    extra_context = {
-        "__timestamp": datetime.now().isoformat(timespec="seconds"),
-        "__cr8_cc_template": template_path,
-    }
-
-    cookiecutter(template_path, extra_context=extra_context)
 
 
 @app.command(name="create")
@@ -269,18 +232,3 @@ def create(
         )
 
     print_crate(crate=crate)
-
-
-@app.command(name="read")
-def read_bag(bag_dir: Annotated[Path, typer.Option(default="-i")] = "./bagit"):
-    """
-    Reads a Research Object Crate (RO-Crate) from the specified directory and prints its details in a table format.
-    """
-
-    print_bagit(bag_dir)
-    crate = ROCrate(bag_dir / "data")
-    print_crate(crate)
-
-
-if __name__ == "__main__":
-    app()

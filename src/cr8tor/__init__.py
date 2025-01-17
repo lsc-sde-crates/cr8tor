@@ -1,4 +1,4 @@
-from cr8tor.schema import (
+from cr8tor.schema.schema import (
     ColumnMetadata,
     DatasetMetadata,
     Project,
