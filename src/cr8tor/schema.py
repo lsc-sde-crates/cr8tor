@@ -1,7 +1,16 @@
 from enum import StrEnum
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
+
+
+class ProjectInit(BaseModel):
+    project_name: str = Field(default="CR8TOR Demo Project")
+    project_description: Optional[str]
+    requester: Optional[str] = ""
+    requester_affiliation: Optional[str] = ""
+    requester_affiliation_url: Optional[str] = ""
+    timestamp: Optional[str] = ""
 
 
 class CrateMeta(StrEnum):
@@ -29,13 +38,16 @@ class CodeRepository(BaseModel):
     """
     External Github repository used to manage this LSCSDE project
     """
+
     name: str
     description: str
     url: str
 
+
 class Affiliation(BaseModel):
     name: str
     url: str
+
 
 class Requester(BaseModel):
     """
