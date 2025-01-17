@@ -2,7 +2,7 @@ from enum import StrEnum
 from typing import List
 from pydantic import BaseModel, Field, HttpUrl
 from datetime import datetime
-from typing import Optional, Literal
+from typing import Optional, Literal, Union
 
 #
 # Classes to represent resources/toml defined information
@@ -86,49 +86,55 @@ class DatasetMetadata(BaseModel):
     table_schema: str
     tables: List[TableMetadata]
 
+
 #
-# Application managed data classes for entities not defined as classes in ro-crate module 
-# TODO: These should really be extensions within the ro-crate py module, discuss whether event/action info should be
-# stored in the resources data or just in ro-crate metadata.json
-# Think we should define these as models for the properties of ro-crate entities  
+# Models for properties of ro-crate entities. Will have to expand on a needs basis 
+#
 
-class Organization(BaseModel):
-    name: str
-
-class SoftwareApplication(BaseModel):
-    name: str
-    provider: Organization
-
-class Agent(BaseModel):
-    name: str
-
-class Instrument(BaseModel):
-    name: str
-    # tool: str
-
-class ActionStatusType(StrEnum):
-    active_action_status: str = "ActiveActionStatus"
-    completed_action_status: str = "CompletedActionStatus"
-    failed_action_status: str = "FailedActionStatus"
-    potential_action_status: str = "PotentialActionStatus"
-
-class Action(BaseModel):
-    type: Literal["Action"]
-    name: str
-    end_time: datetime
-    start_time: datetime
-    action_status: ActionStatusType
-    agent: Agent
-    error: Optional[str] = None
-    instrument: Optional[Instrument] = None
+class BaseRoCrateEntityProperties(BaseModel):
     
-class CreateAction(Action):
-    type: Literal["CreateAction"]
-    result: List[str]
+    id: str = Field(alias="@id", description="Mandatory identifier of entity. This needs to be unique within the context of the ro-crate knowledge graph")
+    type: str = Field(alias="@type", description="Mandatory type of entity")
+    description: Optional[str] = Field(description="Entity desc")
+    
+    class Config:
+        allow_population_by_field_name = True
 
-class AssessAction(Action):
-    type: Literal["AssessAction"]
-    additional_type: str  
+class OrganizationProps(BaseRoCrateEntityProperties):
+    name: str = Field(description="Organisation name e.g. Lancaster University")
+    url: HttpUrl = Field(description="Organisation URL")
+
+class PersonProps(BaseRoCrateEntityProperties):
+    name: str = Field(description="An individual's name")
+    url: HttpUrl = Field(description="Organisation URL")
+
+class SoftwareApplicationProps(BaseRoCrateEntityProperties):
+    type: Literal["SoftwareApplication"] = Field(default="SoftwareApplication", alias="@type")
+    name: str = Field(description="Software application name")
+    provider: Union[OrganizationProps, PersonProps] = Field(description="Software provider. Can be organization or Person")
+
+class SoftwareSourceCodeProps(BaseRoCrateEntityProperties):
+    type: Literal["SoftwareSourceCode"] = Field(default="SoftwareSourceCode", alias="@type")
+    name: str = Field(description="repo name")
+    codeRepository: HttpUrl = Field(description="repo url")
+
+class ActionProps(BaseRoCrateEntityProperties):
+    type: Literal["Action"] = Field(default="Action", alias="@type")
+    name: str = Field(description="Action name")
+    start_time: datetime = Field(description="Start time of the action")
+    end_time: datetime = Field(description="End time of the action")
+    action_status: str = Field(description="Status of the action formmatted based on Provernance Crate Profile spec")
+    agent: str = Field(description="The thing triggering the action i.e. a person, organisation or software application (e.g. Github Action)")
+    error: Optional[str] = Field(default=None, description="Error output if action fails")
+    instrument: Optional[str] = Field(default=None, description="Instrument performing the execution of the action (e.g. cr8tor, specific TRE service)")
+    
+class CreateActionProps(BaseRoCrateEntityProperties):
+    type: Literal["CreateAction"] = Field(default="CreateAction", alias="@type")
+    result: List[str] = Field(description="Id references to other data or context entities")
+
+class AssessActionProps(BaseRoCrateEntityProperties):
+    type: Literal["AssessAction"] = Field(default="AssessAction", alias="@type")
+    additional_type: str = Field(description="Use to reference sub assessment actions (e.g. disclosure check)")
 
 #
 # Bagit classes
