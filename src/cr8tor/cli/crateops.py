@@ -11,7 +11,7 @@ import typer
 import yaml
 from rocrate.rocrate import ROCrate
 
-import cr8tor.schema.schema as s
+import cr8tor.core.schema as s
 from cr8tor.exception import DirectoryNotFoundError
 from cr8tor.utils import get_config, log, make_uuid
 from cr8tor.cli.display import print_crate
@@ -87,7 +87,7 @@ def create(
     #
     # Project Conext Entity
     #
-    project = s.Project(**governance["project"])
+    project = s.ProjectProps(**governance["project"])
     project_uuid = str(uuid.uuid4())
     project_uuid: Annotated[
         str,
@@ -110,7 +110,7 @@ def create(
     )
     crate.add(projectEntity)
 
-    requester = s.Requester(**governance["requester"])
+    requester = s.RequestingAgentProps(**governance["requester"])
     #
     # Requester Affiliation Context Entity
     #
@@ -142,7 +142,7 @@ def create(
     #
     # Repository Conext Entity
     #
-    repo = s.CodeRepository(**governance["repository"])
+    repo = s.CodeRepositoryProps(**governance["repository"])
 
     repoEntity = m.ContextEntity(
         crate=crate,
