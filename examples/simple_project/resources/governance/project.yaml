@@ -1,7 +1,7 @@
 project:
-  name: "Test Project"
-  description: "This is a test project"
-  identifier: "scsde-ref-1"
+  name: "P002"
+  description: "P002 created using CR8TOR."
+  identifier: "cr8-cr8-p002"
 
 repository:
   name: "Github Repo"
@@ -9,10 +9,10 @@ repository:
   url: "https://github.com/lsc-sde-crates/"
 
 requester:
-  name: "Prof. Jane Doe"
+  name: "e.g. Prof. Jane Doe"
   affiliation:
-    name: "Lancaster University"
-    url: "https://www.lancs.ac.uk"
+    name: "e.g. jane.doe@someuni.com"
+    url: "https://someuni.com"
 
 metadata_sources:
   - metadata/dataset_01.yaml

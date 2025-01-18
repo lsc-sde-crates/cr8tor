@@ -1,7 +1,8 @@
-name: "p_abx"
-description: "OMOP conformant data for antimicrobial stewarship"
-catalog: "name of database"
-table_schema: "name of schema"
+project_identifier: "cr8-cr8-p002"
+name: "dataset_01"
+description: "Sample dataset"
+catalog: "catalog_name"
+table_schema: "schema_name"
 tables:
   - name: person
     description: Contains demographics

@@ -10,11 +10,12 @@ dependencies = [
     "cookiecutter>=2.6.0",
     "pydantic>=2.10.4",
     "rocrate>=0.13.0",
+    "tomlkit>=0.13.2",
     "typer>=0.15.1",
 ]
 
 [project.scripts]
-cr8tor = "cr8tor.cli:app"
+cr8tor = "cr8tor.main:app"
 
 [build-system]
 requires = ["hatchling"]

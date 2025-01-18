@@ -1,0 +1,13 @@
+{
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "../cr8-cookiecutter"
+        },
+        {
+            "path": "../cr8tor-examples"
+        }
+    ]
+}
