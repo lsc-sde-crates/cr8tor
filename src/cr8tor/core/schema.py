@@ -17,15 +17,19 @@ from typing import Optional, Literal, Union
 
 
 class BaseRoCrateEntityProperties(BaseModel):
-    id: str = Field(
+    id: Optional[str] = Field(
+        default=None,
         alias="@id",
         description="Mandatory identifier of entity. This needs to be unique within the context of the ro-crate knowledge graph",
     )
-    type: str = Field(alias="@type", description="Mandatory type of entity")
-    description: Optional[str] = Field(description="Entity desc")
+    type: Optional[str] = Field(
+        default=None, alias="@type", description="Mandatory type of entity"
+    )
+    description: Optional[str] = Field(default=None, description="Entity desc")
 
     class Config:
-        populate_by_name = False
+        populate_by_name = True
+        json_encoders = {HttpUrl: str}
 
 
 class ProjectProps(BaseRoCrateEntityProperties):
@@ -43,6 +47,7 @@ class ProjectProps(BaseRoCrateEntityProperties):
     name: str
     description: str
     identifier: str
+    # MemberOf: Optional[List[str]]
 
 
 class OrganizationProps(BaseRoCrateEntityProperties):
@@ -70,7 +75,7 @@ class SoftwareSourceCodeProps(BaseRoCrateEntityProperties):
         default="SoftwareSourceCode", alias="@type"
     )
     name: str = Field(description="repo name")
-    codeRepository: HttpUrl = Field(description="repo url")
+    codeRepository: Optional[HttpUrl] = Field(default=None, description="repo url")
 
 
 class ActionProps(BaseRoCrateEntityProperties):
@@ -102,6 +107,7 @@ class CreateActionProps(BaseRoCrateEntityProperties):
 
 class AssessActionProps(BaseRoCrateEntityProperties):
     type: Literal["AssessAction"] = Field(default="AssessAction", alias="@type")
+
     additional_type: str = Field(
         description="Use to reference sub assessment actions (e.g. disclosure check)"
     )
@@ -112,7 +118,7 @@ class AffiliationProps(BaseRoCrateEntityProperties):
     url: str
 
 
-class RequestingAgentProps(BaseModel):
+class RequestingAgentProps(BaseRoCrateEntityProperties):
     """
     The individual person who is requesting the run MUST be indicated as an `agent` from the
     `CreateAction`, which SHOULD have an `affiliation` to the organisation they are representing
@@ -122,7 +128,7 @@ class RequestingAgentProps(BaseModel):
     """
 
     name: str
-    affiliation: AffiliationProps  # Mike to look at whether we should keep this pattern. Risks circular deps.
+    affiliation: OrganizationProps  # Mike to look at whether we should keep this pattern. Risks circular deps.
 
 
 ###############################################################################

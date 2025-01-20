@@ -89,6 +89,10 @@ def create(
     # Project Conext Entity
     #
 
+    #
+    # Do full check of definitions in governance resources expected by LSC project
+    #
+
     governance["project"].setdefault("@id", f"proj-{project_uuid}")
 
     project = s.ProjectProps(**governance["project"])
@@ -109,26 +113,29 @@ def create(
             "@type": "Project",
             "name": project.name,
             "identifier": project.identifier,
-            "memberOf": [{"@id": f"requester-{project_uuid}"}],
         },
     )
+
     crate.add(projectEntity)
 
-    update_resource_entity(
-        project_resource_path, "project", project.dict(by_alias=True)
-    )
+    if "requesting_agent" not in governance:
+        raise KeyError(
+            "requesting_agent is not defined in governance project.yaml resource"
+        )
 
-    requester = s.RequestingAgentProps(**governance["requester"])
+    requester = s.RequestingAgentProps(**governance["requesting_agent"])
+
     #
     # Requester Affiliation Context Entity
     #
+
     affEntity = m.ContextEntity(
         crate,
-        identifier=f"requester-org-{project_uuid}",
+        identifier=f"requesting-agent-org-{project_uuid}",
         properties={
             "@type": "Organisation",
             "name": requester.affiliation.name,
-            "url": requester.affiliation.url,
+            "url": str(requester.affiliation.url),
         },
     )
     crate.add(affEntity)
@@ -139,18 +146,34 @@ def create(
 
     requesterEntity = m.Person(
         crate,
-        f"requester-{project_uuid}",
+        identifier=f"requesting-agent-{project_uuid}",
         properties={
             "name": requester.name,
-            "affiliation": {"@id": f"requester-org-{project_uuid}"},
+            "affiliation": {"@id": f"requesting-agent-org-{project_uuid}"},
         },
     )
     crate.add(requesterEntity)
 
     #
+    # Add relationship properties, store generated state
+    #
+
+    projectEntity["memberOf"] = [{"@id": requesterEntity.id}]
+
+    update_resource_entity(
+        project_resource_path, "project", project.dict(by_alias=True)
+    )
+
+    #
     # Repository Conext Entity
     #
-    repo = s.CodeRepositoryProps(**governance["repository"])
+
+    if "repository" not in governance:
+        raise KeyError(
+            "The project repository is not defined in governance project.yaml resource"
+        )
+
+    repo = s.SoftwareSourceCodeProps(**governance["repository"])
 
     repoEntity = m.ContextEntity(
         crate=crate,
@@ -159,7 +182,7 @@ def create(
             "@type": "SoftwareSourceCode",
             "name": repo.name,
             "description": repo.description,
-            "codeRepository": f"{repo.url}proj-{project_uuid}",
+            "codeRepository": f"{repo.codeRepository}proj-{project_uuid}",
         },
     )
     crate.add(repoEntity)
