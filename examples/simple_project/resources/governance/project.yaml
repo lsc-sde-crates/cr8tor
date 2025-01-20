@@ -1,18 +1,16 @@
-project:
-  name: "P002"
-  description: "P002 created using CR8TOR."
-  identifier: "cr8-cr8-p002"
-
-repository:
-  name: "Github Repo"
-  description: "This LSC-DIP RO-Crate is versioned and stored in a Git repository on GitHub."
-  url: "https://github.com/lsc-sde-crates/"
-
-requester:
-  name: "e.g. Prof. Jane Doe"
-  affiliation:
-    name: "e.g. jane.doe@someuni.com"
-    url: "https://someuni.com"
-
 metadata_sources:
-  - metadata/dataset_01.yaml
+- metadata/dataset_01.yaml
+project:
+  description: P002 created using CR8TOR.
+  identifier: cr8-cr8-p002
+  name: P002
+repository:
+  description: This LSC-DIP RO-Crate is versioned and stored in a Git repository on
+    GitHub.
+  name: Github Repo
+  url: https://github.com/lsc-sde-crates/
+requester:
+  affiliation:
+    name: e.g. jane.doe@someuni.com
+    url: https://someuni.com
+  name: e.g. Prof. Jane Doe

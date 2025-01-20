@@ -15,6 +15,7 @@ import cr8tor.core.schema as s
 from cr8tor.exception import DirectoryNotFoundError
 from cr8tor.utils import get_config, log, make_uuid
 from cr8tor.cli.display import print_crate
+from cr8tor.cli.crud import update_resource_entity
 
 app = typer.Typer()
 
@@ -76,19 +77,22 @@ def create(
         raise DirectoryNotFoundError(resources_dir)
 
     crate = ROCrate(gen_preview=True)
+    project_uuid = str(uuid.uuid4())
 
     # TODO: Define CreateAction
     # crate.add_action()
 
-    governance = yaml.safe_load(
-        resources_dir.joinpath("governance", "project.yaml").read_text()
-    )
+    project_resource_path = resources_dir.joinpath("governance", "project.yaml")
+    governance = yaml.safe_load(project_resource_path.read_text())
 
     #
     # Project Conext Entity
     #
+
+    governance["project"].setdefault("@id", f"proj-{project_uuid}")
+
     project = s.ProjectProps(**governance["project"])
-    project_uuid = str(uuid.uuid4())
+
     project_uuid: Annotated[
         str,
         "Unique Project Identifier should be the GitHub URL of the Project Crate Repo",
@@ -100,7 +104,7 @@ def create(
 
     projectEntity = m.ContextEntity(
         crate=crate,
-        identifier="proj-" + project_uuid,
+        identifier=project.id,
         properties={
             "@type": "Project",
             "name": project.name,
@@ -109,6 +113,10 @@ def create(
         },
     )
     crate.add(projectEntity)
+
+    update_resource_entity(
+        project_resource_path, "project", project.dict(by_alias=True)
+    )
 
     requester = s.RequestingAgentProps(**governance["requester"])
     #
