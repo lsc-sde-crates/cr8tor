@@ -1,0 +1,60 @@
+site_name: CR8TOR - 5-Safes Compliant Data Orchestration
+site_url: https://lsc-sde-crates.github.io/cr8tor/
+repo_url: https://github.com/lsc-sde-crates/cr8tor
+repo_name: GitHub
+site_description: >
+  CR8TOR is a data orchestration tool that is 5-Safes compliant.
+  It is designed to help Secure Data Environment operators to manage the
+  ingress of curated datasets from a data warehouse or lake hoouse
+  into a ressearch workspace.
+site_author: https://github.com/lsc-sde
+nav:
+  - Home: index.md
+  - API Reference: api_reference.md
+  - Schema Reference: schema_reference.md
+theme:
+  name: material
+  logo: logo.png
+  palette:
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: green
+      accent: green
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: green
+      accent: green
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - content.code.copy
+    - navigation.expand
+    - navigation.path
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - toc.follow
+    # - toc.integrate
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            extensions:
+              - griffe_pydantic:
+                  schema: true
+  - autorefs
+
+watch:
+  - src/cr8tor
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          # format: !!python/name:pymdownx.superfences.fence_code_format
