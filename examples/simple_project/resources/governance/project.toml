@@ -1,0 +1,19 @@
+[[metadata_sources]]
+file = "metadata/dataset_01.toml"
+
+[project]
+description = "P002 created using CR8TOR."
+identifier = "cr8-cr8-p002"
+name = "P002"
+
+[repository]
+codeRepository = "https://github.com/lsc-sde-crates/"
+description = "This LSC-DIP RO-Crate is versioned and stored in a Git repository on GitHub."
+name = "Github Repo"
+
+[requesting_agent]
+name = "e.g. Prof. Jane Doe"
+
+[requesting_agent.affiliation]
+name = "Someuni"
+url = "https://someuni.com"

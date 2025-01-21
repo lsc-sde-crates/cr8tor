@@ -82,7 +82,7 @@ def create(
     # TODO: Define CreateAction
     # crate.add_action()
 
-    project_resource_path = resources_dir.joinpath("governance", "project.yaml")
+    project_resource_path = resources_dir.joinpath("governance", "project.toml")
     governance = read_resource(project_resource_path)
 
     #
@@ -114,7 +114,7 @@ def create(
 
     if "requesting_agent" not in governance:
         raise KeyError(
-            "requesting_agent is not defined in governance project.yaml resource"
+            "requesting_agent is not defined in governance project.toml resource"
         )
 
     requester = s.RequestingAgentProps(**governance["requesting_agent"])
@@ -164,7 +164,7 @@ def create(
 
     if "repository" not in governance:
         raise KeyError(
-            "The project repository is not defined in governance project.yaml resource"
+            "The project repository is not defined in governance project.toml resource"
         )
 
     repo = s.SoftwareSourceCodeProps(**governance["repository"])
@@ -185,13 +185,13 @@ def create(
     # Add governance yaml file to crate
 
     crate.add_file(
-        source=resources_dir.joinpath("governance", "project.yaml"),
-        dest_path="governance/project.yaml",
+        source=resources_dir.joinpath("governance", "project.toml"),
+        dest_path="governance/project.toml",
         properties={"name": project.name, "description": project.description},
     )
 
     log.info(
-        msg="[cyan]Validated and added file[/cyan] - [bold magenta]governance/project.yaml[/bold magenta]",
+        msg="[cyan]Validated and added file[/cyan] - [bold magenta]governance/project.toml[/bold magenta]",
     )
 
     # Validate and add dataset yaml files to crate
