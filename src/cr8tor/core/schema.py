@@ -47,7 +47,6 @@ class ProjectProps(BaseRoCrateEntityProperties):
     name: str
     description: str
     identifier: str
-    # MemberOf: Optional[List[str]]
 
 
 class OrganizationProps(BaseRoCrateEntityProperties):

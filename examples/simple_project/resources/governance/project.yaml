@@ -1,8 +1,6 @@
 metadata_sources:
 - metadata/dataset_01.yaml
 project:
-  '@id': proj-5b7e204a-37d3-4a63-9e35-423b05b1f226
-  '@type': Project
   description: P002 created using CR8TOR.
   identifier: cr8-cr8-p002
   name: P002
@@ -12,7 +10,7 @@ repository:
     GitHub.
   name: Github Repo
 requesting_agent:
+  name: e.g. Prof. Jane Doe
   affiliation:
     name: Someuni
     url: https://someuni.com
-  name: e.g. Prof. Jane Doe

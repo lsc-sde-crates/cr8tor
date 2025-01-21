@@ -15,7 +15,7 @@ import cr8tor.core.schema as s
 from cr8tor.exception import DirectoryNotFoundError
 from cr8tor.utils import get_config, log, make_uuid
 from cr8tor.cli.display import print_crate
-from cr8tor.cli.crud import update_resource_entity
+from cr8tor.cli.resourceops import update_resource_entity, read_resource
 
 app = typer.Typer()
 
@@ -83,18 +83,12 @@ def create(
     # crate.add_action()
 
     project_resource_path = resources_dir.joinpath("governance", "project.yaml")
-    governance = yaml.safe_load(project_resource_path.read_text())
+    governance = read_resource(project_resource_path)
 
     #
     # Project Conext Entity
     #
-
-    #
-    # Do full check of definitions in governance resources expected by LSC project
-    #
-
     governance["project"].setdefault("@id", f"proj-{project_uuid}")
-
     project = s.ProjectProps(**governance["project"])
 
     project_uuid: Annotated[
