@@ -38,17 +38,23 @@ def delete_resource(resource_file_path):
 #
 
 
-def create_resource_entity(resource_file_path, property_key, modified_object):
-    pass
+def create_resource_entity(resource_file_path, property_key, new_object):
+    resource_dict = toml.load(resource_file_path)
+    resource_dict[property_key] = new_object
+
+    with resource_file_path.open("w") as resource:
+        toml.dump(resource_dict, resource)
+
+    log.info(
+        f"[cyan]Added entity {property_key} to resources file:[/cyan] - [bold magenta]{resource_file_path}[/bold magenta]",
+    )
 
 
 def read_resource_entity(resource_file_path, property_key):
     pass
 
 
-def update_resource_entity(resource_file_path, property_key, modified_object):
-    # resource_dict = yaml.safe_load(resource_file_path.read_text())
-
+def update_resource_entity(resource_file_path, property_key, object):
     resource_dict = toml.load(resource_file_path)
 
     if property_key not in resource_dict:
@@ -56,12 +62,18 @@ def update_resource_entity(resource_file_path, property_key, modified_object):
             f"The property key for entity '{property_key}' does not exist in resource: {resource_file_path}"
         )
 
-    resource_dict[property_key].update(modified_object)
-    # dict_obj_str = yaml.dump(resource_dict, default_flow_style=False)
+    target_entity = resource_dict.get(property_key)
+    if isinstance(target_entity, dict):
+        resource_dict[property_key].update(object)
+    elif isinstance(target_entity, list):
+        resource_dict[property_key].append(object)
+    else:
+        raise TypeError(
+            f"Unexpected type when updating '{property_key}' in resource: {resource_file_path}"
+        )
+
     with resource_file_path.open("w") as resource:
         toml.dump(resource_dict, resource)
-
-    # resource_file_path.write_text(dict_obj_str)
 
     log.info(
         f"[cyan]Updated resources file:[/cyan] - [bold magenta]{resource_file_path}[/bold magenta]",

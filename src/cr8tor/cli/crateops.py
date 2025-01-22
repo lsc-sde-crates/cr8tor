@@ -4,6 +4,7 @@ import os
 import uuid
 from pathlib import Path
 from typing import Annotated
+from datetime import datetime
 
 import bagit
 import rocrate.model as m
@@ -14,7 +15,11 @@ import cr8tor.core.schema as s
 from cr8tor.exception import DirectoryNotFoundError
 from cr8tor.utils import log, make_uuid
 from cr8tor.cli.display import print_crate
-from cr8tor.core.resourceops import update_resource_entity, read_resource
+from cr8tor.core.resourceops import (
+    update_resource_entity,
+    read_resource,
+    create_resource_entity,
+)
 
 app = typer.Typer()
 
@@ -78,6 +83,7 @@ def create(
     ###############################################################################
     # 1 Validate project build materials (i.e. resources/ & config.toml)
     ###############################################################################
+    create_start_dt = datetime.now()
 
     config = read_resource(config_file)
 
@@ -114,6 +120,7 @@ def create(
     ###############################################################################
 
     crate = ROCrate(gen_preview=True)
+
     project_uuid: Annotated[
         str,
         "Project UUID is a unique auto-generated identifier on creation of the project",
@@ -264,13 +271,7 @@ def create(
     )
 
     ###############################################################################
-    # 5 Build create action
-    ###############################################################################
-
-    # TODO: Add in CreateAction for this 'cr8tor' create function here
-
-    ###############################################################################
-    # 6 Finalise Crate metadata
+    # 5 Finalise Crate
     ###############################################################################
     crate.name = project_props.name
     crate.description = project_props.description
@@ -286,9 +287,46 @@ def create(
     )
     crate.mainEntity = project_entity
 
-    # Create a new bagit dir or open existing one
-    # Write the crate into the data dir of the bag
-    # Do not zip as the crate is version controlled
+    ###############################################################################
+    # 6 Build create action, save to governance resources
+    ###############################################################################
+
+    create_action_props = s.CreateActionProps(
+        id=f"create-project-action-{project_uuid}",
+        name="Create LSC Project Action",
+        start_time=create_start_dt,
+        end_time=datetime.now(),
+        action_status="CompletedActionStatus",
+        agent="GitHub Action",  # need to add agent to command line
+        error=None,
+        instrument="cr8tor",
+        result=["foo"],
+    )
+
+    crate.add_action(
+        instrument=create_action_props.instrument,
+        identifier=create_action_props.id,
+        # object={"@id": "https://example.com/dataset"},
+        # result={"@id": "https://example.com/result"},
+        properties={
+            "name": create_action_props.name,
+            "startTime": create_action_props.start_time.isoformat(),
+            "endTime": create_action_props.end_time.isoformat(),
+            "actionStatus": create_action_props.action_status,
+            "agent": {
+                "@id": "foo",
+                "@type": "SoftwareApplication",
+                "name": "GitHub Action",
+            },  # TODO ADD AGENT ENTITY
+        },
+    )
+
+    create_resource_entity(project_resource_path, "actions", [])
+    update_resource_entity(project_resource_path, "actions", create_action_props.dict())
+
+    ###############################################################################
+    # 7 Add Ro-crate meta to bagit directory structure
+    ###############################################################################
     if not dryrun:
         bag_dir = Path("./bagit")
 
@@ -317,18 +355,59 @@ def create(
     print_crate(crate=crate)
 
 
-@app.command(name="update")
-def update(
+@app.command(name="build")
+def build():
+    pass
+
+
+@app.command(name="validate")
+def validate(
+    bagit_dir: Annotated[
+        Path,
+        typer.Option(
+            default="-i", help="Bagit directory containing RO-Crate data directory"
+        ),
+    ] = "./bagit",
     resources_dir: Annotated[
         Path,
         typer.Option(
-            default="-i",
-            help="Path of updated resources directory to publish updated RO-Crate artefact.",
+            default="-i", help="Directory containing resources to include in RO-Crate."
         ),
     ] = "./resources",
-    config_file: Annotated[
-        Path, typer.Option(default="-c", help="Location of project config file.")
-    ] = "./config.toml",
-    dryrun: Annotated[bool, typer.Option(default="--dryrun")] = False,
 ):
-    pass
+    project_resource_path = resources_dir.joinpath("governance", "project.toml")
+    proj_roc_meta_path = bagit_dir.joinpath("data")
+
+    crate = ROCrate(proj_roc_meta_path)
+
+    create_action_props = s.CreateActionProps(
+        id="assess-action-XYZ",
+        name="Assess Action Test",
+        start_time=datetime.now(),
+        end_time=datetime.now(),
+        action_status="CompletedActionStatus",
+        agent="GitHub Action",
+        error=None,
+        instrument="cr8tor",
+        result=["Bar"],
+    )
+
+    crate.add_action(
+        instrument=create_action_props.instrument,
+        identifier=create_action_props.id,
+        # object={"@id": "https://example.com/dataset"},
+        # result={"@id": "https://example.com/result"},
+        properties={
+            "name": create_action_props.name,
+            "startTime": create_action_props.start_time.isoformat(),
+            "endTime": create_action_props.end_time.isoformat(),
+            "actionStatus": create_action_props.action_status,
+            "agent": {
+                "@id": "foo",
+                "@type": "SoftwareApplication",
+                "name": "GitHub Action",
+            },  # TODO ADD AGENT ENTITY
+        },
+    )
+
+    update_resource_entity(project_resource_path, "actions", create_action_props.dict())

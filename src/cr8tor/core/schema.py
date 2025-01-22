@@ -97,7 +97,7 @@ class ActionProps(BaseRoCrateEntityProperties):
     )
 
 
-class CreateActionProps(BaseRoCrateEntityProperties):
+class CreateActionProps(ActionProps):
     type: Literal["CreateAction"] = Field(default="CreateAction", alias="@type")
     result: List[str] = Field(
         description="Id references to other data or context entities"
