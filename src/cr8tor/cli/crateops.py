@@ -8,12 +8,11 @@ from typing import Annotated
 import bagit
 import rocrate.model as m
 import typer
-import yaml
 from rocrate.rocrate import ROCrate
 
 import cr8tor.core.schema as s
 from cr8tor.exception import DirectoryNotFoundError
-from cr8tor.utils import get_config, log, make_uuid
+from cr8tor.utils import log, make_uuid
 from cr8tor.cli.display import print_crate
 from cr8tor.cli.resourceops import update_resource_entity, read_resource
 
@@ -70,152 +69,210 @@ def create(
         $ cr8tor create -i /path/to/resources
     """
 
-    config = get_config(config_file)
+    ###############################################################################
+    # 1 Validate project build materials (i.e. resources/ & config.toml)
+    ###############################################################################
 
-    # Raise exception if resources directory is not found.
+    config = read_resource(config_file)
+
     if not resources_dir.exists():
         raise DirectoryNotFoundError(resources_dir)
-
-    crate = ROCrate(gen_preview=True)
-    project_uuid = str(uuid.uuid4())
-
-    # TODO: Define CreateAction
-    # crate.add_action()
 
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
     governance = read_resource(project_resource_path)
 
-    #
-    # Project Conext Entity
-    #
-    governance["project"].setdefault("@id", f"proj-{project_uuid}")
-    project = s.ProjectProps(**governance["project"])
+    access_resource_path = resources_dir.joinpath("access", "access.toml")
+    access = read_resource(access_resource_path)
 
+    ###############################################################################
+    # 2 Check mandatory user-defined elements (i.e. gov, access) exists before
+    #  pydantic model validation on fields
+    ###############################################################################
+
+    governance_required_keys = {
+        "project": f"To create a LSC project, 'project' properties must be defined in resource: {project_resource_path}",
+        "requesting_agent": f"To create a LSC project, 'requesting_agent' properties must be defined in resource: {project_resource_path}",
+        "repository": f"To create a LSC project, 'repository' properties must be defined in resource: {project_resource_path}",
+    }
+
+    for key, error_message in governance_required_keys.items():
+        if key not in governance:
+            raise KeyError(error_message)
+
+    access_required_keys = {
+        "source": f"To create a LSC project, source connection info is needed in resource: {access_resource_path}",
+        "credentials": f"To create a LSC project, connection credentials info is needed in resource: {access_resource_path}",
+    }
+
+    for key, error_message in access_required_keys.items():
+        if key not in access:
+            raise KeyError(error_message)
+
+    ###############################################################################
+    # 3 Create initial Ro-Crate & build contextual entities
+    ###############################################################################
+
+    crate = ROCrate(gen_preview=True)
     project_uuid: Annotated[
         str,
-        "Unique Project Identifier should be the GitHub URL of the Project Crate Repo",
-    ] = os.getenv("PROJECT_IDENTIFIER", project_uuid)
+        "Project UUID is a unique auto-generated identifier on creation of the project",
+    ] = os.getenv("PROJECT_IDENTIFIER", str(uuid.uuid4()))
 
+    #
+    # Load project info and init RC 'Project' entity
+    #
+
+    governance["project"].setdefault("@id", f"proj-{project_uuid}")
+
+    project_props = s.ProjectProps(**governance["project"])
     log.info(
-        f"[cyan]Creating RO-Crate for[/cyan] - [bold magenta]{project.name}[/bold magenta]",
+        f"[cyan]Creating RO-Crate for[/cyan] - [bold magenta]{project_props.name}[/bold magenta]",
     )
 
-    projectEntity = m.ContextEntity(
+    project_entity = m.ContextEntity(
         crate=crate,
-        identifier=project.id,
+        identifier=project_props.id,
         properties={
             "@type": "Project",
-            "name": project.name,
-            "identifier": project.identifier,
+            "name": project_props.name,
+            "identifier": project_props.identifier,
         },
     )
 
-    crate.add(projectEntity)
-
-    if "requesting_agent" not in governance:
-        raise KeyError(
-            "requesting_agent is not defined in governance project.toml resource"
-        )
-
-    requester = s.RequestingAgentProps(**governance["requesting_agent"])
+    crate.add(project_entity)
 
     #
-    # Requester Affiliation Context Entity
+    # Load requesting agent info and init RC 'Person' entity
     #
 
-    affEntity = m.ContextEntity(
+    requesting_agent_props = s.RequestingAgentProps(**governance["requesting_agent"])
+    person_entity = m.Person(
+        crate,
+        identifier=f"requesting-agent-{project_uuid}",
+        properties={
+            "name": requesting_agent_props.name,
+            "affiliation": {"@id": f"requesting-agent-org-{project_uuid}"},
+        },
+    )
+
+    aff_entity = m.ContextEntity(
         crate,
         identifier=f"requesting-agent-org-{project_uuid}",
         properties={
             "@type": "Organisation",
-            "name": requester.affiliation.name,
-            "url": str(requester.affiliation.url),
+            "name": requesting_agent_props.affiliation.name,
+            "url": str(requesting_agent_props.affiliation.url),
         },
     )
-    crate.add(affEntity)
 
-    #
-    # Requester Context Entity
-    #
+    crate.add(aff_entity)
+    crate.add(person_entity)
 
-    requesterEntity = m.Person(
-        crate,
-        identifier=f"requesting-agent-{project_uuid}",
-        properties={
-            "name": requester.name,
-            "affiliation": {"@id": f"requesting-agent-org-{project_uuid}"},
-        },
-    )
-    crate.add(requesterEntity)
+    # Relation definition for ro-crate metadata file only (i.e. not stored are managed in the resources)
+    project_entity["memberOf"] = [{"@id": person_entity.id}]
 
-    #
-    # Add relationship properties, store generated state
-    #
-
-    projectEntity["memberOf"] = [{"@id": requesterEntity.id}]
-
+    # Update resources to include generated id properties for project info
     update_resource_entity(
-        project_resource_path, "project", project.dict(by_alias=True)
+        project_resource_path, "project", project_props.dict(by_alias=True)
     )
 
     #
-    # Repository Conext Entity
+    # Load project repository info and init RC 'SoftwareSourceCode' entity
     #
 
-    if "repository" not in governance:
-        raise KeyError(
-            "The project repository is not defined in governance project.toml resource"
-        )
+    repo_props = s.SoftwareSourceCodeProps(**governance["repository"])
 
-    repo = s.SoftwareSourceCodeProps(**governance["repository"])
-
-    repoEntity = m.ContextEntity(
+    repo_entity = m.ContextEntity(
         crate=crate,
         identifier=f"repo-{project_uuid}",
         properties={
             "@type": "SoftwareSourceCode",
-            "name": repo.name,
-            "description": repo.description,
-            "codeRepository": f"{repo.codeRepository}proj-{project_uuid}",
+            "name": repo_props.name,
+            "description": repo_props.description,
+            "codeRepository": f"{repo_props.codeRepository}proj-{project_uuid}",
         },
     )
-    crate.add(repoEntity)
+
+    crate.add(repo_entity)
     crate.metadata["isBasedOn"] = {"@id": f"repo-{project_uuid}"}
 
-    # Add governance yaml file to crate
+    #
+    # Load access info and init RC entities
+    #
+
+    contract_props = s.DataAccessContract(
+        connection=s.DatabricksSourceConnection(**access["source"]),
+        credentials=s.SourceAccessCredential(**access["credentials"]),
+    )
+    # TODO: Identify and init any RC contextual entities for describing data access
+
+    ###############################################################################
+    # 4 Build data entities
+    ###############################################################################
+
+    #
+    # Governance resources
+    #
 
     crate.add_file(
-        source=resources_dir.joinpath("governance", "project.toml"),
+        source=project_resource_path,
         dest_path="governance/project.toml",
-        properties={"name": project.name, "description": project.description},
+        properties={
+            "name": project_props.name,
+            "description": project_props.description,
+        },
     )
 
     log.info(
         msg="[cyan]Validated and added file[/cyan] - [bold magenta]governance/project.toml[/bold magenta]",
     )
 
-    # Validate and add dataset yaml files to crate
+    #
+    # Dataset metadata resources
+    #
 
-    for f in resources_dir.joinpath("metadata").glob("dataset*.yaml"):
-        dataset = s.DatasetMetadata.model_validate(yaml.safe_load(f.open()))
+    for f in resources_dir.joinpath("metadata").glob("dataset*.toml"):
+        dataset_dict = read_resource(f)
+        dataset_props = s.DatasetMetadata(**dataset_dict)
 
         crate.add_file(
             source=f,
             dest_path=f"metadata/{f.name}",
-            properties={"name": dataset.name, "description": dataset.description},
+            properties={
+                "name": dataset_props.name,
+                "description": dataset_props.description,
+            },
         )
 
         log.info(
-            msg=f"[cyan]Validated and added file[/cyan] - [bold magenta]metadata/{f.name}[/bold magenta]",
+            msg=f"[cyan]Validated and added datasets descriptor files[/cyan] - [bold magenta]metadata/{f.name}[/bold magenta]",
         )
 
-    # ToDo: Add any other yaml files with validation here
+    #
+    # Access resources
+    #
 
-    # ToDo: Should we also add arbitrary other files in here as well - eg. markdown
+    crate.add_file(
+        source=project_resource_path,
+        dest_path="access/access.toml",
+        properties={"name": contract_props.connection.name},
+    )
 
-    # Add root level metadata to the crate
-    crate.name = project.name
-    crate.description = project.description
+    log.info(
+        msg="[cyan]Validated and added access descriptor file[/cyan] - [bold magenta]access/access.toml[/bold magenta]",
+    )
+
+    ###############################################################################
+    # 5 Build create action
+    ###############################################################################
+
+    # TODO: Add in CreateAction for this 'cr8tor' create function here
+
+    ###############################################################################
+    # 6 Finalise Crate metadata
+    ###############################################################################
+    crate.name = project_props.name
+    crate.description = project_props.description
     crate.license = s.CrateMeta.License
     crate.publisher = m.ContextEntity(
         crate,
@@ -223,10 +280,10 @@ def create(
         properties={
             "@type": "Organisation",
             "name": "LSC SDE",
-            "url": "https://github.com/lsc-sde-crates",
+            "url": repo_props.codeRepository,
         },
     )
-    crate.mainEntity = projectEntity
+    crate.mainEntity = project_entity
 
     # Create a new bagit dir or open existing one
     # Write the crate into the data dir of the bag

@@ -1,0 +1,11 @@
+[source]
+name = "MyDatabricksConnection"
+host_url = "https://lsc-sde-instance.cloud.databricks.com"
+port = 443
+catalog = "main"
+schema_name = "omop"
+table = "my_table"
+
+[credentials]
+provider = "AzureKeyVault"
+secret_name = "srv-principal-foo123-access-token"

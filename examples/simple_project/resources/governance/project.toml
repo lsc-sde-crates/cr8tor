@@ -5,6 +5,8 @@ file = "metadata/dataset_01.toml"
 description = "P002 created using CR8TOR."
 identifier = "cr8-cr8-p002"
 name = "P002"
+"@id" = "proj-fdee7810-df99-4b82-98d3-9accb271b2cd"
+"@type" = "Project"
 
 [repository]
 codeRepository = "https://github.com/lsc-sde-crates/"

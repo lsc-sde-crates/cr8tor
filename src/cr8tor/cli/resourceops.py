@@ -5,7 +5,7 @@ by this module and packaging them into RO-Crate and BagIt archives.
 
 import toml
 from cr8tor.utils import log
-
+from pathlib import Path
 #
 # Whole file resource operations
 #
@@ -15,10 +15,8 @@ def create_resource(resource_file_path):
     pass
 
 
-def read_resource(resource_file_path):
+def read_resource(resource_file_path: Path) -> dict:
     try:
-        # return yaml.safe_load(resource_file_path.read_text())
-
         return toml.load(resource_file_path)
     except FileNotFoundError:
         log.info(

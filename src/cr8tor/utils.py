@@ -4,10 +4,8 @@ import logging
 import os
 import uuid
 from hashlib import md5
-from pathlib import Path
 from typing import Annotated
 
-import tomllib
 from pydantic import HttpUrl
 from rich.console import Console
 from rich.logging import RichHandler
@@ -43,18 +41,17 @@ def make_uuid(
     return uuid.UUID(hex=hx).urn
 
 
-def get_config(f: Path) -> dict:
-    """
-    Reads a TOML configuration file and returns its contents as a dictionary.
-    Args:
-        f (Path): The path to the TOML file.
-    Returns:
-        dict: The contents of the TOML file as a dictionary.
-    Raises:
-        FileNotFoundError: If the file does not exist.
-        IsADirectoryError: If the path is a directory.
-        tomllib.TOMLDecodeError: If the file is not a valid TOML file.
-        OSError: If there is an issue opening the file.
-    """
-
-    return tomllib.load(f.open("rb"))
+# def get_config(f: Path) -> dict:
+#     """
+#     Reads a TOML configuration file and returns its contents as a dictionary.
+#     Args:
+#         f (Path): The path to the TOML file.
+#     Returns:
+#         dict: The contents of the TOML file as a dictionary.
+#     Raises:
+#         FileNotFoundError: If the file does not exist.
+#         IsADirectoryError: If the path is a directory.
+#         tomllib.TOMLDecodeError: If the file is not a valid TOML file.
+#         OSError: If there is an issue opening the file.
+#     """
+#     return read_resource(f)
