@@ -14,7 +14,7 @@ import cr8tor.core.schema as s
 from cr8tor.exception import DirectoryNotFoundError
 from cr8tor.utils import log, make_uuid
 from cr8tor.cli.display import print_crate
-from cr8tor.cli.resourceops import update_resource_entity, read_resource
+from cr8tor.core.resourceops import update_resource_entity, read_resource
 
 app = typer.Typer()
 
@@ -315,3 +315,20 @@ def create(
         )
 
     print_crate(crate=crate)
+
+
+@app.command(name="update")
+def update(
+    resources_dir: Annotated[
+        Path,
+        typer.Option(
+            default="-i",
+            help="Path of updated resources directory to publish updated RO-Crate artefact.",
+        ),
+    ] = "./resources",
+    config_file: Annotated[
+        Path, typer.Option(default="-c", help="Location of project config file.")
+    ] = "./config.toml",
+    dryrun: Annotated[bool, typer.Option(default="--dryrun")] = False,
+):
+    pass
