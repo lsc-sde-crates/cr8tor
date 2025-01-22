@@ -44,6 +44,12 @@ def init_bag(project_id: str, bag_dir: Path, config: dict) -> bagit.Bag:
     return bag
 
 
+def check_required_keys(data: dict, required_keys: dict):
+    for key, error_message in required_keys.items():
+        if key not in data:
+            raise KeyError(error_message)
+
+
 @app.command(name="create")
 def create(
     resources_dir: Annotated[
@@ -95,18 +101,13 @@ def create(
         "repository": f"To create a LSC project, 'repository' properties must be defined in resource: {project_resource_path}",
     }
 
-    for key, error_message in governance_required_keys.items():
-        if key not in governance:
-            raise KeyError(error_message)
-
     access_required_keys = {
         "source": f"To create a LSC project, source connection info is needed in resource: {access_resource_path}",
         "credentials": f"To create a LSC project, connection credentials info is needed in resource: {access_resource_path}",
     }
 
-    for key, error_message in access_required_keys.items():
-        if key not in access:
-            raise KeyError(error_message)
+    check_required_keys(governance, governance_required_keys)
+    check_required_keys(access, access_required_keys)
 
     ###############################################################################
     # 3 Create initial Ro-Crate & build contextual entities
