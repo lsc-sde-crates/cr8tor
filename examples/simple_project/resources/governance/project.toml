@@ -1,34 +1,10 @@
-[[actions]]
-id = "create-project-action-16a10c61-e97e-4316-9bac-49fa24f61f21"
-type = "CreateAction"
-name = "Create LSC Project Action"
-start_time = 2025-01-22T16:33:29.245574
-end_time = 2025-01-22T16:33:29.257766
-action_status = "CompletedActionStatus"
-agent = "GitHub Action"
-instrument = "cr8tor"
-result = [ "foo",]
-
-[[actions]]
-id = "assess-action-XYZ"
-type = "CreateAction"
-name = "Assess Action Test"
-start_time = 2025-01-22T17:06:39.428929
-end_time = 2025-01-22T17:06:39.428931
-action_status = "CompletedActionStatus"
-agent = "GitHub Action"
-instrument = "cr8tor"
-result = [ "Bar",]
-
 [[metadata_sources]]
 file = "metadata/dataset_01.toml"
 
 [project]
 description = "P002 created using CR8TOR."
-identifier = "cr8-cr8-p002"
+reference = "cr8-cr8-p002"
 name = "P002"
-"@id" = "proj-83fab8bf-bb80-43b4-9976-d50da8ce4dba"
-"@type" = "Project"
 
 [repository]
 codeRepository = "https://github.com/lsc-sde-crates/"

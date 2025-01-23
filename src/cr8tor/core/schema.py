@@ -46,7 +46,7 @@ class ProjectProps(BaseRoCrateEntityProperties):
     type: Literal["Project"] = Field(default="Project", alias="@type")
     name: str
     description: str
-    identifier: str
+    reference: str
 
 
 class OrganizationProps(BaseRoCrateEntityProperties):
