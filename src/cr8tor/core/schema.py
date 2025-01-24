@@ -104,7 +104,7 @@ class CreateActionProps(ActionProps):
     )
 
 
-class AssessActionProps(BaseRoCrateEntityProperties):
+class AssessActionProps(ActionProps):
     type: Literal["AssessAction"] = Field(default="AssessAction", alias="@type")
 
     additional_type: str = Field(

@@ -392,6 +392,11 @@ def build(
     print_crate(crate=crate)
 
 
+###############################################################################
+# VALIDATE: Semantic validation of resources info (e.g. data contract details)
+###############################################################################
+
+
 @app.command(name="validate")
 def validate(
     bagit_dir: Annotated[
@@ -410,11 +415,21 @@ def validate(
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
     proj_roc_meta_path = bagit_dir.joinpath("data")
 
+    #
+    # Verify mircroservice in target TRE can connect to data source (i.e. verify data contract details in access/)
+    # Call REST API - Talk to Piotr about what this will look like
+    #
+
+    #
+    # Query ro-crate metadata to ensure prereq actions have completed
+    # Given its a knowledge graph we should probably be using something like rdflib to load metadata into a graph and query using SPARQL
+    #
+
     crate = ROCrate(proj_roc_meta_path)
 
-    create_action_props = s.CreateActionProps(
-        id="assess-action-XYZ",
-        name="Assess Action Test",
+    assess_action_props = s.AssessActionProps(
+        id="validate-action-XYZ",
+        name="Validate Assess Action",
         start_time=datetime.now(),
         end_time=datetime.now(),
         action_status="CompletedActionStatus",
@@ -422,18 +437,19 @@ def validate(
         error=None,
         instrument="cr8tor",
         result=["Bar"],
+        additional_type="Semantic Validation",
     )
 
     crate.add_action(
-        instrument=create_action_props.instrument,
-        identifier=create_action_props.id,
+        instrument=assess_action_props.instrument,
+        identifier=assess_action_props.id,
         # object={"@id": "https://example.com/dataset"},
         # result={"@id": "https://example.com/result"},
         properties={
-            "name": create_action_props.name,
-            "startTime": create_action_props.start_time.isoformat(),
-            "endTime": create_action_props.end_time.isoformat(),
-            "actionStatus": create_action_props.action_status,
+            "name": assess_action_props.name,
+            "startTime": assess_action_props.start_time.isoformat(),
+            "endTime": assess_action_props.end_time.isoformat(),
+            "actionStatus": assess_action_props.action_status,
             "agent": {
                 "@id": "foo",
                 "@type": "SoftwareApplication",
@@ -442,6 +458,80 @@ def validate(
         },
     )
 
-    update_resource_entity(project_resource_path, "actions", create_action_props.dict())
+    update_resource_entity(project_resource_path, "actions", assess_action_props.dict())
+
+    build(resources_dir)
+
+
+@app.command(name="approve")
+def approve(
+    bagit_dir: Annotated[
+        Path,
+        typer.Option(
+            default="-i", help="Bagit directory containing RO-Crate data directory"
+        ),
+    ] = "./bagit",
+    resources_dir: Annotated[
+        Path,
+        typer.Option(
+            default="-i", help="Directory containing resources to include in RO-Crate."
+        ),
+    ] = "./resources",
+    agent_token: Annotated[
+        str,
+        typer.Option(default="-i", help=""),
+    ] = "./resources",
+):
+    project_resource_path = resources_dir.joinpath("governance", "project.toml")
+    proj_roc_meta_path = bagit_dir.joinpath("data")
+
+    #
+    # Authorise approver agent
+    #
+
+    #
+    # Check previous prereq actions have been performed
+    #
+
+    #
+    # Handle different REST responses from GA on approval process to create/update action status
+    #
+
+    approve_action_props = s.AssessActionProps(
+        id="apporove-assess-action-XYZ",
+        name="approve-Assess Action Test",
+        start_time=datetime.now(),
+        end_time=datetime.now(),
+        action_status="CompletedActionStatus",
+        agent="Joe Bloggs",
+        error=None,
+        instrument="cr8tor",
+        result=["Bar"],
+        additional_type="Sign Off Approval",
+    )
+
+    crate = ROCrate(proj_roc_meta_path)
+
+    crate.add_action(
+        instrument=approve_action_props.instrument,
+        identifier=approve_action_props.id,
+        # object={"@id": "https://example.com/dataset"},
+        # result={"@id": "https://example.com/result"},
+        properties={
+            "name": approve_action_props.name,
+            "startTime": approve_action_props.start_time.isoformat(),
+            "endTime": approve_action_props.end_time.isoformat(),
+            "actionStatus": approve_action_props.action_status,
+            "agent": {
+                "@id": "foo",
+                "@type": "SoftwareApplication",
+                "name": "GitHub Action",
+            },  # TODO ADD AGENT ENTITY
+        },
+    )
+
+    update_resource_entity(
+        project_resource_path, "actions", approve_action_props.dict()
+    )
 
     build(resources_dir)
