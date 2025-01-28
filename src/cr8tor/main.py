@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Annotated
-
+from dotenv import load_dotenv, find_dotenv
 import typer
 from rocrate.rocrate import ROCrate
 
@@ -25,4 +25,5 @@ def read_bag(bag_dir: Annotated[Path, typer.Option(default="-i")] = "./bagit"):
 
 
 if __name__ == "__main__":
+    load_dotenv(find_dotenv())
     app()

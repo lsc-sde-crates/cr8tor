@@ -3,9 +3,10 @@ import asyncio
 import os
 from pydantic import BaseModel
 from typing import Optional, Union, Literal, Any, Dict
+from dotenv import load_dotenv, find_dotenv
 
 
-class HTTPResponse(BaseModel):
+class HTTPResponse(BaseModel, frozen=True):
     status: Literal["success", "error"]
     action: Literal["validate", "approve"]
     action_type: Literal["assessAction", "createAction"]
@@ -93,20 +94,42 @@ class APIClient:
 
 
 def get_service_api(service: str) -> APIClient:
-    if service == "ApprovalMicroSrv":
-        base_url = "https://6c556f5b-f83e-42d0-94ca-5ade56f98b05.mock.pstmn.io"
-        token = os.getenv("API_TOKEN", "123")  # Use environment variable or fallback
-    elif service == "MetaDataMicroSrv":
-        base_url = "https://metadata.service.url"  # Replace with actual URL
-        token = os.getenv("METADATA_API_TOKEN", "abc")
+    # token = os.getenv("GITHUB_TOKEN")
+    # if not token:
+    #    raise ValueError("GITHUB_TOKEN environment variable is not set")
+    if service == "MetaDataService":
+        base_url = os.getenv("METADATA_BASE_URL")
+        if not base_url:
+            raise ValueError("METADATA_BASE_URL environment variable not set")
+        token = os.getenv("METADATA_API_TOKEN", "123")
+    elif service == "ApprovalService":
+        base_url = os.getenv("APPROVAL_BASE_URL")
+        if not base_url:
+            raise ValueError("APPROVAL_BASE_URL environment variable not set")
+        token = os.getenv(
+            "APPROVAL_API_TOKEN", "123"
+        )  # TODO: change to real token from github secrets
     else:
         raise ValueError(f"Unknown service: {service}")
 
     return APIClient(base_url, token)
 
 
+async def validate_access(project_url: str) -> HTTPResponse:
+    service = "MetaDataService"
+    async with get_service_api(service) as metadata_service_client:
+        response = await metadata_service_client.post(
+            "validate", data={"project_url": project_url}
+        )
+        if isinstance(response, SuccessResponse):
+            print("Success:", response)
+        else:
+            print("Error:", response)
+        return response
+
+
 async def approve(project_url: str) -> HTTPResponse:
-    service = "ApprovalMicroSrv"
+    service = "ApprovalService"
     async with get_service_api(service) as approval_service_client:
         response = await approval_service_client.post(
             "approve", data={"project_url": project_url}
@@ -118,15 +141,11 @@ async def approve(project_url: str) -> HTTPResponse:
         return response
 
 
-async def validate(project_url: str) -> HTTPResponse:
-    # service = "ApprovalMicroSrv"
-    pass
-
-
 async def main():
     # testing
-    await approve("http://example.com/ro-crate-123")
+    await validate_access("http://example.com/ro-crate-123")
 
 
 if __name__ == "__main__":
+    load_dotenv(find_dotenv())
     asyncio.run(main())
