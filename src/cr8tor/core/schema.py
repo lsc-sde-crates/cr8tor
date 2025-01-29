@@ -208,6 +208,7 @@ class BagitInfo(BaseModel):
 
 class DataSourceConnection(BaseModel):
     name: Optional[str] = None
+    type: str = Field(description="Data source type")
 
 
 class DatabricksSourceConnection(DataSourceConnection):
@@ -217,18 +218,24 @@ class DatabricksSourceConnection(DataSourceConnection):
     )
     catalog: str = Field(description="Unity catalog name")
     schema_name: str = Field(description="Schema name in UC")
-    table: str = Field(description="Target table name")
+    table: list[str] | None = Field(default=None, description="Target table names")
 
 
 class SourceAccessCredential(BaseModel):
-    provider: str = Field(description="Service providing the secrets e.g. KeyVault")
-    secret_name: str = Field(description="Key name in secrets provider to access token")
+    provider: str | None = Field(
+        default=None,
+        description="Service providing the secrets e.g. KeyVault",
+    )
+    spn_clientid: str = Field(
+        description="Key name in secrets provider to access spn clientid ",
+    )
+    spn_secret: str = Field(
+        description="Key name in secrets provider to access spn secret",
+    )
 
 
 class DataAccessContract(BaseModel):
-    connection: DataSourceConnection = Field(
-        description="db connection details definition"
-    )
+    source: DataSourceConnection = Field(description="db connection details definition")
     credentials: SourceAccessCredential = Field(
         description="Auth provider and secrets key"
     )

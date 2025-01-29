@@ -1,11 +1,13 @@
 [source]
 name = "MyDatabricksConnection"
+type = "DatabricksSQL"
 host_url = "https://lsc-sde-instance.cloud.databricks.com"
 port = 443
 catalog = "main"
 schema_name = "omop"
-table = "my_table"
+table = ["my_table"]
 
 [credentials]
 provider = "AzureKeyVault"
-secret_name = "srv-principal-foo123-access-token"
+spn_clientid = "srv-principal-foo123-access-token"
+spn_secret = "srv-principal-foo123-access-token"

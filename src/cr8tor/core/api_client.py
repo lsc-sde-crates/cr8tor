@@ -8,11 +8,11 @@ from dotenv import load_dotenv, find_dotenv
 
 class HTTPResponse(BaseModel, frozen=True):
     status: Literal["success", "error"]
-    action: Literal["validate", "approve"]
     action_type: Literal["assessAction", "createAction"]
+    action: Literal["validate", "approve"]
     description: Optional[str] = None
     message: str
-    action_metadata: Dict[str, Any]
+    payload: Dict[str, Any]
 
 
 class SuccessResponse(HTTPResponse):

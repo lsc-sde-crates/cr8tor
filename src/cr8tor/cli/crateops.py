@@ -11,6 +11,8 @@ import rocrate.model as m
 import typer
 from rocrate.rocrate import ROCrate
 
+# from cr8tor.core.api_client import *
+
 import cr8tor.core.schema as s
 from cr8tor.exception import DirectoryNotFoundError
 from cr8tor.utils import log, make_uuid
