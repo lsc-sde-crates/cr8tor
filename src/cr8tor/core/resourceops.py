@@ -11,8 +11,9 @@ from pathlib import Path
 #
 
 
-def create_resource(resource_file_path):
-    pass
+def create_resource(resource_file_path: Path, data: dict):
+    with open(resource_file_path, "w") as f:
+        toml.dump(data, f)
 
 
 def read_resource(resource_file_path: Path) -> dict:
@@ -38,7 +39,7 @@ def delete_resource(resource_file_path):
 #
 
 
-def create_resource_entity(resource_file_path, property_key, new_object):
+def create_resource_entity(resource_file_path: Path, property_key: str, new_object):
     resource_dict = toml.load(resource_file_path)
     resource_dict[property_key] = new_object
 
@@ -50,11 +51,11 @@ def create_resource_entity(resource_file_path, property_key, new_object):
     )
 
 
-def read_resource_entity(resource_file_path, property_key):
+def read_resource_entity(resource_file_path: Path, property_key: str):
     pass
 
 
-def update_resource_entity(resource_file_path, property_key, object):
+def update_resource_entity(resource_file_path: Path, property_key: str, object):
     resource_dict = toml.load(resource_file_path)
 
     if property_key not in resource_dict:
@@ -80,5 +81,5 @@ def update_resource_entity(resource_file_path, property_key, object):
     )
 
 
-def delete_resource_entity(resource_file_path, property_key):
+def delete_resource_entity(resource_file_path: Path, property_key: str):
     pass

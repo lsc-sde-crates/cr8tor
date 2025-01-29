@@ -1,9 +1,10 @@
 import httpx
-import asyncio
 import os
 from pydantic import BaseModel
 from typing import Optional, Union, Literal, Any, Dict
 from dotenv import load_dotenv, find_dotenv
+
+from cr8tor.core.schema import DataAccessContract
 
 
 class HTTPResponse(BaseModel, frozen=True):
@@ -25,8 +26,8 @@ class ErrorResponse(HTTPResponse):
 
 
 class APIClient:
-    def __init__(self, base_url: str, token: str):
-        self.base_url = base_url
+    def __init__(self, base_url: str, token: str, port: Optional[int] = None):
+        self.base_url = f"{base_url}:{port}" if port else base_url
         self.token = token
         self.client = httpx.AsyncClient()
 
@@ -46,7 +47,7 @@ class APIClient:
             )
             return self.handle_response(response)
         except httpx.RequestError as exc:
-            raise RuntimeError(f"Request failed: {exc}") from exc
+            raise RuntimeError(f"GET Request {url} failed: {exc}") from exc
 
     async def post(
         self, endpoint: str, data: dict = None
@@ -58,7 +59,7 @@ class APIClient:
             )
             return self.handle_response(response)
         except httpx.RequestError as exc:
-            raise RuntimeError(f"Request failed: {exc}") from exc
+            raise RuntimeError(f"POST request {url} failed: {exc}") from exc
 
     async def put(
         self, endpoint: str, data: dict = None
@@ -68,7 +69,7 @@ class APIClient:
             response = await self.client.put(url, json=data, headers=self.get_headers())
             return self.handle_response(response)
         except httpx.RequestError as exc:
-            raise RuntimeError(f"Request failed: {exc}") from exc
+            raise RuntimeError(f"PUT request {url} failed: {exc}") from exc
 
     async def delete(self, endpoint: str) -> Union[SuccessResponse, ErrorResponse]:
         url = f"{self.base_url}/{endpoint}"
@@ -76,7 +77,7 @@ class APIClient:
             response = await self.client.delete(url, headers=self.get_headers())
             return self.handle_response(response)
         except httpx.RequestError as exc:
-            raise RuntimeError(f"Request failed: {exc}") from exc
+            raise RuntimeError(f"DELETE Request {url} failed: {exc}") from exc
 
     def handle_response(
         self, response: httpx.Response
@@ -94,32 +95,33 @@ class APIClient:
 
 
 def get_service_api(service: str) -> APIClient:
+    load_dotenv(find_dotenv())
     # token = os.getenv("GITHUB_TOKEN")
     # if not token:
     #    raise ValueError("GITHUB_TOKEN environment variable is not set")
     if service == "MetaDataService":
-        base_url = os.getenv("METADATA_BASE_URL")
-        if not base_url:
-            raise ValueError("METADATA_BASE_URL environment variable not set")
-        token = os.getenv("METADATA_API_TOKEN", "123")
+        base_url = os.getenv("METADATA_HOST")
+        port = os.getenv("METADATA_PORT")
+        if not base_url and not port:
+            raise ValueError("METADATA environment variables not set")
+        token = os.getenv("METADATA_API_TOKEN")
     elif service == "ApprovalService":
-        base_url = os.getenv("APPROVAL_BASE_URL")
-        if not base_url:
-            raise ValueError("APPROVAL_BASE_URL environment variable not set")
-        token = os.getenv(
-            "APPROVAL_API_TOKEN", "123"
-        )  # TODO: change to real token from github secrets
+        base_url = os.getenv("APPROVALS_HOST")
+        port = os.getenv("APPROVALS_PORT")
+        if not base_url or not port:
+            raise ValueError("APPROVALS environments variable not set")
+        token = os.getenv("APPROVALS_API_TOKEN")
     else:
         raise ValueError(f"Unknown service: {service}")
 
-    return APIClient(base_url, token)
+    return APIClient(base_url, token, port)
 
 
-async def validate_access(project_url: str) -> HTTPResponse:
-    service = "MetaDataService"
-    async with get_service_api(service) as metadata_service_client:
-        response = await metadata_service_client.post(
-            "validate", data={"project_url": project_url}
+async def validate_access(access_info: DataAccessContract) -> HTTPResponse:
+    service = "ApprovalService"
+    async with get_service_api(service) as approval_service_client:
+        response = await approval_service_client.post(
+            endpoint="project/validate", data=access_info.dict()
         )
         if isinstance(response, SuccessResponse):
             print("Success:", response)
@@ -141,11 +143,9 @@ async def approve(project_url: str) -> HTTPResponse:
         return response
 
 
-async def main():
-    # testing
-    await validate_access("http://example.com/ro-crate-123")
+# async def main():
+#     pass
 
 
-if __name__ == "__main__":
-    load_dotenv(find_dotenv())
-    asyncio.run(main())
+# if __name__ == "__main__":
+#     asyncio.run(main())

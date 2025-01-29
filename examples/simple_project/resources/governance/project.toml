@@ -1,3 +1,47 @@
+[[actions]]
+id = "create-project-action-ab42bc0f-d984-46c6-8fb3-6c3059f9edbb"
+type = "CreateAction"
+name = "Create LSC Project Action"
+start_time = 2025-01-29T18:05:03.967783
+end_time = 2025-01-29T18:05:03.971143
+action_status = "CompletedActionStatus"
+agent = "GitHub Action"
+instrument = "cr8tor"
+result = [ "foo",]
+
+[[actions]]
+id = "validate-action-XYZ"
+type = "AssessAction"
+name = "Validate Assess Action"
+start_time = 2025-01-29T18:05:23.718534
+end_time = 2025-01-29T18:05:23.718537
+action_status = "CompletedActionStatus"
+agent = "GitHub Action"
+instrument = "cr8tor"
+additional_type = "Semantic Validation"
+
+[[actions]]
+id = "validate-action-XYZ"
+type = "AssessAction"
+name = "Validate Assess Action"
+start_time = 2025-01-29T18:15:43.643523
+end_time = 2025-01-29T18:15:43.643526
+action_status = "CompletedActionStatus"
+agent = "GitHub Action"
+instrument = "cr8tor"
+additional_type = "Semantic Validation"
+
+[[actions]]
+id = "validate-action-XYZ"
+type = "AssessAction"
+name = "Validate Assess Action"
+start_time = 2025-01-29T18:17:42.535379
+end_time = 2025-01-29T18:17:42.535416
+action_status = "CompletedActionStatus"
+agent = "GitHub Action"
+instrument = "cr8tor"
+additional_type = "Semantic Validation"
+
 [[metadata_sources]]
 file = "metadata/dataset_01.toml"
 
@@ -5,6 +49,7 @@ file = "metadata/dataset_01.toml"
 description = "P002 created using CR8TOR."
 reference = "cr8-cr8-p002"
 name = "P002"
+id = "ab42bc0f-d984-46c6-8fb3-6c3059f9edbb"
 
 [repository]
 codeRepository = "https://github.com/lsc-sde-crates/"

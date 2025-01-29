@@ -5,13 +5,13 @@ import uuid
 from pathlib import Path
 from typing import Annotated
 from datetime import datetime
-
+import asyncio
 import bagit
 import rocrate.model as m
 import typer
 from rocrate.rocrate import ROCrate
 
-# from cr8tor.core.api_client import *
+import cr8tor.core.api_client as api
 
 import cr8tor.core.schema as s
 from cr8tor.exception import DirectoryNotFoundError
@@ -22,6 +22,9 @@ from cr8tor.core.resourceops import (
     read_resource,
     create_resource_entity,
 )
+
+from pydantic import ValidationError
+
 
 app = typer.Typer()
 
@@ -253,7 +256,7 @@ def build(
     #
 
     contract_props = s.DataAccessContract(
-        connection=s.DatabricksSourceConnection(**access["source"]),
+        source=s.DatabricksSourceConnection(**access["source"]),
         credentials=s.SourceAccessCredential(**access["credentials"]),
     )
     # TODO: Identify and init any RC contextual entities for describing data access
@@ -307,7 +310,7 @@ def build(
     crate.add_file(
         source=project_resource_path,
         dest_path="access/access.toml",
-        properties={"name": contract_props.connection.name},
+        properties={"name": contract_props.source.name},
     )
 
     log.info(
@@ -418,9 +421,32 @@ def validate(
     proj_roc_meta_path = bagit_dir.joinpath("data")
 
     #
-    # Verify mircroservice in target TRE can connect to data source (i.e. verify data contract details in access/)
-    # Call REST API - Talk to Piotr about what this will look like
+    # Call Approvals service (routed to Metatdata /metadata/project) to validate access and populate metadata
     #
+
+    access_resource_path = resources_dir.joinpath("access", "access.toml")
+    try:
+        access = read_resource(access_resource_path)
+        access_contract = s.DataAccessContract(
+            source=s.DatabricksSourceConnection(**access["source"]),
+            credentials=s.SourceAccessCredential(**access["credentials"]),
+        )
+    except ValidationError as e:
+        print("Validation Error:", e)
+
+    except Exception as e:
+        print("An unexpected error occurred:", e)
+
+    metadata = asyncio.run(api.validate_access(access_contract))
+
+    print(metadata)
+    # Check if metadata already exists
+    # meta_resource_path = resources_dir.joinpath("metatdata", "metadata.toml")
+    # false
+    # create_resource(meta_resource_path, metadata)
+    # true
+    # update tables metadata
+    # update_resource_entity(meta_resource_path, table.name, table)
 
     #
     # Query ro-crate metadata to ensure prereq actions have completed

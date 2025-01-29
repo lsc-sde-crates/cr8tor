@@ -1,13 +1,13 @@
 [source]
-name = "MyDatabricksConnection"
+name = "Cr8tor PoC Connection"
 type = "DatabricksSQL"
 host_url = "https://lsc-sde-instance.cloud.databricks.com"
 port = 443
-catalog = "main"
-schema_name = "omop"
-table = ["my_table"]
+catalog = "dbw-lsc-uks-datadev-omop-01"
+schema_name = "z__cr8tor_poc"
+table = ["care_site", "concept", "domain", "provider"]
 
 [credentials]
 provider = "AzureKeyVault"
-spn_clientid = "srv-principal-foo123-access-token"
-spn_secret = "srv-principal-foo123-access-token"
+spn_clientid = "mph_test_clientid_key"
+spn_secret = "mph_test_secret_key"
