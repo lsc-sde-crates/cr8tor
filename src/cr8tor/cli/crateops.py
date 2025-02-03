@@ -10,6 +10,8 @@ import rocrate.model as m
 import typer
 from rocrate.rocrate import ROCrate
 
+import asyncio
+import cr8tor.core.api_client as api
 
 import cr8tor.core.schema as s
 from cr8tor.exception import DirectoryNotFoundError
@@ -420,22 +422,23 @@ def validate(
     # Call Approvals service (routed to Metatdata /metadata/project) to validate access and populate metadata
     #
 
-    # access_resource_path = resources_dir.joinpath("access", "access.toml")
-    # try:
-    #     access = read_resource(access_resource_path)
-    #     access_contract = s.DataAccessContract(
-    #         source=s.DatabricksSourceConnection(**access["source"]),
-    #         credentials=s.SourceAccessCredential(**access["credentials"]),
-    #     )
-    # except ValidationError as e:
-    #     print("Validation Error:", e)
+    access_resource_path = resources_dir.joinpath("access", "access.toml")
+    try:
+        access = read_resource(access_resource_path)
+        access_contract = s.DataAccessContract(
+            source=s.DatabricksSourceConnection(**access["source"]),
+            credentials=s.SourceAccessCredential(**access["credentials"]),
+        )
+    except ValidationError as e:
+        print("Validation Error:", e)
 
-    # except Exception as e:
-    #     print("An unexpected error occurred:", e)
+    except Exception as e:
+        print("An unexpected error occurred:", e)
 
-    # metadata = asyncio.run(api.validate_access(access_contract))
+    # print(access_contract)
+    metadata = asyncio.run(api.validate_access(access_contract))
 
-    # print(metadata)
+    print(metadata)
 
     # Check if metadata already exists
     # meta_resource_path = resources_dir.joinpath("metatdata", "metadata.toml")

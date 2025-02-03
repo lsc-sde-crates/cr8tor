@@ -212,7 +212,7 @@ class DataSourceConnection(BaseModel):
 
 
 class DatabricksSourceConnection(DataSourceConnection):
-    host_url: HttpUrl = Field(description="dbs workspace URL")
+    host_url: str = Field(description="dbs workspace URL")
     port: int = Field(
         default=443, description="Port for the db cluster (defaults to 443)"
     )
@@ -235,7 +235,7 @@ class SourceAccessCredential(BaseModel):
 
 
 class DataAccessContract(BaseModel):
-    source: DataSourceConnection = Field(description="db connection details definition")
+    source: Union[DataSourceConnection, DatabricksSourceConnection] = Field(description="db connection details definition")
     credentials: SourceAccessCredential = Field(
         description="Auth provider and secrets key"
     )

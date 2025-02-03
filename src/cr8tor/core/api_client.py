@@ -20,9 +20,10 @@ class SuccessResponse(HTTPResponse):
     status: Literal["success"]
 
 
-class ErrorResponse(HTTPResponse):
-    status: Literal["error"]
-    error_code: str
+class ErrorResponse(BaseModel):
+    # status: Literal["error"]
+    # error_code: str
+    detail: str
 
 
 class APIClient:
@@ -33,8 +34,9 @@ class APIClient:
 
     def get_headers(self) -> dict:
         return {
-            "Authorization": f"Bearer {self.token}",
+            # "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
+            "x-api-key":f"{self.token}",
         }
 
     async def get(
@@ -54,6 +56,7 @@ class APIClient:
     ) -> Union[SuccessResponse, ErrorResponse]:
         url = f"{self.base_url}/{endpoint}"
         try:
+            print(data)
             response = await self.client.post(
                 url, json=data, headers=self.get_headers()
             )
@@ -85,6 +88,7 @@ class APIClient:
         if response.status_code == 200:
             return SuccessResponse(**response.json())
         else:
+            print(response.json())
             return ErrorResponse(**response.json())
 
     async def __aenter__(self):
@@ -120,8 +124,10 @@ def get_service_api(service: str) -> APIClient:
 async def validate_access(access_info: DataAccessContract) -> HTTPResponse:
     service = "ApprovalService"
     async with get_service_api(service) as approval_service_client:
+
+        print("VALIDATE:", access_info.model_dump(mode="json"))
         response = await approval_service_client.post(
-            endpoint="project/validate", data=access_info.dict()
+            endpoint="project/validate", data=access_info.model_dump(mode="json")
         )
         if isinstance(response, SuccessResponse):
             print("Success:", response)
