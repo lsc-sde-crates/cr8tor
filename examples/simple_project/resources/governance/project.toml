@@ -1,9 +1,9 @@
 [[actions]]
-id = "create-project-action-d72af32d-15c4-4880-923c-76119f648701"
+id = "create-project-action-1a462cc1-e996-4fe0-a295-b566e547cf21"
 type = "CreateAction"
 name = "Create LSC Project Action"
-start_time = 2025-02-03T12:18:53.302681
-end_time = 2025-02-03T12:18:53.318090
+start_time = 2025-02-04T19:33:51.124303
+end_time = 2025-02-04T19:33:51.170104
 action_status = "CompletedActionStatus"
 agent = "GitHub Action"
 instrument = "cr8tor"
@@ -13,19 +13,8 @@ result = [ "foo",]
 id = "validate-action-XYZ"
 type = "AssessAction"
 name = "Validate Assess Action"
-start_time = 2025-02-03T14:29:40.656571
-end_time = 2025-02-03T14:29:40.656571
-action_status = "CompletedActionStatus"
-agent = "GitHub Action"
-instrument = "cr8tor"
-additional_type = "Semantic Validation"
-
-[[actions]]
-id = "validate-action-XYZ"
-type = "AssessAction"
-name = "Validate Assess Action"
-start_time = 2025-02-03T14:34:07.427667
-end_time = 2025-02-03T14:34:07.427667
+start_time = 2025-02-04T19:34:08.660979
+end_time = 2025-02-04T19:34:08.660979
 action_status = "CompletedActionStatus"
 agent = "GitHub Action"
 instrument = "cr8tor"

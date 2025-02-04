@@ -12,6 +12,8 @@ from pathlib import Path
 
 
 def create_resource(resource_file_path: Path, data: dict):
+
+    resource_file_path.parent.mkdir(parents=True, exist_ok=True)
     with open(resource_file_path, "w") as f:
         toml.dump(data, f)
 
@@ -26,8 +28,10 @@ def read_resource(resource_file_path: Path) -> dict:
         return {"Error": f"The resource file '{resource_file_path}' is missing."}
 
 
-def update_resource(resource_file_path):
-    pass
+def update_resource(resource_file_path, data: dict):
+    if resource_file_path.exists():
+        with open(resource_file_path, "w") as f:
+            toml.dump(data, f)
 
 
 def delete_resource(resource_file_path):

@@ -1,9 +1,9 @@
 import httpx
 import os
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 from typing import Optional, Union, Literal, Any, Dict
 from dotenv import load_dotenv, find_dotenv
-
+import json
 from cr8tor.core.schema import DataAccessContract
 
 
@@ -16,9 +16,11 @@ class HTTPResponse(BaseModel, frozen=True):
     payload: Dict[str, Any]
 
 
-class SuccessResponse(HTTPResponse):
-    status: Literal["success"]
-
+class SuccessResponse(BaseModel):
+    # status: Literal["success"]
+    # payload: dict
+    class Config:
+        extra = Extra.allow
 
 class ErrorResponse(BaseModel):
     # status: Literal["error"]
@@ -88,7 +90,6 @@ class APIClient:
         if response.status_code == 200:
             return SuccessResponse(**response.json())
         else:
-            print(response.json())
             return ErrorResponse(**response.json())
 
     async def __aenter__(self):
@@ -125,7 +126,6 @@ async def validate_access(access_info: DataAccessContract) -> HTTPResponse:
     service = "ApprovalService"
     async with get_service_api(service) as approval_service_client:
 
-        print("VALIDATE:", access_info.model_dump(mode="json"))
         response = await approval_service_client.post(
             endpoint="project/validate", data=access_info.model_dump(mode="json")
         )

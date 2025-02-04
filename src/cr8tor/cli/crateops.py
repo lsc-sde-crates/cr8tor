@@ -21,6 +21,8 @@ from cr8tor.core.resourceops import (
     update_resource_entity,
     read_resource,
     create_resource_entity,
+    create_resource,
+    update_resource,
 )
 
 
@@ -437,16 +439,13 @@ def validate(
 
     # print(access_contract)
     metadata = asyncio.run(api.validate_access(access_contract))
-
-    print(metadata)
-
-    # Check if metadata already exists
-    # meta_resource_path = resources_dir.joinpath("metatdata", "metadata.toml")
-    # false
-    # create_resource(meta_resource_path, metadata)
-    # true
-    # update tables metadata
-    # update_resource_entity(meta_resource_path, table.name, table)
+    validate_dataset_info = s.DatasetMetadata(**metadata.dict())
+  
+    meta_resource_path = resources_dir.joinpath("metadata", f"dataset_{validate_dataset_info.name}.toml")
+    if not meta_resource_path.exists():
+        create_resource(meta_resource_path, validate_dataset_info.dict())
+    else:
+        update_resource(meta_resource_path, validate_dataset_info.dict())
 
     #
     # Query ro-crate metadata to ensure prereq actions have completed
