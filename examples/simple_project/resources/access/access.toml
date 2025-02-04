@@ -1,9 +1,9 @@
 [source]
 name = "Cr8tor PoC Connection"
 type = "DatabricksSQL"
-host_url = "https://lsc-sde-instance.cloud.databricks.com"
+host_url = "https://adb-1868816176859647.7.azuredatabricks.net"
 port = 443
-catalog = "dbw-lsc-uks-datadev-omop-01"
+catalog = "rde_dev"
 schema_name = "z__cr8tor_poc"
 table = ["care_site", "concept", "domain", "provider"]
 
