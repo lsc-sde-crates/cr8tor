@@ -219,6 +219,7 @@ class DatabricksSourceConnection(DataSourceConnection):
     catalog: str = Field(description="Unity catalog name")
     schema_name: str = Field(description="Schema name in UC")
     table: list[str] | None = Field(default=None, description="Target table names")
+    http_path: str = Field(description="Schema name in UC")
 
 
 class SourceAccessCredential(BaseModel):
