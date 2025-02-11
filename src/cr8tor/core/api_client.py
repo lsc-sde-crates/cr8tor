@@ -23,9 +23,9 @@ class SuccessResponse(BaseModel):
         extra = Extra.allow
 
 class ErrorResponse(BaseModel):
-    # status: Literal["error"]
+    status: Literal["error"]
     # error_code: str
-    detail: str
+    payload: Dict[str, Any]
 
 
 class APIClient:
@@ -133,7 +133,22 @@ async def validate_access(access_info: DataAccessContract) -> HTTPResponse:
             print("Success:", response)
         else:
             print("Error:", response)
-        return response
+            raise Exception(response)
+        return response.payload
+
+
+async def stage_transfer(access_info: DataAccessContract) -> HTTPResponse:
+    service = "ApprovalService"
+    async with get_service_api(service) as approval_service_client:
+
+        response = await approval_service_client.post(
+            endpoint="project/package", data=access_info.model_dump(mode="json")
+        )
+        if isinstance(response, SuccessResponse):
+            print("Success:", response)
+        else:
+            print("Error:", response)
+        return response.payload
 
 
 async def approve(project_url: str) -> HTTPResponse:

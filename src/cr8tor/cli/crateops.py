@@ -258,6 +258,9 @@ def build(
     contract_props = s.DataAccessContract(
         source=s.DatabricksSourceConnection(**access["source"]),
         credentials=s.SourceAccessCredential(**access["credentials"]),
+         project_name=governance["project"]["project_name"],
+            project_start_time=governance["project"]["project_start_time"],
+            destination_type=governance["project"]["destination_type"],
     )
     # TODO: Identify and init any RC contextual entities for describing data access
 
@@ -418,6 +421,9 @@ def validate(
     ] = "./resources",
 ):
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
+    
+    project_info = read_resource(project_resource_path)
+  
     proj_roc_meta_path = bagit_dir.joinpath("data")
 
     #
@@ -430,6 +436,9 @@ def validate(
         access_contract = s.DataAccessContract(
             source=s.DatabricksSourceConnection(**access["source"]),
             credentials=s.SourceAccessCredential(**access["credentials"]),
+            project_name=project_info["project"]["project_name"],
+            project_start_time=project_info["project"]["project_start_time"],
+            destination_type=project_info["project"]["destination_type"],
         )
     except ValidationError as e:
         print("Validation Error:", e)
@@ -439,7 +448,7 @@ def validate(
 
     # print(access_contract)
     metadata = asyncio.run(api.validate_access(access_contract))
-    validate_dataset_info = s.DatasetMetadata(**metadata.dict())
+    validate_dataset_info = s.DatasetMetadata(**metadata)
   
     meta_resource_path = resources_dir.joinpath("metadata", f"dataset_{validate_dataset_info.name}.toml")
     if not meta_resource_path.exists():
@@ -562,6 +571,91 @@ def approve(
     )
 
     build(resources_dir)
+
+
+
+###############################################################################
+# STAGE TRANSFER: Package and transfer data to staging container in TRE
+###############################################################################
+
+@app.command(name="stage-transfer")
+def stage_transfer(
+    bagit_dir: Annotated[
+        Path,
+        typer.Option(
+            default="-i", help="Bagit directory containing RO-Crate data directory"
+        ),
+    ] = "./bagit",
+    resources_dir: Annotated[
+        Path,
+        typer.Option(
+            default="-i", help="Directory containing resources to include in RO-Crate."
+        ),
+    ] = "./resources",
+):
+    project_resource_path = resources_dir.joinpath("governance", "project.toml")
+    access_resource_path = resources_dir.joinpath("access", "access.toml")
+
+    project_info = read_resource(project_resource_path)
+    
+    try:
+        access = read_resource(access_resource_path)
+        access_contract = s.DataAccessContract(
+            source=s.DatabricksSourceConnection(**access["source"]),
+            credentials=s.SourceAccessCredential(**access["credentials"]),
+            project_name=project_info["project"]["project_name"],
+            project_start_time=project_info["project"]["project_start_time"],
+            destination_type=project_info["project"]["destination_type"],
+        )
+    except ValidationError as e:
+        print("Validation Error:", e)
+
+    except Exception as e:
+        print("An unexpected error occurred:", e)
+
+    # print(access_contract)
+    resp = asyncio.run(api.stage_transfer(access_contract))
+    # validate_dataset_info = s.DatasetMetadata(**metadata.dict())
+  
+   
+    # crate = ROCrate(proj_roc_meta_path)
+
+    # assess_action_props = s.AssessActionProps(
+    #     id="validate-action-XYZ",
+    #     name="Validate Assess Action",
+    #     start_time=datetime.now(),
+    #     end_time=datetime.now(),
+    #     action_status="CompletedActionStatus",
+    #     agent="GitHub Action",
+    #     error=None,
+    #     instrument="cr8tor",
+    #     result=["Bar"],
+    #     additional_type="Semantic Validation",
+    # )
+
+    # crate.add_action(
+    #     instrument=assess_action_props.instrument,
+    #     identifier=assess_action_props.id,
+    #     # object={"@id": "https://example.com/dataset"},
+    #     # result={"@id": "https://example.com/result"},
+    #     properties={
+    #         "name": assess_action_props.name,
+    #         "startTime": assess_action_props.start_time.isoformat(),
+    #         "endTime": assess_action_props.end_time.isoformat(),
+    #         "actionStatus": assess_action_props.action_status,
+    #         "agent": {
+    #             "@id": "foo",
+    #             "@type": "SoftwareApplication",
+    #             "name": "GitHub Action",
+    #         },  # TODO ADD AGENT ENTITY
+    #     },
+    # )
+
+    # update_resource_entity(project_resource_path, "actions", assess_action_props.dict())
+
+    # build(resources_dir)
+
+
 
 
 @app.command(name="publish")

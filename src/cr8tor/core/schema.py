@@ -233,8 +233,25 @@ class SourceAccessCredential(BaseModel):
         description="Key name in secrets provider to access spn secret",
     )
 
+class DataPublishContract(BaseModel):
+    """Model required for all publish endpoints."""
 
-class DataAccessContract(BaseModel):
+    project_name: str = (
+        Field(description="Project name (without whitespaces)", pattern=r"^\S+$"),
+    )
+    project_start_time: str = (
+        Field(
+            description="Start time of the LSC project action. Format: YYYYMMDD_HHMMSS",
+            pattern=r"^\d{8}_\d{6}$",
+        ),
+    )
+    destination_type: str = Field(
+        description="Target SDE storage account where data should be loaded",
+        enum=["LSC", "NW"],
+    )
+
+
+class DataAccessContract(DataPublishContract):
     source: Union[DataSourceConnection, DatabricksSourceConnection] = Field(description="db connection details definition")
     credentials: SourceAccessCredential = Field(
         description="Auth provider and secrets key"
