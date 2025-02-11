@@ -22,6 +22,7 @@ class SuccessResponse(BaseModel):
     class Config:
         extra = Extra.allow
 
+
 class ErrorResponse(BaseModel):
     status: Literal["error"]
     # error_code: str
@@ -38,7 +39,7 @@ class APIClient:
         return {
             # "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
-            "x-api-key":f"{self.token}",
+            "x-api-key": f"{self.token}",
         }
 
     async def get(
@@ -125,7 +126,6 @@ def get_service_api(service: str) -> APIClient:
 async def validate_access(access_info: DataAccessContract) -> HTTPResponse:
     service = "ApprovalService"
     async with get_service_api(service) as approval_service_client:
-
         response = await approval_service_client.post(
             endpoint="project/validate", data=access_info.model_dump(mode="json")
         )
@@ -137,10 +137,22 @@ async def validate_access(access_info: DataAccessContract) -> HTTPResponse:
         return response.payload
 
 
-async def stage_transfer(access_info: DataAccessContract) -> HTTPResponse:
+async def stage_transfer(access_info: DataAccessContract, test: bool) -> HTTPResponse:
+    if test:
+        json_str = """{
+            "status": "success",
+            "payload": {
+                "data_retrieved": [
+                    {
+                        "file_path": "data/outputs/database.duckdb"
+                    }
+                ]
+            }
+        }"""
+        return json.loads(json_str)["payload"]
+
     service = "ApprovalService"
     async with get_service_api(service) as approval_service_client:
-
         response = await approval_service_client.post(
             endpoint="project/package", data=access_info.model_dump(mode="json")
         )
