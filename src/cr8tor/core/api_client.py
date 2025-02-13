@@ -1,6 +1,6 @@
 import httpx
 import os
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 from typing import Optional, Union, Literal, Any, Dict
 from dotenv import load_dotenv, find_dotenv
 import json
@@ -20,7 +20,7 @@ class SuccessResponse(BaseModel):
     # status: Literal["success"]
     # payload: dict
     class Config:
-        extra = Extra.allow
+        extra = "allow"
 
 
 class ErrorResponse(BaseModel):

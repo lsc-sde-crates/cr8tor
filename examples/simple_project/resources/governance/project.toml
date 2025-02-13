@@ -1,58 +1,3 @@
-[[actions]]
-id = "create-project-action-625c9f7c-6f33-4d3d-89a1-633dda42152d"
-type = "CreateAction"
-name = "Create LSC Project Action"
-start_time = 2025-02-07T14:13:09.980670
-end_time = 2025-02-07T14:13:09.991104
-action_status = "CompletedActionStatus"
-agent = "GitHub Action"
-instrument = "cr8tor"
-result = [ "foo",]
-
-[[actions]]
-id = "validate-action-XYZ"
-type = "AssessAction"
-name = "Validate Assess Action"
-start_time = 2025-02-07T14:13:39.878595
-end_time = 2025-02-07T14:13:39.878595
-action_status = "CompletedActionStatus"
-agent = "GitHub Action"
-instrument = "cr8tor"
-additional_type = "Semantic Validation"
-
-[[actions]]
-id = "validate-action-XYZ"
-type = "AssessAction"
-name = "Validate Assess Action"
-start_time = 2025-02-10T15:31:33.482694
-end_time = 2025-02-10T15:31:33.482694
-action_status = "CompletedActionStatus"
-agent = "GitHub Action"
-instrument = "cr8tor"
-additional_type = "Semantic Validation"
-
-[[actions]]
-id = "validate-action-XYZ"
-type = "AssessAction"
-name = "Validate Assess Action"
-start_time = 2025-02-10T17:58:35.900207
-end_time = 2025-02-10T17:58:35.900207
-action_status = "CompletedActionStatus"
-agent = "GitHub Action"
-instrument = "cr8tor"
-additional_type = "Semantic Validation"
-
-[[actions]]
-id = "validate-action-XYZ"
-type = "AssessAction"
-name = "Validate Assess Action"
-start_time = 2025-02-10T18:02:13.669618
-end_time = 2025-02-10T18:02:13.669618
-action_status = "CompletedActionStatus"
-agent = "GitHub Action"
-instrument = "cr8tor"
-additional_type = "Semantic Validation"
-
 [[metadata_sources]]
 file = "metadata/dataset_01.toml"
 
@@ -60,7 +5,6 @@ file = "metadata/dataset_01.toml"
 description = "P002 created using CR8TOR."
 reference = "cr8-cr8-p002"
 name = "P002"
-id = "625c9f7c-6f33-4d3d-89a1-633dda42152d"
 project_name = "Pr002"
 project_start_time = "20250201_010101"
 destination_type = "LSC"

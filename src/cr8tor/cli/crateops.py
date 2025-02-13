@@ -15,7 +15,6 @@ from pydantic import ValidationError
 import asyncio
 import cr8tor.core.api_client as api
 
-from cr8tor.core.crate_graph import ROCrateGraph
 import cr8tor.core.schema as s
 from cr8tor.exception import DirectoryNotFoundError
 from cr8tor.utils import log, make_uuid
@@ -117,7 +116,7 @@ def create(
         agent="GitHub Action",  # need to add agent to command line
         error=None,
         instrument="cr8tor",
-        result=["foo"],
+        result=[{"object": "foo"}],
     )
 
     create_resource_entity(project_resource_path, "actions", [])
@@ -600,27 +599,17 @@ def stage_transfer(
 ):
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
     access_resource_path = resources_dir.joinpath("access", "access.toml")
+    # crate_meta_file = bagit_dir.joinpath("data", "ro-crate-metadata.json")
+
     project_info = read_resource(project_resource_path)
 
-    crate_meta_file = bagit_dir.joinpath("data", "ro-crate-metadata.json")
+    # Check if access to source has been validated in previous ro-crate knowledge graph
+    # graph = ROCrateGraph(crate_meta_file)
 
-    print(crate_meta_file)
-    graph = ROCrateGraph(crate_meta_file)
-
-    if not graph.is_validated():
-        raise Exception(
-            "Cannot this action becase ro-crate has not completed validation phase"
-        )
-
-    return
-
-    # Check if access to source has been validated (actions in project.toml)
-
-    # Check metadata file for dataset is defined
-
-    # Perform transfer
-
-    # Add dataset path to validated metadata file
+    # if not graph.is_validated():
+    #     raise Exception(
+    #         "Cannot this action becase ro-crate has not completed validation phase"
+    #     )
 
     try:
         access = read_resource(access_resource_path)
@@ -639,45 +628,25 @@ def stage_transfer(
 
     # print(access_contract)
     resp = asyncio.run(api.stage_transfer(access_contract, True))
-    # validate_dataset_info = s.DatasetMetadata(**metadata.dict())
-    print(resp)
+    # validate_resp = s.DatasetMetadata(**metadata.dict())
 
-    # crate = ROCrate(proj_roc_meta_path)
+    create_transfer_action_props = s.CreateActionProps(
+        id=f"stage-transfer-action-{project_info['project']['id']}",
+        name="Create LSC Project Action",
+        start_time=datetime.now(),
+        end_time=datetime.now(),
+        action_status="CompletedActionStatus",
+        agent="GitHub Action",
+        error=None,
+        instrument="cr8tor",
+        result=resp["data_retrieved"],
+    )
 
-    # assess_action_props = s.AssessActionProps(
-    #     id="validate-action-XYZ",
-    #     name="Validate Assess Action",
-    #     start_time=datetime.now(),
-    #     end_time=datetime.now(),
-    #     action_status="CompletedActionStatus",
-    #     agent="GitHub Action",
-    #     error=None,
-    #     instrument="cr8tor",
-    #     result=["Bar"],
-    #     additional_type="Semantic Validation",
-    # )
+    update_resource_entity(
+        project_resource_path, "actions", create_transfer_action_props.model_dump()
+    )
 
-    # crate.add_action(
-    #     instrument=assess_action_props.instrument,
-    #     identifier=assess_action_props.id,
-    #     # object={"@id": "https://example.com/dataset"},
-    #     # result={"@id": "https://example.com/result"},
-    #     properties={
-    #         "name": assess_action_props.name,
-    #         "startTime": assess_action_props.start_time.isoformat(),
-    #         "endTime": assess_action_props.end_time.isoformat(),
-    #         "actionStatus": assess_action_props.action_status,
-    #         "agent": {
-    #             "@id": "foo",
-    #             "@type": "SoftwareApplication",
-    #             "name": "GitHub Action",
-    #         },  # TODO ADD AGENT ENTITY
-    #     },
-    # )
-
-    # update_resource_entity(project_resource_path, "actions", assess_action_props.dict())
-
-    # build(resources_dir)
+    build(resources_dir)
 
 
 @app.command(name="publish")

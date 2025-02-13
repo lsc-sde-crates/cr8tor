@@ -97,9 +97,14 @@ class ActionProps(BaseRoCrateEntityProperties):
     )
 
 
+class ResultItem(BaseModel):
+    class Config:
+        extra = "allow"
+
+
 class CreateActionProps(ActionProps):
     type: Literal["CreateAction"] = Field(default="CreateAction", alias="@type")
-    result: List[str] = Field(
+    result: List[ResultItem] = Field(
         description="Id references to other data or context entities"
     )
 
@@ -234,6 +239,7 @@ class SourceAccessCredential(BaseModel):
         description="Key name in secrets provider to access spn secret",
     )
 
+
 class DataPublishContract(BaseModel):
     """Model required for all publish endpoints."""
 
@@ -253,7 +259,9 @@ class DataPublishContract(BaseModel):
 
 
 class DataAccessContract(DataPublishContract):
-    source: Union[DataSourceConnection, DatabricksSourceConnection] = Field(description="db connection details definition")
+    source: Union[DataSourceConnection, DatabricksSourceConnection] = Field(
+        description="db connection details definition"
+    )
     credentials: SourceAccessCredential = Field(
         description="Auth provider and secrets key"
     )
