@@ -1,3 +1,4 @@
+import debugpy
 from pathlib import Path
 from typing import Annotated
 from dotenv import load_dotenv, find_dotenv
@@ -26,5 +27,8 @@ def read_bag(bag_dir: Annotated[Path, typer.Option(default="-i")] = "./bagit"):
 
 
 if __name__ == "__main__":
+    debugpy.listen(("localhost", 5678))
+    debugpy.wait_for_client()
+
     load_dotenv(find_dotenv())
     app()

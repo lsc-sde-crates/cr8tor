@@ -328,6 +328,7 @@ source = { editable = "." }
 dependencies = [
     { name = "bagit" },
     { name = "cookiecutter" },
+    { name = "debugpy" },
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "rdflib" },
@@ -355,6 +356,7 @@ dev = [
 requires-dist = [
     { name = "bagit", specifier = ">=1.8.1" },
     { name = "cookiecutter", specifier = ">=2.6.0" },
+    { name = "debugpy", specifier = ">=1.5.1" },
     { name = "pydantic", specifier = ">=2.10.4" },
     { name = "python-dotenv", specifier = ">=0.19.1" },
     { name = "rdflib", specifier = ">=7.1.3" },

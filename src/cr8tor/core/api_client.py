@@ -267,6 +267,23 @@ async def stage_transfer(access_info: DataAccessContract, test: bool) -> HTTPRes
         return response.payload
 
 
+async def publish(access_info: DataAccessContract, test: bool) -> HTTPResponse:
+    if test:
+        json_str = """ """
+        return json.loads(json_str)
+
+    service = "ApprovalService"
+    async with get_service_api(service) as approval_service_client:
+        response = await approval_service_client.post(
+            endpoint="project/publish", data=access_info.model_dump(mode="json")
+        )
+        if isinstance(response, SuccessResponse):
+            print("Success:", response)
+        else:
+            print("Error:", response)
+        return response.payload
+
+
 async def approve(project_url: str) -> HTTPResponse:
     service = "ApprovalService"
     async with get_service_api(service) as approval_service_client:

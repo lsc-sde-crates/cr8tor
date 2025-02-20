@@ -1,10 +1,14 @@
+import os
 import typer
+# import asyncio
+
 from pathlib import Path
 from typing import Annotated
 
-# from cr8tor.core.resourceops import *
-from cr8tor.cli.app import app
+# import cr8tor.core.api_client as api
 import cr8tor.cli.build as ro_crate_builder
+
+app = typer.Typer()
 
 
 @app.command(name="publish")
@@ -30,11 +34,9 @@ def publish(
         typer.Option(default="-i", help=""),
     ] = "./resources",
 ):
-    # project_resource_path = resources_dir.joinpath("governance", "project.toml")
-    # proj_roc_meta_path = bagit_dir.joinpath("data")
+    if agent is None:
+        agent = os.getenv("APP_NAME")
 
-    #
-    # Log the action and update on statuses
-    #
-
+    # resp_dict = asyncio.run(api.stage_transfer(None, True))
+    # print(resp_dict)
     ro_crate_builder.build(resources_dir)

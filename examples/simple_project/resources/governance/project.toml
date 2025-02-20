@@ -87,6 +87,19 @@ instrument = "PublishService"
 file_path = "data/outputs/database.duckdb"
 
 
+[[actions]]
+id = "stage-transfer-action-3f9d9c53-ddcf-44e0-805d-944a73a6ce74"
+type = "CreateAction"
+name = "Create LSC Project Action"
+start_time = 2025-02-20T15:08:31.280718
+end_time = 2025-02-20T15:08:31.289248
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "PublishService"
+[[actions.result]]
+file_path = "data/outputs/database.duckdb"
+
+
 [[metadata_sources]]
 file = "metadata/dataset_pr002.toml"
 
