@@ -123,7 +123,111 @@ def get_service_api(service: str) -> APIClient:
     return APIClient(base_url, token, port)
 
 
-async def validate_access(access_info: DataAccessContract) -> HTTPResponse:
+async def validate_access(access_info: DataAccessContract, test: bool) -> HTTPResponse:
+    if test:
+        json_str = """{
+    "status": "success",
+    "payload": {
+        "name": "pr001",
+        "description": "This is test metadata for a test project comprising a few tables",
+        "schema_name": "z__cr8tor_poc",
+        "tables": [
+            {
+                "name": "concept",
+                "description": "",
+                "columns": [
+                    {
+                        "name": "concept_class_id",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "concept_code",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "concept_id",
+                        "description": "",
+                        "datatype": "LONG"
+                    },
+                    {
+                        "name": "concept_name",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "domain_id",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "inserted_date_time",
+                        "description": "",
+                        "datatype": "TIMESTAMP"
+                    },
+                    {
+                        "name": "inserted_process_instance_id",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "inserted_process_queue_id",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "invalid_reason",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "source_system",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "standard_concept",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "updated_date_time",
+                        "description": "",
+                        "datatype": "TIMESTAMP"
+                    },
+                    {
+                        "name": "updated_process_instance_id",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "updated_process_queue_id",
+                        "description": "",
+                        "datatype": "STRING"
+                    },
+                    {
+                        "name": "valid_end_date",
+                        "description": "",
+                        "datatype": "DATE"
+                    },
+                    {
+                        "name": "valid_start_date",
+                        "description": "",
+                        "datatype": "DATE"
+                    },
+                    {
+                        "name": "vocabulary_id",
+                        "description": "",
+                        "datatype": "STRING"
+                    }
+                ]
+            }
+        ]
+    }
+}"""
+        return json.loads(json_str)["payload"]
+
     service = "ApprovalService"
     async with get_service_api(service) as approval_service_client:
         response = await approval_service_client.post(
@@ -149,7 +253,7 @@ async def stage_transfer(access_info: DataAccessContract, test: bool) -> HTTPRes
                 ]
             }
         }"""
-        return json.loads(json_str)["payload"]
+        return json.loads(json_str)
 
     service = "ApprovalService"
     async with get_service_api(service) as approval_service_client:

@@ -5,7 +5,7 @@ host_url = "https://adb-1868816176859647.7.azuredatabricks.net"
 port = 443
 catalog = "rde_dev"
 schema_name = "z__cr8tor_poc"
-table = ["care_site", "concept", "domain", "provider"]
+table = ["concept"]
 http_path = "/sql/1.0/warehouses/0aec44b2e70e201d"
 
 [credentials]

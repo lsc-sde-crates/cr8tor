@@ -1,5 +1,94 @@
+[[actions]]
+id = "create-project-action-3f9d9c53-ddcf-44e0-805d-944a73a6ce74"
+type = "CreateAction"
+name = "Create LSC Project Action"
+start_time = 2025-02-20T11:10:01.218225
+end_time = 2025-02-20T11:10:01.222677
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "cr8tor"
+[[actions.result]]
+"@id" = "3f9d9c53-ddcf-44e0-805d-944a73a6ce74"
+
+
+[[actions]]
+id = "validate-sem-3f9d9c53-ddcf-44e0-805d-944a73a6ce74"
+type = "AssessAction"
+name = "Validate action"
+start_time = 2025-02-20T11:20:03.179104
+end_time = 2025-02-20T11:20:03.182354
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "MetadataService"
+additional_type = "Semantic Validation"
+
+[[actions]]
+id = "stage-transfer-action-3f9d9c53-ddcf-44e0-805d-944a73a6ce74"
+type = "CreateAction"
+name = "Create LSC Project Action"
+start_time = 2025-02-20T11:51:57.679182
+end_time = 2025-02-20T11:51:57.679186
+action_status = "CompletedActionStatus"
+agent = "GitHub Action"
+instrument = "cr8tor"
+[[actions.result]]
+file_path = "data/outputs/database.duckdb"
+
+
+[[actions]]
+id = "stage-transfer-action-3f9d9c53-ddcf-44e0-805d-944a73a6ce74"
+type = "CreateAction"
+name = "Create LSC Project Action"
+start_time = 2025-02-20T11:56:28.688127
+end_time = 2025-02-20T11:56:28.690615
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "cr8tor"
+[[actions.result]]
+file_path = "data/outputs/database.duckdb"
+
+
+[[actions]]
+id = "stage-transfer-action-3f9d9c53-ddcf-44e0-805d-944a73a6ce74"
+type = "CreateAction"
+name = "Create LSC Project Action"
+start_time = 2025-02-20T11:59:51.055059
+end_time = 2025-02-20T11:59:51.056925
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "PublishService"
+[[actions.result]]
+file_path = "data/outputs/database.duckdb"
+
+
+[[actions]]
+id = "stage-transfer-action-3f9d9c53-ddcf-44e0-805d-944a73a6ce74"
+type = "CreateAction"
+name = "Create LSC Project Action"
+start_time = 2025-02-20T12:03:46.414432
+end_time = 2025-02-20T12:03:46.420636
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "PublishService"
+[[actions.result]]
+file_path = "data/outputs/database.duckdb"
+
+
+[[actions]]
+id = "stage-transfer-action-3f9d9c53-ddcf-44e0-805d-944a73a6ce74"
+type = "CreateAction"
+name = "Create LSC Project Action"
+start_time = 2025-02-20T12:05:08.608931
+end_time = 2025-02-20T12:05:08.614799
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "PublishService"
+[[actions.result]]
+file_path = "data/outputs/database.duckdb"
+
+
 [[metadata_sources]]
-file = "metadata/dataset_01.toml"
+file = "metadata/dataset_pr002.toml"
 
 [project]
 description = "P002 created using CR8TOR."
@@ -8,6 +97,8 @@ name = "P002"
 project_name = "Pr002"
 project_start_time = "20250201_010101"
 destination_type = "LSC"
+destination_format = "DUCKDB"
+id = "3f9d9c53-ddcf-44e0-805d-944a73a6ce74"
 
 [repository]
 codeRepository = "https://github.com/lsc-sde-crates/"

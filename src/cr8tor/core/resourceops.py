@@ -12,7 +12,6 @@ from pathlib import Path
 
 
 def create_resource(resource_file_path: Path, data: dict):
-
     resource_file_path.parent.mkdir(parents=True, exist_ok=True)
     with open(resource_file_path, "w") as f:
         toml.dump(data, f)
@@ -56,7 +55,15 @@ def create_resource_entity(resource_file_path: Path, property_key: str, new_obje
 
 
 def read_resource_entity(resource_file_path: Path, property_key: str):
-    pass
+    try:
+        return toml.load(resource_file_path)[property_key]
+    except FileNotFoundError:
+        log.info(
+            f"[red]Entity missing in resource file[/red] - [bold red]{resource_file_path}[/bold red]",
+        )
+    return {
+        "Error": f"The resource file '{resource_file_path}' is missing entity {property_key}."
+    }
 
 
 def update_resource_entity(resource_file_path: Path, property_key: str, object):
@@ -71,6 +78,7 @@ def update_resource_entity(resource_file_path: Path, property_key: str, object):
     if isinstance(target_entity, dict):
         resource_dict[property_key].update(object)
     elif isinstance(target_entity, list):
+        print("sdf")
         resource_dict[property_key].append(object)
     else:
         raise TypeError(

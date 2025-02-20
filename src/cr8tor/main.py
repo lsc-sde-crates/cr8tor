@@ -4,12 +4,13 @@ from dotenv import load_dotenv, find_dotenv
 import typer
 from rocrate.rocrate import ROCrate
 
-from cr8tor.cli.crateops import app as cli_crateops
+# from cr8tor.cli.create import app as cli_commands
+from cr8tor.cli import app as cli
 from cr8tor.cli.display import print_bagit, print_crate
 from cr8tor.cli.initiate import app as cli_initiate
 
 app = typer.Typer()
-app.add_typer(cli_crateops)
+app.add_typer(cli)
 app.add_typer(cli_initiate)
 
 

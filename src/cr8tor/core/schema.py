@@ -2,9 +2,10 @@
 
 from enum import StrEnum
 from typing import List
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 from datetime import datetime
 from typing import Optional, Literal, Union
+
 
 ###############################################################################
 # Models to validate properties of Schema.org entities
@@ -77,12 +78,19 @@ class SoftwareSourceCodeProps(BaseRoCrateEntityProperties):
     codeRepository: Optional[HttpUrl] = Field(default=None, description="repo url")
 
 
-class ActionProps(BaseRoCrateEntityProperties):
+class ActionStatusType(StrEnum):
+    ACTIVE: str = "ActiveActionStatus"
+    COMPLETED: str = "CompletedActionStatus"
+    FAILED: str = "FailedActionStatus"
+    POTENTIAL: str = "PotentialActionStatus"
+
+
+class ActionProps(BaseRoCrateEntityProperties, use_enum_values=True):
     type: Literal["Action"] = Field(default="Action", alias="@type")
     name: str = Field(description="Action name")
     start_time: datetime = Field(description="Start time of the action")
     end_time: datetime = Field(description="End time of the action")
-    action_status: str = Field(
+    action_status: ActionStatusType = Field(
         description="Status of the action formmatted based on Provernance Crate Profile spec"
     )
     agent: str = Field(
@@ -95,6 +103,19 @@ class ActionProps(BaseRoCrateEntityProperties):
         default=None,
         description="Instrument performing the execution of the action (e.g. cr8tor, specific TRE service)",
     )
+
+    @field_validator("action_status", mode="before")
+    @classmethod
+    def convert_to_enum(cls, v):
+        """Converts a string value to an ActionStatusType enum."""
+        if isinstance(v, str):
+            try:
+                return ActionStatusType(v)
+            except ValueError:
+                raise ValueError(
+                    f"Invalid action_status: '{v}'. Must be one of {list(ActionStatusType)}"
+                )
+        return v
 
 
 class ResultItem(BaseModel):
@@ -164,22 +185,22 @@ class CrateMeta(StrEnum):
 
 class ColumnMetadata(BaseModel):
     name: str
-    description: str
     datatype: str
 
 
 class TableMetadata(BaseModel):
     name: str
-    description: str
     columns: List[ColumnMetadata]
 
 
 class DatasetMetadata(BaseModel):
     name: str
-    description: str
-    catalog: str
-    table_schema: str
+    schema_name: str
+    description: Optional[str] = Field(
+        description="A dataset comprising one or more tables"
+    )
     tables: List[TableMetadata]
+    staging_path: Optional[str] = None
 
 
 class AffiliationInfo(BaseModel):
@@ -256,6 +277,10 @@ class DataPublishContract(BaseModel):
         description="Target SDE storage account where data should be loaded",
         enum=["LSC", "NW"],
     )
+    destination_format: str = Field(
+        description="Target format for the data to be loaded",
+        enum=["CSV", "DUCKDB"],
+    )
 
 
 class DataAccessContract(DataPublishContract):
@@ -265,3 +290,19 @@ class DataAccessContract(DataPublishContract):
     credentials: SourceAccessCredential = Field(
         description="Auth provider and secrets key"
     )
+    dataset: DatasetMetadata = Field(
+        description="Metadata for the requested tables",
+    )
+
+
+class StageTransferLocation(BaseModel):
+    file_path: str
+
+
+class StageTransferPayload(BaseModel):
+    data_retrieved: List[StageTransferLocation]
+
+
+class HTTPPayloadResponse(BaseModel):
+    status: str
+    payload: Union[StageTransferPayload]

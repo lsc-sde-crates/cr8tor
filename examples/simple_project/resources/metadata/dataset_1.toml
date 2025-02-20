@@ -1,0 +1,15 @@
+name = "dataset_1"
+description = "Metadata of required tables/columns"
+schema_name = "z__cr8tor_poc"
+staging_path = "data/outputs/database.duckdb"
+[[tables]]
+name = "concept"
+[[tables.columns]]
+name = "concept_class_id"
+description = ""
+datatype = "STRING"
+
+[[tables.columns]]
+name = "concept_code"
+description = ""
+datatype = "STRING"
