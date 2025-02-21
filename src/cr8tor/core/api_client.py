@@ -256,7 +256,7 @@ async def stage_transfer(
             "payload": {
                 "data_retrieved": [
                     {
-                        "file_path": "data/outputs/database.duckdb"
+                        "file_path": "lsc/staging/data/outputs/database.duckdb"
                     }
                 ]
             }
@@ -282,7 +282,7 @@ async def publish(access_info: DataContractProjectRequest, test: bool) -> HTTPRe
             "payload": {
                 "data_published": [
                     {
-                        "file_path": "data/outputs/database.duckdb",
+                        "file_path": "lsc/production/data/outputs/database.duckdb",
                         "hash_value": "f12190d5b8bd373103a6ecbd3e6f059d211c85fc3843888115c53f647c806afffdb2a55a6d98af4c78ecf5ee534d044a708240696a5852b484928ee10580f087",
                         "total_bytes": 1585152
                     }
