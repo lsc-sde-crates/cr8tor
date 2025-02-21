@@ -201,6 +201,7 @@ class DatasetMetadata(BaseModel):
     )
     tables: List[TableMetadata]
     staging_path: Optional[str] = None
+    publish_path: Optional[str] = None
 
 
 class AffiliationInfo(BaseModel):
@@ -261,9 +262,44 @@ class SourceAccessCredential(BaseModel):
     )
 
 
-class DataPublishContract(BaseModel):
-    """Model required for all publish endpoints."""
+# class DataPublishContract(BaseModel):
+#     """Model required for all publish endpoints."""
 
+#     project_name: str = (
+#         Field(description="Project name (without whitespaces)", pattern=r"^\S+$"),
+#     )
+#     project_start_time: str = (
+#         Field(
+#             description="Start time of the LSC project action. Format: YYYYMMDD_HHMMSS",
+#             pattern=r"^\d{8}_\d{6}$",
+#         ),
+#     )
+#     destination_type: str = Field(
+#         description="Target SDE storage account where data should be loaded",
+#         enum=["LSC", "NW"],
+#     )
+#     destination_format: Optional[str] = Field(
+#         description="Target format for the data to be loaded",
+#         default=None,
+#     )
+
+
+# class ValidateDataContractRequest(DataPublishContract):
+#     source: Union[DataSourceConnection, DatabricksSourceConnection] = Field(
+#         description="db connection details definition"
+#     )
+#     credentials: SourceAccessCredential = Field(
+#         description="Auth provider and secrets key"
+#     )
+#     dataset: DatasetMetadata = Field(
+#         description="Metadata for the requested tables",
+#     )
+
+
+#
+# Service Request Models
+#
+class DataContractProjectRequest(BaseModel):
     project_name: str = (
         Field(description="Project name (without whitespaces)", pattern=r"^\S+$"),
     )
@@ -277,22 +313,39 @@ class DataPublishContract(BaseModel):
         description="Target SDE storage account where data should be loaded",
         enum=["LSC", "NW"],
     )
+
+
+class DataContractAccessRequest(DataContractProjectRequest):
     destination_format: str = Field(
         description="Target format for the data to be loaded",
         enum=["CSV", "DUCKDB"],
     )
-
-
-class DataAccessContract(DataPublishContract):
     source: Union[DataSourceConnection, DatabricksSourceConnection] = Field(
         description="db connection details definition"
     )
     credentials: SourceAccessCredential = Field(
         description="Auth provider and secrets key"
     )
+
+
+class DataContractValidateRequest(DataContractAccessRequest):
     dataset: DatasetMetadata = Field(
         description="Metadata for the requested tables",
     )
+
+
+#
+# TODO: Ask Piotr to make this 'dataset' not metadata like validate req
+#
+class DataContractStageTransferRequest(DataContractAccessRequest):
+    metadata: DatasetMetadata = Field(
+        description="Metadata for the requested tables",
+    )
+
+
+#
+# Payload Response models
+#
 
 
 class StageTransferLocation(BaseModel):
@@ -303,6 +356,16 @@ class StageTransferPayload(BaseModel):
     data_retrieved: List[StageTransferLocation]
 
 
+class PublishLocation(BaseModel):
+    file_path: str
+    hash_value: str
+    total_bytes: int
+
+
+class PublishPayload(BaseModel):
+    data_published: List[PublishLocation]
+
+
 class HTTPPayloadResponse(BaseModel):
     status: str
-    payload: Union[StageTransferPayload]
+    payload: Union[StageTransferPayload, PublishPayload]

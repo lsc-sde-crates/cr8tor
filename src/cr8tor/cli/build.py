@@ -220,17 +220,7 @@ def build(
             },
         )
 
-        data_ctx_entity = m.ContextEntity(
-            crate=crate,
-            identifier=f"{dataset_props.name}",
-            properties={
-                "@type": "Dataset",
-                "name": f"{dataset_props.name}",
-                "description": dataset_props.description,
-            },
-        )
-
-        crate.add(data_ctx_entity)
+        hasparts = []
 
         if dataset_props.staging_path is not None:
             staging_entity = m.ContextEntity(
@@ -239,17 +229,39 @@ def build(
                 properties={
                     "@type": "Dataset",
                     "name": f"{dataset_props.name} (Staging)",
-                    "contentLocation": {
-                        "@id": f"staging-loc-{dataset_props.staging_path}",
-                        "@type": "Place",
-                        "name": "Staging Area",
-                        "url": f"{dataset_props.staging_path}",
-                    },
-                    "encodingFormat": "application/x-duckdb",
+                    "url": f"{dataset_props.staging_path}",
+                    "encodingFormat": "application/x-duckdb",  # TODO: add format from project metadata
                 },
             )
             crate.add(staging_entity)
-            data_ctx_entity.setdefault("hasPart", []).append({"@id": staging_entity.id})
+            hasparts.append({"@id": staging_entity.id})
+
+        if dataset_props.publish_path is not None:
+            publish_entity = m.ContextEntity(
+                crate=crate,
+                identifier=f"{dataset_props.name}-publish",
+                properties={
+                    "@type": "Dataset",
+                    "name": f"{dataset_props.name} (Publish)",
+                    "url": f"{dataset_props.publish_path}",
+                    "encodingFormat": "application/x-duckdb",  # TODO: add format from project metadata
+                },
+            )
+            crate.add(publish_entity)
+            hasparts.append({"@id": publish_entity.id})
+
+        data_ctx_entity = m.ContextEntity(
+            crate=crate,
+            identifier=f"{dataset_props.name}",
+            properties={
+                "@type": "Dataset",
+                "name": f"{dataset_props.name}",
+                "description": dataset_props.description,
+                "hasPart": hasparts,
+            },
+        )
+
+        crate.add(data_ctx_entity)
 
     #
     # Access resources

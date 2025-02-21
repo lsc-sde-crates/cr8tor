@@ -87,7 +87,7 @@ def validate(
             access = project_resources.read_resource(access_resource_path)
             dataset_meta = project_resources.read_resource(dataset_meta_file)
 
-            access_contract = s.DataAccessContract(
+            access_contract = s.DataContractValidateRequest(
                 source=s.DatabricksSourceConnection(**access["source"]),
                 credentials=s.SourceAccessCredential(**access["credentials"]),
                 # TODO: Validate & select against porject pydantic model

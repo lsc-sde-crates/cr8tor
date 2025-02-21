@@ -55,7 +55,7 @@ def stage_transfer(
 
         try:
             access = project_resources.read_resource(access_resource_path)
-            access_contract = schemas.DataAccessContract(
+            access_contract = schemas.DataContractStageTransferRequest(
                 source=schemas.DatabricksSourceConnection(**access["source"]),
                 credentials=schemas.SourceAccessCredential(**access["credentials"]),
                 # TODO: Validate & select against porject pydantic model
@@ -63,7 +63,7 @@ def stage_transfer(
                 project_start_time=project_info["project"]["project_start_time"],
                 destination_type=project_info["project"]["destination_type"],
                 destination_format=project_info["project"]["destination_format"],
-                dataset=dataset_props,
+                metadata=dataset_props,
             )
         except ValidationError as e:
             print("Validation Error:", e)

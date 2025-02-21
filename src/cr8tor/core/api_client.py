@@ -4,7 +4,11 @@ from pydantic import BaseModel
 from typing import Optional, Union, Literal, Any, Dict
 from dotenv import load_dotenv, find_dotenv
 import json
-from cr8tor.core.schema import DataAccessContract
+from cr8tor.core.schema import (
+    DataContractProjectRequest,
+    DataContractValidateRequest,
+    DataContractStageTransferRequest,
+)
 
 
 class HTTPResponse(BaseModel, frozen=True):
@@ -123,7 +127,9 @@ def get_service_api(service: str) -> APIClient:
     return APIClient(base_url, token, port)
 
 
-async def validate_access(access_info: DataAccessContract, test: bool) -> HTTPResponse:
+async def validate_access(
+    access_info: DataContractValidateRequest, test: bool
+) -> HTTPResponse:
     if test:
         json_str = """{
     "status": "success",
@@ -241,7 +247,9 @@ async def validate_access(access_info: DataAccessContract, test: bool) -> HTTPRe
         return response.payload
 
 
-async def stage_transfer(access_info: DataAccessContract, test: bool) -> HTTPResponse:
+async def stage_transfer(
+    access_info: DataContractStageTransferRequest, test: bool
+) -> HTTPResponse:
     if test:
         json_str = """{
             "status": "success",
@@ -267,9 +275,20 @@ async def stage_transfer(access_info: DataAccessContract, test: bool) -> HTTPRes
         return response.payload
 
 
-async def publish(access_info: DataAccessContract, test: bool) -> HTTPResponse:
+async def publish(access_info: DataContractProjectRequest, test: bool) -> HTTPResponse:
     if test:
-        json_str = """ """
+        json_str = """{
+            "status": "success",
+            "payload": {
+                "data_published": [
+                    {
+                        "file_path": "data/outputs/database.duckdb",
+                        "hash_value": "f12190d5b8bd373103a6ecbd3e6f059d211c85fc3843888115c53f647c806afffdb2a55a6d98af4c78ecf5ee534d044a708240696a5852b484928ee10580f087",
+                        "total_bytes": 1585152
+                    }
+                ]
+            }
+        }"""
         return json.loads(json_str)
 
     service = "ApprovalService"
