@@ -1,7 +1,7 @@
 """Module with functions to initiate a CR8 project"""
 
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
 from cookiecutter.main import cookiecutter
@@ -19,12 +19,15 @@ def init(
             prompt=True,
         ),
     ],
+    project_name: Annotated[Optional[str], typer.Option()] = None,
 ):
     """
     Initialize a new CR8 project using a specified cookiecutter template.
     Args:
         template_path (str): The GitHub URL or relative path to the cr8-cookiecutter template.
                              This is prompted from the user if not provided.
+        project_name (Optional[str]): The name of the project to be created.
+                                      This is optional and can be provided as an argument.
     The function generates a new project by applying the specified cookiecutter template.
     It also adds a timestamp to the context used by the template.
     The `template_path` argument is annotated with `typer.Option` to provide command-line
@@ -36,6 +39,10 @@ def init(
         or
 
         `cr8tor init -t path-to-local-cr8-cookiecutter-dir`
+
+        or
+
+        `cr8tor init -t path-to-local-cr8-cookiecutter-dir` --project-name "my-project"
     """
 
     extra_context = {
@@ -43,4 +50,8 @@ def init(
         "__cr8_cc_template": template_path,
     }
 
-    cookiecutter(template_path, extra_context=extra_context)
+    if project_name is not None:
+        extra_context.update({"project_name": project_name})
+        cookiecutter(template_path, extra_context=extra_context, no_input=True)
+    else:
+        cookiecutter(template_path, extra_context=extra_context)
