@@ -37,7 +37,7 @@ class APIClient:
     def __init__(self, base_url: str, token: str, port: Optional[int] = None):
         self.base_url = f"{base_url}:{port}" if port else base_url
         self.token = token
-        self.client = httpx.AsyncClient()
+        self.client = httpx.AsyncClient(timeout=60 * 60)
 
     def get_headers(self) -> dict:
         return {
