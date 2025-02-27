@@ -19,6 +19,7 @@ def init(
             prompt=True,
         ),
     ],
+    checkout: Annotated[Optional[str], typer.Option()] = None,
     project_name: Annotated[Optional[str], typer.Option()] = None,
 ):
     """
@@ -52,6 +53,8 @@ def init(
 
     if project_name is not None:
         extra_context.update({"project_name": project_name})
-        cookiecutter(template_path, extra_context=extra_context, no_input=True)
+        cookiecutter(
+            template_path, checkout=checkout, extra_context=extra_context, no_input=True
+        )
     else:
-        cookiecutter(template_path, extra_context=extra_context)
+        cookiecutter(template_path, checkout=checkout, extra_context=extra_context)
