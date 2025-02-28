@@ -1,4 +1,4 @@
-name: Init RO-Crate Project repository
+name: Init RO-Crate Project
 
 on:
   workflow_dispatch:
