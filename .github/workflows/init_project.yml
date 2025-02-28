@@ -36,4 +36,4 @@ jobs:
           git config --global user.email "lscsde-actions@github.com"
 
           ORG=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)
-          cr8tor init -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -chk feature-pzm-update-resources  -n "project002" -org $ORG -pat ${{ secrets.ORG_LVL_RW_REPOS_TEAMS }} --push
+          cr8tor init -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -chk feature-pzm-update-resources  -n "project002" -org $ORG --push
