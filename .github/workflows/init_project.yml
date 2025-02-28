@@ -9,7 +9,7 @@ on:
             required: true
   push:
     branches:
-      - ondemand
+      - pzm-add-orchestration-feature
 env:
     GH_TOKEN: ${{ secrets.ORG_LVL_RW_REPOS_TEAMS }}
 
