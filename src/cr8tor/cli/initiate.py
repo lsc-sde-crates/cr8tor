@@ -181,7 +181,7 @@ def create_and_push_project(
 
         # Use the PAT for authentication
         repo_http_url_with_token = repo_http_url.replace(
-            "https://", "https://pat_token@"
+            "https://", f"https://{pat_token}@"
         )
         origin = repo.create_remote("origin", repo_http_url_with_token)
         origin.push(refspec="HEAD:main")
