@@ -169,8 +169,7 @@ def create_and_push_project(
     if response.status_code == 201:
         print(f"GitHub repository '{git_org}/{repo_name}' created successfully.")
     else:
-        print(f"Failed to create GitHub repository: {response.json()}")
-        return
+        raise ValueError(f"Failed to create GitHub repository: {response.json()}")
 
     # Step 3: Initialize git, add, commit and push the local project
     repo_http_url = response.json()["clone_url"]
@@ -179,15 +178,11 @@ def create_and_push_project(
         repo.git.add(A=True)
         repo.index.commit("Initial commit")
 
-        # Use the PAT for authentication
-        repo_http_url_with_token = repo_http_url.replace(
-            "https://", f"https://{pat_token}@"
-        )
-        origin = repo.create_remote("origin", repo_http_url_with_token)
+        origin = repo.create_remote("origin", repo_http_url)
         origin.push(refspec="HEAD:main")
         print(f"Project pushed to GitHub repository '{git_org}/{repo_name}'.")
     except Exception as e:
-        print(f"An error occurred while pushing to GitHub: {e}")
+        raise ValueError(f"An error occurred while pushing to GitHub: {e}")
 
     # Step 4: Apply the rule set for the repository
     project_repo_ruleset_path = Path(project_dir).joinpath(
@@ -205,7 +200,7 @@ def create_and_push_project(
         response.raise_for_status()
         print(f"Rule set applied for {repo_name}")
     except Exception as e:
-        print(f"An error applying rulesets to the GitHub repo: {e}")
+        raise ValueError(f"An error applying rulesets to the GitHub repo: {e}")
 
 
 def check_and_create_teams(repo_name: str, git_org: str, github_token: str) -> None:
