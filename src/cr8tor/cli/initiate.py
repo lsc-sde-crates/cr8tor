@@ -1,10 +1,16 @@
 """Module with functions to initiate a CR8 project"""
 
 from datetime import datetime
-from typing import Annotated, Optional
-
+from typing import Annotated
+from pathlib import Path
+import cr8tor.core.schema as schemas
+import git
 import typer
 from cookiecutter.main import cookiecutter
+import cr8tor.core.resourceops as project_resources
+
+import requests
+import json
 
 app = typer.Typer()
 
@@ -15,35 +21,78 @@ def init(
         str,
         typer.Option(
             default="-t",
-            help="Github URL or relative path to cr8-cookiecutter template",
+            help="GitHub URL or relative path to cr8-cookiecutter template",
             prompt=True,
         ),
     ],
-    checkout: Annotated[Optional[str], typer.Option()] = None,
-    project_name: Annotated[Optional[str], typer.Option()] = None,
+    push_to_github: Annotated[
+        bool,
+        typer.Option(
+            "--push/--no-push",
+            help="Flag to indicate if the project should be pushed to GitHub",
+        ),
+    ] = False,
+    pat_token: Annotated[
+        str,
+        typer.Option(
+            "-pat",
+            help="GitHub personal access token",
+            hide_input=True,
+        ),
+    ] = None,
+    git_org: Annotated[
+        str,
+        typer.Option(
+            "-org",
+            help="Target github organisation name",
+            hide_input=True,
+        ),
+    ] = None,
+    checkout: Annotated[
+        str,
+        typer.Option(
+            "-chk",
+            help="Branch, tag or commit to checkout from cookiecutter template",
+        ),
+    ] = None,
+    project_name: Annotated[
+        str,
+        typer.Option(
+            "-n",
+            help="Name of the project to be created. This is optional and can be provided as an argument.",
+        ),
+    ] = None,
 ):
     """
+
     Initialize a new CR8 project using a specified cookiecutter template.
+
     Args:
         template_path (str): The GitHub URL or relative path to the cr8-cookiecutter template.
-                             This is prompted from the user if not provided.
-        project_name (Optional[str]): The name of the project to be created.
-                                      This is optional and can be provided as an argument.
+                            This is prompted from the user if not provided.
+        push_to_github (bool): Flag to indicate if the project should be pushed to GitHub.
+        pat_token (Optional[str]): The GitHub personal access token.
+        git_org (Optional[str]): The target GitHub organization name.
+        checkout (Optional[str]): The branch, tag, or commit to checkout from the cookiecutter template.
+        project_name (Optional[str]): The name of the project to be created. If provided, cookiecutter will skip the prompt for other values.
+
     The function generates a new project by applying the specified cookiecutter template.
     It also adds a timestamp to the context used by the template.
-    The `template_path` argument is annotated with `typer.Option` to provide command-line
-    interface options such as default value, help message, and prompt.
-    Example:
 
-        `cr8tor init -t https://github.com/lsc-sde-crates/cr8-cookiecutter`)
+    If `push_to_github` is True, it will also create a GitHub repository under the specified organization
+    and push the generated project to GitHub using the provided personal access token.
 
-        or
+    Example usage:
 
-        `cr8tor init -t path-to-local-cr8-cookiecutter-dir`
+        cr8tor init -t https://github.com/lsc-sde-crates/cr8-cookiecutter
 
         or
 
-        `cr8tor init -t path-to-local-cr8-cookiecutter-dir` --project-name "my-project"
+        cr8tor init -t path-to-local-cr8-cookiecutter-dir
+
+        or
+
+        cr8tor init -t path-to-local-cr8-cookiecutter-dir -n "my-project" -org "lsc-sde-crates" -pat "your-github-pat" --push
     """
 
     extra_context = {
@@ -51,10 +100,154 @@ def init(
         "__cr8_cc_template": template_path,
     }
 
+    # Generate the project with cookiecutter
     if project_name is not None:
         extra_context.update({"project_name": project_name})
-        cookiecutter(
+        extra_context.update({"github_organization": git_org})
+        project_dir = cookiecutter(
             template_path, checkout=checkout, extra_context=extra_context, no_input=True
         )
     else:
-        cookiecutter(template_path, checkout=checkout, extra_context=extra_context)
+        project_dir = cookiecutter(
+            template_path, checkout=checkout, extra_context=extra_context
+        )
+    resources_dir = Path(project_dir).joinpath("resources")
+    project_resource_path = resources_dir.joinpath("governance", "project.toml")
+    project_dict = project_resources.read_resource_entity(
+        project_resource_path, "project"
+    )
+    project_info = schemas.ProjectProps(**project_dict)
+
+    if push_to_github and pat_token and git_org:
+        repo_name = project_info.reference
+
+        # Create the repository and push the project to GitHub
+        create_and_push_project(project_dir, repo_name, git_org, pat_token)
+
+        # Check and create contributor teams
+        check_and_create_teams(repo_name, git_org, pat_token)
+
+
+def create_and_push_project(
+    project_dir: str, repo_name: str, git_org: str, pat_token: str
+):
+    """
+    Create a new GitHub repository under the `lsc-sde-crates` organization and push the local directory to it.
+    Args:
+        project_dir (str): The local project directory generated by cookiecutter.
+        repo_name (str): The desired repository name.
+        git_org (str): The GitHub organization name.
+        pat_token (str): The GitHub personal access token.
+    """
+
+    headers = {
+        "Authorization": f"token {pat_token}",
+        "Accept": "application/vnd.github.v3+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+    # Step 1: Check if the repository already exists
+    repo_url = f"https://api.github.com/repos/{git_org}/{repo_name}"
+    response = requests.get(repo_url, headers=headers)
+
+    if response.status_code == 200:
+        # Repository already exists, skip creation
+        print(
+            f"GitHub repository '{git_org}/{repo_name}' already exists. Skipping creation..."
+        )
+        return
+
+    # Step 2: Create a new repository under the organization
+    repo_url = f"https://api.github.com/orgs/{git_org}/repos"
+    payload = {
+        "name": repo_name,
+        "description": f"Data Access Request repository for project {repo_name}",
+        "private": True,  # You can adjust this to make it private/public if needed. By default, it's private.
+    }
+    response = requests.post(repo_url, json=payload, headers=headers)
+
+    if response.status_code == 201:
+        print(f"GitHub repository '{git_org}/{repo_name}' created successfully.")
+    else:
+        print(f"Failed to create GitHub repository: {response.json()}")
+        return
+
+    # Step 3: Initialize git, add, commit and push the local project
+    repo_http_url = response.json()["clone_url"]
+    try:
+        repo = git.Repo.init(project_dir)
+        repo.git.add(A=True)
+        repo.index.commit("Initial commit")
+
+        origin = repo.create_remote("origin", repo_http_url)
+        origin.push(refspec="HEAD:main")
+        print(f"Project pushed to GitHub repository '{git_org}/{repo_name}'.")
+    except Exception as e:
+        print(f"An error occurred while pushing to GitHub: {e}")
+
+    # Step 4: Apply the rule set for the repository
+    project_repo_ruleset_path = Path(project_dir).joinpath(
+        ".github", "branch_rules", "protect_main.json"
+    )
+    with project_repo_ruleset_path.open("r") as f:
+        project_repo_ruleset = json.load(f)
+
+    try:
+        response = requests.post(
+            f"https://api.github.com/repos/{git_org}/{repo_name}/rulesets",
+            headers=headers,
+            json=project_repo_ruleset,
+        )
+        response.raise_for_status()
+        print(f"Rule set applied for {repo_name}")
+    except Exception as e:
+        print(f"An error applying rulesets to the GitHub repo: {e}")
+
+
+def check_and_create_teams(repo_name: str, git_org: str, github_token: str) -> None:
+    """
+    Check for the existence of GitHub teams and create them if they do not exist.
+
+    Args:
+        repo_name (str): The name of the repository.
+        git_org (str): The GitHub organization name.
+        github_token (str): The GitHub personal access token.
+
+    This function checks if the contributor and approver teams exist for the given repository.
+    If they do not exist, it creates them with the appropriate permissions and settings.
+    """
+
+    headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+    def team_exists(team_name):
+        response = requests.get(
+            f"https://api.github.com/orgs/{git_org}/teams/{team_name}", headers=headers
+        )
+        return response.status_code == 200
+
+    def create_team(team_name, description):
+        data = {
+            "name": team_name,
+            "description": description,
+            "permission": "push",
+            "notification_setting": "notifications_enabled",
+            "privacy": "closed",
+        }
+        response = requests.post(
+            f"https://api.github.com/orgs/{git_org}/teams", headers=headers, json=data
+        )
+        response.raise_for_status()
+
+    contributor_team = f"{repo_name}-contributor"
+
+    if not team_exists(contributor_team):
+        create_team(
+            contributor_team, f"Team for contributor members for project {repo_name}"
+        )
+        print(f"Created team {contributor_team}")
+    else:
+        print(f"Team {contributor_team} already exists. Skipping creation...")
