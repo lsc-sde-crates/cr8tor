@@ -172,14 +172,15 @@ def create_and_push_project(
         raise ValueError(f"Failed to create GitHub repository: {response.json()}")
 
     # Step 3: Initialize git, add, commit and push the local project
-    repo_http_url = response.json()["clone_url"]
     try:
         repo = git.Repo.init(project_dir)
+        repo.git.checkout("-b", "main")  # Ensure 'main' branch exists
         repo.git.add(A=True)
         repo.index.commit("Initial commit")
 
-        origin = repo.create_remote("origin", repo_http_url)
-        origin.push(refspec="HEAD:main")
+        auth_repo_url = f"https://{pat_token}@github.com/{git_org}/{repo_name}.git"
+        repo.create_remote("origin", auth_repo_url)
+        repo.git.push("--set-upstream", "origin", "main")
         print(f"Project pushed to GitHub repository '{git_org}/{repo_name}'.")
     except Exception as e:
         raise ValueError(f"An error occurred while pushing to GitHub: {e}")
