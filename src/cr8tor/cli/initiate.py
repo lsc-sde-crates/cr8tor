@@ -179,7 +179,11 @@ def create_and_push_project(
         repo.git.add(A=True)
         repo.index.commit("Initial commit")
 
-        origin = repo.create_remote("origin", repo_http_url)
+        # Use the PAT for authentication
+        repo_http_url_with_token = repo_http_url.replace(
+            "https://", "https://pat_token@"
+        )
+        origin = repo.create_remote("origin", repo_http_url_with_token)
         origin.push(refspec="HEAD:main")
         print(f"Project pushed to GitHub repository '{git_org}/{repo_name}'.")
     except Exception as e:
