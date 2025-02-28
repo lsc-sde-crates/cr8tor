@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
         new_project_name:
-            description: The name of the new RO-Crate project
+            description: Name of the new RO-Crate project
             type: string
             required: true
   push:
