@@ -241,13 +241,32 @@ def check_and_create_teams(repo_name: str, git_org: str, github_token: str) -> N
             f"https://api.github.com/orgs/{git_org}/teams", headers=headers, json=data
         )
         response.raise_for_status()
+        return response.json()["slug"]
+
+    def add_or_update_team_repository_permission(team_slug):
+        data = {"permission": "push"}
+        response = requests.put(
+            f"https://api.github.com/orgs/{git_org}/teams/{team_slug}/repos/{git_org}/{repo_name}",
+            headers=headers,
+            json=data,
+        )
+        response.raise_for_status()
 
     contributor_team = f"{repo_name}-contributor"
 
     if not team_exists(contributor_team):
-        create_team(
+        team_slug = create_team(
             contributor_team, f"Team for contributor members for project {repo_name}"
         )
         print(f"Created team {contributor_team}")
+
+        add_or_update_team_repository_permission("devops_admin")
+        print(
+            f"Added 'devops_admin' repository 'push' permission to team {contributor_team}"
+        )
+        add_or_update_team_repository_permission(team_slug)
+        print(
+            f"Added {repo_name} repository 'push' permission to team {contributor_team}"
+        )
     else:
         print(f"Team {contributor_team} already exists. Skipping creation...")
