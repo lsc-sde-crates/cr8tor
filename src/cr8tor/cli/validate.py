@@ -5,11 +5,11 @@ import cr8tor.core.api_client as api
 import cr8tor.core.schema as s
 import cr8tor.cli.build as ro_crate_builder
 import cr8tor.core.resourceops as project_resources
+import cr8tor.core.crate_graph as proj_graph
 
 from pathlib import Path
 from typing import Annotated, List, Tuple, Optional
 from datetime import datetime
-from pydantic import ValidationError
 
 app = typer.Typer()
 
@@ -63,7 +63,6 @@ def validate(
         agent = os.getenv("APP_NAME")
 
     start_time = datetime.now()
-    # proj_roc_meta_path = bagit_dir.joinpath("data")
     access_resource_path = resources_dir.joinpath("access", "access.toml")
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
     project_dict = project_resources.read_resource_entity(
@@ -71,14 +70,13 @@ def validate(
     )
     project_info = s.ProjectProps(**project_dict)
 
-    #
-    # Check if create actions are complete in knowledge graph
-    #
-    # graph = ROCrateGraph(crate_meta_file)
-    # if not graph.is_created():
-    #     raise Exception(
-    #         "Cannot perform this action becase ro-crate has not completed creation phase"
-    #     )
+    current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
+    if not current_rocrate_graph.is_created():
+        typer.echo(
+            "The create command must be run on the target project before validation",
+            err=True,
+        )
+        raise typer.Exit(code=1)
 
     is_valid = True
 
@@ -97,11 +95,9 @@ def validate(
                 destination_format=project_dict["destination_format"],
                 dataset=s.DatasetMetadata(**dataset_meta),
             )
-        except ValidationError as e:
-            print("Validation Error:", e)
-
         except Exception as e:
-            print("An unexpected error occurred:", e)
+            typer.echo("Error", err=e)
+            raise typer.Exit(code=1)
 
         metadata = asyncio.run(api.validate_access(access_contract, True))
         validate_dataset_info = s.DatasetMetadata(**metadata)
@@ -112,17 +108,11 @@ def validate(
         if not is_valid:
             break
 
-    #
-    # Check if performed and/or status of validate action on project in metatdata knowledge graph
-    #
-    # if doesnt exist, create action and set status
-    #
-
     statusType = s.ActionStatusType.COMPLETED if is_valid else s.ActionStatusType.FAILED
 
     assess_action_props = s.AssessActionProps(
         id=f"validate-sem-{project_info.id}",
-        name="Validate action",
+        name="Validate LSC Project Action",
         start_time=start_time,
         end_time=datetime.now(),
         action_status=statusType,
@@ -130,14 +120,14 @@ def validate(
         error=err,
         instrument=os.getenv("METADATA_NAME"),
         additional_type="Semantic Validation",
+        result=[],
     )
 
+    project_resources.delete_resource_entity(
+        project_resource_path, "actions", "id", f"validate-sem-{project_info.id}"
+    )
     project_resources.update_resource_entity(
         project_resource_path, "actions", assess_action_props.model_dump()
     )
-
-    #
-    # If exists update status
-    #
 
     ro_crate_builder.build(resources_dir)

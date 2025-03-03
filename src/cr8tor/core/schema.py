@@ -85,6 +85,11 @@ class ActionStatusType(StrEnum):
     POTENTIAL: str = "PotentialActionStatus"
 
 
+class ResultItem(BaseModel):
+    class Config:
+        extra = "allow"
+
+
 class ActionProps(BaseRoCrateEntityProperties, use_enum_values=True):
     type: Literal["Action"] = Field(default="Action", alias="@type")
     name: str = Field(description="Action name")
@@ -92,6 +97,9 @@ class ActionProps(BaseRoCrateEntityProperties, use_enum_values=True):
     end_time: datetime = Field(description="End time of the action")
     action_status: ActionStatusType = Field(
         description="Status of the action formmatted based on Provernance Crate Profile spec"
+    )
+    result: List[ResultItem] = Field(
+        description="Id references to other data or context entities"
     )
     agent: str = Field(
         description="The thing triggering the action i.e. a person, organisation or software application (e.g. Github Action)"
@@ -118,16 +126,8 @@ class ActionProps(BaseRoCrateEntityProperties, use_enum_values=True):
         return v
 
 
-class ResultItem(BaseModel):
-    class Config:
-        extra = "allow"
-
-
 class CreateActionProps(ActionProps):
     type: Literal["CreateAction"] = Field(default="CreateAction", alias="@type")
-    result: List[ResultItem] = Field(
-        description="Id references to other data or context entities"
-    )
 
 
 class AssessActionProps(ActionProps):

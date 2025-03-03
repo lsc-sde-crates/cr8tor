@@ -1,20 +1,29 @@
 from rdflib import Graph
 from rdflib.query import Result
 import sys
+from pathlib import Path
 
 
 class ROCrateGraph:
-    def __init__(self, rocrate_metadata_path, base_uri="https://lscsde.org/crate/"):
+    def __init__(
+        self, rocrate_metadata_path: Path, base_uri="https://lscsde.org/crate/"
+    ):
         """Load ROCrate graph"""
         self.graph = Graph()
 
-        with open(rocrate_metadata_path, "r", encoding="utf-8") as f:
+        rocrate_metadata_path = Path(rocrate_metadata_path)
+
+        with open(
+            rocrate_metadata_path.joinpath("data", "ro-crate-metadata.json"),
+            "r",
+            encoding="utf-8",
+        ) as f:
             ro_crate_jsonld = f.read()
 
         self.graph.parse(data=ro_crate_jsonld, format="json-ld", publicID=base_uri)
-        print("\n=== DEBUG: RDF Triples ===")
-        for stmt in self.graph:
-            print(stmt)
+        # print("\n=== DEBUG: RDF Triples ===")
+        # for stmt in self.graph:
+        #     print(stmt)
 
     def run_query(self, sparql_query) -> Result:
         """Execute SPARQL query on the graph."""
@@ -42,18 +51,32 @@ class ROCrateGraph:
         query = """
           PREFIX schema: <http://schema.org/>
           PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-          SELECT ?action ?name WHERE {
+          SELECT (IF(COUNT(?action) > 0, "True", "False") AS ?result) WHERE {
             ?action rdf:type schema:AssessAction ;
-                    schema:name ?name .
+                    schema:name 'Validate LSC Project Action';
+                    schema:actionStatus 'CompletedActionStatus' .
           }
         """
         result = self.run_query(query)
-        [print(str(row.name)) for row in result]
+        for row in result:
+            return row.result
+        return False
 
-        #
-        # Add condition logic
-        #
-        return True
+    def get_validate_status(self) -> bool:
+        """Check if project has been validated successfully"""
+        query = """
+          PREFIX schema: <http://schema.org/>
+          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+          SELECT ?status WHERE {
+            ?action rdf:type schema:AssessAction ;
+                    schema:name 'Validate LSC Project Action';
+                    schema:actionStatus ?status .
+          }
+        """
+        result = self.run_query(query)
+        for row in result:
+            return row.status
+        return None
 
 
 if __name__ == "__main__":
@@ -64,6 +87,6 @@ if __name__ == "__main__":
     rocrate_metadata_path = sys.argv[1]
     graph = ROCrateGraph(rocrate_metadata_path)
 
-    print("\n=== Running is_created() test ===")
-    created = graph.is_created()
-    print(f"\nResult: is_created() -> {created}")
+    print("\n=== Running get_validate_status() test ===")
+    created = graph.get_validate_status()
+    print(f"\nResult: get_validate_status() -> {created}")
