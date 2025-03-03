@@ -1,0 +1,37 @@
+name: Init RO-Crate Project
+
+on:
+  workflow_dispatch:
+    inputs:
+        new_project_name:
+            description: Name of the new RO-Crate project
+            type: string
+            required: true
+
+env:
+    GH_TOKEN: ${{ secrets.ORG_LVL_RW_REPOS_TEAMS }}
+
+jobs:
+  init-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Run cr8tor Init
+        run: |
+          wget -qO- https://astral.sh/uv/install.sh | sh
+          uv sync
+          source .venv/bin/activate
+
+          git config --global user.name "LSCSDE Governance Actions"
+          git config --global user.email "lscsde-actions@github.com"
+
+          ORG=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)
+          cr8tor init -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -n "${{inputs.new_project_name}}" -org $ORG --push
