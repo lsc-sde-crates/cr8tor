@@ -9,6 +9,7 @@ from datetime import datetime
 from cr8tor.exception import DirectoryNotFoundError
 import cr8tor.core.resourceops as project_resources
 import cr8tor.cli.build as ro_crate_builder
+import cr8tor.core.crate_graph as proj_graph
 
 app = typer.Typer()
 
@@ -25,6 +26,12 @@ def create(
             default="-i", help="Directory containing resources to include in RO-Crate."
         ),
     ] = "./resources",
+    bagit_dir: Annotated[
+        Path,
+        typer.Option(
+            default="-i", help="Bagit directory containing RO-Crate data directory"
+        ),
+    ] = "./bagit",
     config_file: Annotated[
         Path, typer.Option(default="-c", help="Location of configuration TOML file.")
     ] = "./config.toml",
@@ -53,17 +60,17 @@ def create(
         raise DirectoryNotFoundError(resources_dir)
 
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
+
+    proj_roc_meta_path = bagit_dir.joinpath("data", "ro-crate-metadata.json")
     governance = project_resources.read_resource(project_resource_path)
 
-    if "project" not in governance:
-        raise KeyError(
-            f"To create a LSC project, 'project' properties must be defined in resource: {project_resource_path}"
-        )
+    graph = proj_graph.ROCrateGraph(proj_roc_meta_path)
 
-    if "id" in governance["project"]:
-        raise RuntimeError(
-            f"Create has already been run on this project. Project ID: {governance['project']['id']}"
+    if graph.is_created() and "id" in governance["project"]:
+        print(
+            f"A create action has already been run on this project. Project ID: {governance['project']['id']}"
         )
+        return
 
     governance["project"].setdefault("id", project_uuid)
     project_resources.update_resource_entity(

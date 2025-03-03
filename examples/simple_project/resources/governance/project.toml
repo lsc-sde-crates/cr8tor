@@ -1,3 +1,16 @@
+[[actions]]
+id = "create-project-action-77b29012-1934-432d-b74d-626557b7c2fe"
+type = "CreateAction"
+name = "Create LSC Project Action"
+start_time = 2025-03-03T11:13:29.358948
+end_time = 2025-03-03T11:13:29.368202
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "cr8tor"
+[[actions.result]]
+"@id" = "77b29012-1934-432d-b74d-626557b7c2fe"
+
+
 [[metadata_sources]]
 file = "metadata/dataset_1.toml"
 
@@ -9,6 +22,7 @@ project_name = "Pr002"
 project_start_time = "20250201_010101"
 destination_type = "LSC"
 destination_format = "DUCKDB"
+id = "77b29012-1934-432d-b74d-626557b7c2fe"
 
 [repository]
 codeRepository = "https://github.com/lsc-sde-crates/"
