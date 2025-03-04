@@ -21,9 +21,9 @@ class ROCrateGraph:
             ro_crate_jsonld = f.read()
 
         self.graph.parse(data=ro_crate_jsonld, format="json-ld", publicID=base_uri)
-        # print("\n=== DEBUG: RDF Triples ===")
-        # for stmt in self.graph:
-        #     print(stmt)
+        print("\n=== DEBUG: RDF Triples ===")
+        for stmt in self.graph:
+            print(stmt)
 
     def run_query(self, sparql_query) -> Result:
         """Execute SPARQL query on the graph."""
@@ -54,6 +54,22 @@ class ROCrateGraph:
           SELECT (IF(COUNT(?action) > 0, "True", "False") AS ?result) WHERE {
             ?action rdf:type schema:AssessAction ;
                     schema:name 'Validate LSC Project Action';
+                    schema:actionStatus 'CompletedActionStatus' .
+          }
+        """
+        result = self.run_query(query)
+        for row in result:
+            return row.result
+        return False
+
+    def is_staged(self) -> bool:
+        """Check if project has been validated successfully"""
+        query = """
+          PREFIX schema: <http://schema.org/>
+          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+          SELECT (IF(COUNT(?action) > 0, "True", "False") AS ?result) WHERE {
+            ?action rdf:type schema:AssessAction ;
+                    schema:name 'Stage Data Transfer Action';
                     schema:actionStatus 'CompletedActionStatus' .
           }
         """

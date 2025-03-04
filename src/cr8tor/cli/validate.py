@@ -123,6 +123,12 @@ def validate(
         result=[],
     )
 
+    #
+    # This assumes validate can be run multiple times on a project
+    # Ensures previous run entities for this action are cleared in "actions" before
+    # actions is updated with the new action entity
+    #
+
     project_resources.delete_resource_entity(
         project_resource_path, "actions", "id", f"validate-sem-{project_info.id}"
     )

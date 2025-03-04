@@ -1,11 +1,12 @@
 import os
 import typer
 import asyncio
-
+import uuid
 from pathlib import Path
 from typing import Annotated
 import cr8tor.core.schema as schemas
 import cr8tor.core.resourceops as project_resources
+import cr8tor.core.crate_graph as proj_graph
 
 from datetime import datetime
 
@@ -51,6 +52,14 @@ def publish(
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
     project_info = project_resources.read_resource(project_resource_path)
 
+    current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
+    if not current_rocrate_graph.is_staged():
+        typer.echo(
+            "The stage-transfer command must be successfully run on the target project before publihsing the data transfer",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
     dataset_meta_file = None
 
     # TODO: Discuss with Piotr whether the publish function should be called per dataset or per project?
@@ -74,10 +83,12 @@ def publish(
         and validate_resp.payload.data_published[0].file_path
     ):
         publish_location_dict = validate_resp.payload.data_published[0].model_dump()
+        publish_location_dict["@id"] = str(uuid.uuid4())
+
         publish_results.append(publish_location_dict)
 
         project_resources.create_resource_entity(
-            dataset_meta_file, "publish_path", publish_location_dict["file_path"]
+            dataset_meta_file, "publish_path", publish_location_dict
         )
 
     if publish_results:
@@ -89,7 +100,7 @@ def publish(
 
     create_publish_action_props = schemas.CreateActionProps(
         id=f"publish-action-{project_info['project']['id']}",
-        name="Create LSC Project Action",
+        name="Publish LSC Project Action",
         start_time=start_time,
         end_time=datetime.now(),
         action_status=status,
@@ -99,6 +110,12 @@ def publish(
         result=publish_results,
     )
 
+    project_resources.delete_resource_entity(
+        project_resource_path,
+        "actions",
+        "id",
+        f"publish-action-{project_info['project']['id']}",
+    )
     project_resources.update_resource_entity(
         project_resource_path, "actions", create_publish_action_props.model_dump()
     )

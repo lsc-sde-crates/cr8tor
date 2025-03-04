@@ -200,8 +200,8 @@ class DatasetMetadata(BaseModel):
         description="A dataset comprising one or more tables"
     )
     tables: List[TableMetadata]
-    staging_path: Optional[str] = None
-    publish_path: Optional[str] = None
+    staging_path: Optional[dict] = None
+    publish_path: Optional[dict] = None
 
 
 class AffiliationInfo(BaseModel):
