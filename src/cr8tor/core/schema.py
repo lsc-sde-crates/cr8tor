@@ -185,7 +185,7 @@ class CrateMeta(StrEnum):
 
 class ColumnMetadata(BaseModel):
     name: str
-    datatype: str
+    datatype: Optional[str] = None
 
 
 class TableMetadata(BaseModel):
