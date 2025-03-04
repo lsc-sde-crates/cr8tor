@@ -66,14 +66,11 @@ def publish(
         destination_type=project_info["project"]["destination_type"],
     )
 
-    resp_dict = asyncio.run(api.publish(publish_req, True))
-    validate_resp = schemas.HTTPPayloadResponse(**resp_dict)
+    resp_dict = asyncio.run(api.publish(publish_req, False))
+    validate_resp = schemas.PublishPayload(**resp_dict)
 
-    if (
-        validate_resp.payload.data_published
-        and validate_resp.payload.data_published[0].file_path
-    ):
-        publish_location_dict = validate_resp.payload.data_published[0].model_dump()
+    if validate_resp.data_published and validate_resp.data_published[0].file_path:
+        publish_location_dict = validate_resp.data_published[0].model_dump()
         publish_results.append(publish_location_dict)
 
         project_resources.create_resource_entity(

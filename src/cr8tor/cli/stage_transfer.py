@@ -71,17 +71,14 @@ def stage_transfer(
         except Exception as e:
             print("An unexpected error occurred:", e)
 
-        resp_dict = asyncio.run(api.stage_transfer(access_contract, True))
-        validate_resp = schemas.HTTPPayloadResponse(**resp_dict)
+        resp_dict = asyncio.run(api.stage_transfer(access_contract, False))
+        validate_resp = schemas.StageTransferPayload(**resp_dict)
 
         # TODO: Handle multiple staging locations
         # TODO: Add error response handler for action error property
 
-        if (
-            validate_resp.payload.data_retrieved
-            and validate_resp.payload.data_retrieved[0].file_path
-        ):
-            staging_location_dict = validate_resp.payload.data_retrieved[0].model_dump()
+        if validate_resp.data_retrieved and validate_resp.data_retrieved[0].file_path:
+            staging_location_dict = validate_resp.data_retrieved[0].model_dump()
 
             staging_results.append(staging_location_dict)
 
