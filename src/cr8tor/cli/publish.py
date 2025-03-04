@@ -75,7 +75,7 @@ def publish(
         destination_type=project_info["project"]["destination_type"],
     )
 
-    resp_dict = asyncio.run(api.publish(publish_req, True))
+    resp_dict = asyncio.run(api.publish(publish_req))
     validate_resp = schemas.HTTPPayloadResponse(**resp_dict)
 
     if (

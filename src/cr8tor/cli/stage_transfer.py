@@ -78,7 +78,7 @@ def stage_transfer(
             typer.echo("Error", err=e)
             raise typer.Exit(code=1)
 
-        resp_dict = asyncio.run(api.stage_transfer(access_contract, True))
+        resp_dict = asyncio.run(api.stage_transfer(access_contract))
         validate_resp = schemas.HTTPPayloadResponse(**resp_dict)
 
         # TODO: Handle multiple staging locations

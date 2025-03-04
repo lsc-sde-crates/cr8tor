@@ -11,6 +11,18 @@ instrument = "cr8tor"
 "@id" = "831d0751-4b95-43ea-adf1-ea17f674abea"
 
 
+[[actions]]
+id = "validate-sem-831d0751-4b95-43ea-adf1-ea17f674abea"
+type = "AssessAction"
+name = "Validate LSC Project Action"
+start_time = 2025-03-04T14:19:49.931958
+end_time = 2025-03-04T14:19:50.766162
+action_status = "CompletedActionStatus"
+result = []
+agent = "cr8tor-cli"
+instrument = "MetadataService"
+additional_type = "Semantic Validation"
+
 [[metadata_sources]]
 file = "metadata/dataset_1.toml"
 
