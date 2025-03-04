@@ -49,7 +49,7 @@ def validate(
     bagit_dir: Annotated[
         Path,
         typer.Option(
-            default="-i", help="Bagit directory containing RO-Crate data directory"
+            default="-b", help="Bagit directory containing RO-Crate data directory"
         ),
     ] = "./bagit",
     resources_dir: Annotated[

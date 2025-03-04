@@ -1,57 +1,14 @@
 [[actions]]
-id = "create-project-action-831d0751-4b95-43ea-adf1-ea17f674abea"
+id = "create-project-action-cc4e87e9-961e-42a6-8a38-2a560df16367"
 type = "CreateAction"
 name = "Create LSC Project Action"
-start_time = 2025-03-04T14:18:37.343906
-end_time = 2025-03-04T14:18:37.349319
+start_time = 2025-03-04T15:34:58.253188
+end_time = 2025-03-04T15:34:58.256602
 action_status = "CompletedActionStatus"
 agent = "cr8tor-cli"
 instrument = "cr8tor"
 [[actions.result]]
-"@id" = "831d0751-4b95-43ea-adf1-ea17f674abea"
-
-
-[[actions]]
-id = "validate-sem-831d0751-4b95-43ea-adf1-ea17f674abea"
-type = "AssessAction"
-name = "Validate LSC Project Action"
-start_time = 2025-03-04T14:19:49.931958
-end_time = 2025-03-04T14:19:50.766162
-action_status = "CompletedActionStatus"
-result = []
-agent = "cr8tor-cli"
-instrument = "MetadataService"
-additional_type = "Semantic Validation"
-
-[[actions]]
-id = "stage-transfer-action-831d0751-4b95-43ea-adf1-ea17f674abea"
-type = "CreateAction"
-name = "Stage Data Transfer Action"
-start_time = 2025-03-04T14:20:57.247180
-end_time = 2025-03-04T14:20:57.254583
-action_status = "CompletedActionStatus"
-agent = "cr8tor-cli"
-instrument = "PublishService"
-[[actions.result]]
-file_path = "lsc/staging/data/outputs/database.duckdb"
-"@id" = "3790be83-cd3f-4dda-a094-0ee93abd193c"
-
-
-[[actions]]
-id = "publish-action-831d0751-4b95-43ea-adf1-ea17f674abea"
-type = "CreateAction"
-name = "Publish LSC Project Action"
-start_time = 2025-03-04T14:21:03.653534
-end_time = 2025-03-04T14:21:04.227008
-action_status = "CompletedActionStatus"
-agent = "cr8tor-cli"
-error = ""
-instrument = "PublishService"
-[[actions.result]]
-file_path = "lsc/production/data/outputs/database.duckdb"
-hash_value = "f12190d5b8bd373103a6ecbd3e6f059d211c85fc3843888115c53f647c806afffdb2a55a6d98af4c78ecf5ee534d044a708240696a5852b484928ee10580f087"
-total_bytes = 1585152
-"@id" = "52deb265-c99c-4a9a-8e2e-8aa72c35b4d4"
+"@id" = "cc4e87e9-961e-42a6-8a38-2a560df16367"
 
 
 [[metadata_sources]]
@@ -65,7 +22,7 @@ project_name = "Pr002"
 project_start_time = "20250201_010101"
 destination_type = "LSC"
 destination_format = "DUCKDB"
-id = "831d0751-4b95-43ea-adf1-ea17f674abea"
+id = "cc4e87e9-961e-42a6-8a38-2a560df16367"
 
 [repository]
 codeRepository = "https://github.com/lsc-sde-crates/"
