@@ -62,14 +62,15 @@ def create(
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
     governance = project_resources.read_resource(project_resource_path)
 
-    current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
+    if bagit_dir.exists():
+        current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
 
-    if current_rocrate_graph.is_created() and "id" in governance["project"]:
-        typer.echo(
-            f"A create action has already been run on this project. Project ID: {governance['project']['id']}",
-            err=True,
-        )
-        raise typer.Exit(code=1)
+        if current_rocrate_graph.is_created() and "id" in governance["project"]:
+            typer.echo(
+                f"A create action has already been run on this project. Project ID: {governance['project']['id']}",
+                err=True,
+            )
+            raise typer.Exit(code=1)
 
     governance["project"].setdefault("id", project_uuid)
     project_resources.update_resource_entity(

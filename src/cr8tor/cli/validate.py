@@ -99,7 +99,7 @@ def validate(
             typer.echo("Error", err=e)
             raise typer.Exit(code=1)
 
-        metadata = asyncio.run(api.validate_access(access_contract, True))
+        metadata = asyncio.run(api.validate_access(access_contract))
         validate_dataset_info = s.DatasetMetadata(**metadata)
 
         is_valid, err = verify_tables_metadata(
