@@ -103,7 +103,7 @@ def validate(
         except Exception as e:
             print("An unexpected error occurred:", e)
 
-        metadata = asyncio.run(api.validate_access(access_contract, True))
+        metadata = asyncio.run(api.validate_access(access_contract, False))
         validate_dataset_info = s.DatasetMetadata(**metadata)
 
         is_valid, err = verify_tables_metadata(
