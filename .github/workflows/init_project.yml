@@ -7,6 +7,7 @@ on:
             description: Name of the new RO-Crate project
             type: string
             required: true
+  push:
 
 env:
     GH_TOKEN: ${{ secrets.ORG_LVL_RW_REPOS_TEAMS }}
