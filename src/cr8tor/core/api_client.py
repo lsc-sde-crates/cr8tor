@@ -127,9 +127,8 @@ def get_service_api(service: str) -> APIClient:
     return APIClient(base_url, token, port)
 
 
-async def validate_access(
-    access_info: DataContractValidateRequest, test: bool
-) -> HTTPResponse:
+async def validate_access(access_info: DataContractValidateRequest) -> HTTPResponse:
+    test = os.getenv("USE_TEST_DATA", "false").lower() == "true"
     if test:
         json_str = """{
     "status": "success",
@@ -247,9 +246,8 @@ async def validate_access(
         return response.payload
 
 
-async def stage_transfer(
-    access_info: DataContractStageTransferRequest, test: bool
-) -> HTTPResponse:
+async def stage_transfer(access_info: DataContractStageTransferRequest) -> HTTPResponse:
+    test = os.getenv("USE_TEST_DATA", "false").lower() == "true"
     if test:
         json_str = """{
             "status": "success",
@@ -275,7 +273,8 @@ async def stage_transfer(
         return response.payload
 
 
-async def publish(access_info: DataContractProjectRequest, test: bool) -> HTTPResponse:
+async def publish(access_info: DataContractProjectRequest) -> HTTPResponse:
+    test = os.getenv("USE_TEST_DATA", "false").lower() == "true"
     if test:
         json_str = """{
             "status": "success",

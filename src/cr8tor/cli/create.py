@@ -6,9 +6,9 @@ import cr8tor.core.schema as schemas
 from pathlib import Path
 from typing import Annotated
 from datetime import datetime
-from cr8tor.exception import DirectoryNotFoundError
 import cr8tor.core.resourceops as project_resources
 import cr8tor.cli.build as ro_crate_builder
+import cr8tor.core.crate_graph as proj_graph
 
 app = typer.Typer()
 
@@ -25,6 +25,12 @@ def create(
             default="-i", help="Directory containing resources to include in RO-Crate."
         ),
     ] = "./resources",
+    bagit_dir: Annotated[
+        Path,
+        typer.Option(
+            default="-i", help="Bagit directory containing RO-Crate data directory"
+        ),
+    ] = "./bagit",
     config_file: Annotated[
         Path, typer.Option(default="-c", help="Location of configuration TOML file.")
     ] = "./config.toml",
@@ -50,20 +56,21 @@ def create(
     ] = os.getenv("PROJECT_UUID", str(uuid.uuid4()))
 
     if not resources_dir.exists():
-        raise DirectoryNotFoundError(resources_dir)
+        typer.echo(f"Missing resrouces directory at: {resources_dir}", err=True)
+        raise typer.Exit(code=1)
 
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
     governance = project_resources.read_resource(project_resource_path)
 
-    if "project" not in governance:
-        raise KeyError(
-            f"To create a LSC project, 'project' properties must be defined in resource: {project_resource_path}"
-        )
+    if bagit_dir.exists():
+        current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
 
-    if "id" in governance["project"]:
-        raise RuntimeError(
-            f"Create has already been run on this project. Project ID: {governance['project']['id']}"
-        )
+        if current_rocrate_graph.is_created() and "id" in governance["project"]:
+            typer.echo(
+                f"A create action has already been run on this project. Project ID: {governance['project']['id']}",
+                err=True,
+            )
+            raise typer.Exit(code=1)
 
     governance["project"].setdefault("id", project_uuid)
     governance["project"].setdefault(
@@ -87,7 +94,7 @@ def create(
 
     project_resources.create_resource_entity(project_resource_path, "actions", [])
     project_resources.update_resource_entity(
-        project_resource_path, "actions", create_action_props.dict()
+        project_resource_path, "actions", create_action_props.model_dump()
     )
 
     ro_crate_builder.build(resources_dir, config_file, dryrun)

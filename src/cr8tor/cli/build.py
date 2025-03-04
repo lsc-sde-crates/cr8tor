@@ -307,24 +307,19 @@ def build(
         if action["type"] == "CreateAction":
             action_props = s.CreateActionProps(**action)
         elif action["type"] == "AssessAction":
-            print(action)
             action_props = s.AssessActionProps(**action)
 
         crate.add_action(
             instrument=action_props.instrument,
             identifier=action_props.id,
-            # object={"@id": "https://example.com/dataset"},
-            # result={"@id": "https://example.com/result"},
+            result=[item.model_dump() for item in action_props.result],
             properties={
+                "@type": action_props.type,
                 "name": action_props.name,
                 "startTime": action_props.start_time.isoformat(),
                 "endTime": action_props.end_time.isoformat(),
                 "actionStatus": action_props.action_status,
-                "agent": {
-                    "@id": "foo",
-                    "@type": "SoftwareApplication",
-                    "name": "GitHub Action",
-                },  # TODO ADD AGENT ENTITY
+                "agent": action_props.agent,
             },
         )
 

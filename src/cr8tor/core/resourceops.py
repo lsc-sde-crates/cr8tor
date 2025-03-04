@@ -78,7 +78,6 @@ def update_resource_entity(resource_file_path: Path, property_key: str, object):
     if isinstance(target_entity, dict):
         resource_dict[property_key].update(object)
     elif isinstance(target_entity, list):
-        print("sdf")
         resource_dict[property_key].append(object)
     else:
         raise TypeError(
@@ -93,5 +92,48 @@ def update_resource_entity(resource_file_path: Path, property_key: str, object):
     )
 
 
-def delete_resource_entity(resource_file_path: Path, property_key: str):
-    pass
+def delete_resource_entity(
+    resource_file_path: Path, property_key: str, attribute: str, value
+):
+    """
+    Deletes an object from a list in a TOML file based on a given attribute.
+
+    :param resource_file_path: Path to the TOML file
+    :param property_key: Key in the TOML file that contains the list of objects
+    :param attribute: The attribute to match for deletion
+    :param value: The value of the attribute to match
+    """
+    resource_dict = toml.load(resource_file_path)
+
+    if property_key not in resource_dict:
+        raise KeyError(
+            f"The property key for entity '{property_key}' does not exist in resource: {resource_file_path}"
+        )
+
+    target_entity = resource_dict.get(property_key)
+
+    if isinstance(target_entity, list):
+        original_length = len(target_entity)
+
+        resource_dict[property_key] = [
+            obj
+            for obj in target_entity
+            if not (isinstance(obj, dict) and obj.get(attribute) == value)
+        ]
+
+        if len(resource_dict[property_key]) == original_length:
+            log.warning(
+                f"No matching object found with {attribute} = {value} in '{property_key}'."
+            )
+
+    else:
+        raise TypeError(
+            f"Expected a list for '{property_key}', but found {type(target_entity).__name__} in resource: {resource_file_path}"
+        )
+
+    with resource_file_path.open("w") as resource:
+        toml.dump(resource_dict, resource)
+
+    log.info(
+        f"[cyan]Deleted object from resources file:[/cyan] - [bold magenta]{resource_file_path}[/bold magenta]",
+    )
