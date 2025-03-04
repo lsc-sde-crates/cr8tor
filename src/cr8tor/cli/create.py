@@ -66,6 +66,9 @@ def create(
         )
 
     governance["project"].setdefault("id", project_uuid)
+    governance["project"].setdefault(
+        "project_start_time", create_start_dt.strftime("%Y%m%d_%H%M%S")
+    )
     project_resources.update_resource_entity(
         project_resource_path, "project", governance["project"]
     )
