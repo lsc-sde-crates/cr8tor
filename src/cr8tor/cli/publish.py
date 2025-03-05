@@ -76,13 +76,10 @@ def publish(
     )
 
     resp_dict = asyncio.run(api.publish(publish_req))
-    validate_resp = schemas.HTTPPayloadResponse(**resp_dict)
+    validate_resp = schemas.PublishPayload(**resp_dict)
 
-    if (
-        validate_resp.payload.data_published
-        and validate_resp.payload.data_published[0].file_path
-    ):
-        publish_location_dict = validate_resp.payload.data_published[0].model_dump()
+    if validate_resp.data_published and validate_resp.data_published[0].file_path:
+        publish_location_dict = validate_resp.data_published[0].model_dump()
         publish_location_dict["@id"] = str(uuid.uuid4())
 
         publish_results.append(publish_location_dict)

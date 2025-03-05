@@ -259,7 +259,7 @@ async def stage_transfer(access_info: DataContractStageTransferRequest) -> HTTPR
                 ]
             }
         }"""
-        return json.loads(json_str)
+        return json.loads(json_str)["payload"]
 
     service = "ApprovalService"
     async with get_service_api(service) as approval_service_client:
@@ -288,7 +288,7 @@ async def publish(access_info: DataContractProjectRequest) -> HTTPResponse:
                 ]
             }
         }"""
-        return json.loads(json_str)
+        return json.loads(json_str)["payload"]
 
     service = "ApprovalService"
     async with get_service_api(service) as approval_service_client:

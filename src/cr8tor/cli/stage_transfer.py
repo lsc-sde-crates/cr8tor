@@ -79,16 +79,13 @@ def stage_transfer(
             raise typer.Exit(code=1)
 
         resp_dict = asyncio.run(api.stage_transfer(access_contract))
-        validate_resp = schemas.HTTPPayloadResponse(**resp_dict)
+        validate_resp = schemas.StageTransferPayload(**resp_dict)
 
         # TODO: Handle multiple staging locations
         # TODO: Add error response handler for action error property
 
-        if (
-            validate_resp.payload.data_retrieved
-            and validate_resp.payload.data_retrieved[0].file_path
-        ):
-            staging_location_dict = validate_resp.payload.data_retrieved[0].model_dump()
+        if validate_resp.data_retrieved and validate_resp.data_retrieved[0].file_path:
+            staging_location_dict = validate_resp.data_retrieved[0].model_dump()
             staging_location_dict["@id"] = str(uuid.uuid4())
 
             staging_results.append(staging_location_dict)
