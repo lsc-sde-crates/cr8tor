@@ -1,0 +1,37 @@
+[[actions]]
+id = "create-project-action-cc4e87e9-961e-42a6-8a38-2a560df16367"
+type = "CreateAction"
+name = "Create LSC Project Action"
+start_time = 2025-03-04T15:34:58.253188
+end_time = 2025-03-04T15:34:58.256602
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "cr8tor"
+[[actions.result]]
+"@id" = "cc4e87e9-961e-42a6-8a38-2a560df16367"
+
+
+[[metadata_sources]]
+file = "metadata/dataset_1.toml"
+
+[project]
+description = "P002 created using CR8TOR."
+reference = "cr8-cr8-p002"
+name = "P002"
+project_name = "Pr002"
+project_start_time = "20250201_010101"
+destination_type = "LSC"
+destination_format = "DUCKDB"
+id = "cc4e87e9-961e-42a6-8a38-2a560df16367"
+
+[repository]
+codeRepository = "https://github.com/lsc-sde-crates/"
+description = "This LSC-DIP RO-Crate is versioned and stored in a Git repository on GitHub."
+name = "Github Repo"
+
+[requesting_agent]
+name = "e.g. Prof. Jane Doe"
+
+[requesting_agent.affiliation]
+name = "Someuni"
+url = "https://someuni.com"

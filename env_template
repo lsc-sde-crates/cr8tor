@@ -1,0 +1,14 @@
+APP_NAME=cr8tor-cli
+APPROVALS_NAME=ApprovalsService
+APPROVALS_HOST=http://localhost
+APPROVALS_PORT=8000
+APPROVALS_API_TOKEN=default_key
+METADATA_HOST=http://localhost
+METADATA_PORT=8002
+METADATA_API_TOKEN=default_key
+METADATA_NAME=MetadataService
+PUBLISH_HOST=http://localhost
+PUBLISH_PORT=8003
+PUBLISH_API_TOKEN=default_key
+PUBLISH_NAME=PublishService
+USE_TEST_DATA=true

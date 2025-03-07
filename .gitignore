@@ -1,3 +1,8 @@
+# Ignore generated bagit
+/examples/simple_project/bagit/
+
+.qodo/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -136,3 +141,5 @@ cython_debug/
 data/
 *.db
 logs/
+
+examples/*/bagit
