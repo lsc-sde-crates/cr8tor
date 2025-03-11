@@ -4,12 +4,8 @@ from datetime import datetime
 from typing import Annotated
 from pathlib import Path
 
-import git
 import typer
-import json
-import os
 import re
-import time
 
 from cookiecutter.main import cookiecutter
 from cookiecutter.exceptions import OutputDirExistsException
@@ -60,6 +56,15 @@ def init(
             help="Name of the project to be created. This is optional and can be provided as an argument.",
         ),
     ] = None,
+    environment: Annotated[
+        str,
+        typer.Option(
+            "-e",
+            help="Target environment. Default PROD. Must be one of the three options: DEV, TEST, PROD.",
+            case_sensitive=False,
+            show_choices=True,
+        ),
+    ] = "PROD",
 ):
     """
 
@@ -91,10 +96,16 @@ def init(
 
         cr8tor init -t path-to-local-cr8-cookiecutter-dir -n "my-project" -org "lsc-sde-crates" --push
     """
+    valid_environments = ["DEV", "TEST", "PROD"]
+    if environment.upper() not in valid_environments:
+        raise typer.BadParameter(
+            f"Invalid environment. Choose from {valid_environments}."
+        )
 
     extra_context = {
         "__timestamp": datetime.now().isoformat(timespec="seconds"),
         "__cr8_cc_template": template_path,
+        "environment": environment.upper(),
     }
 
     # Generate the project with cookiecutter
@@ -137,157 +148,10 @@ def init(
         gh_client = gh_rest_api_client.GHApiClient(git_org)
 
         # Create the repository and push the project to GitHub
-        create_and_push_project(gh_client, project_dir, repo_name)
+        gh_rest_api_client.create_and_push_project(gh_client, project_dir, repo_name)
 
         # Check and create contributor teams
-        check_and_create_teams(gh_client, repo_name)
+        gh_rest_api_client.check_and_create_teams(gh_client, repo_name)
 
         # Create repository environments for Signing Off experience
-        create_github_environments(gh_client, repo_name)
-
-
-def create_and_push_project(
-    gh_client: gh_rest_api_client.GHApiClient,
-    project_dir: str,
-    repo_name: str,
-):
-    """
-
-    Create a GitHub repository and push the generated project.
-
-    Args:
-        gh_client (GHApiClient): The GitHub API client.
-        project_dir (str): The local directory of the generated project.
-        repo_name (str): The repository name to be created.
-
-    """
-
-    # Step 1: Check if the repository already exists
-    response = gh_client.get_repository(repo_name)
-
-    if response:
-        # Repository already exists, skip creation
-        log.info(
-            f"GitHub repository '{gh_client.git_org}/{repo_name}' already exists. Skipping creation..."
-        )
-        return
-
-    # Step 2: Create a new repository under the organization
-    response = gh_client.create_repository(repo_name)
-
-    if response:
-        log.info(
-            f"GitHub repository '{gh_client.git_org}/{repo_name}' created successfully."
-        )
-    else:
-        raise ValueError(f"Failed to create GitHub repository: {response}")
-
-    # Step 3: Initialize git, add, commit and push the local project
-    try:
-        repo = git.Repo.init(project_dir)
-        repo.git.checkout("-b", "main")  # Ensure 'main' branch exists
-        repo.git.add(A=True)
-        repo.index.commit("Initial commit")
-
-        auth_repo_url = f"https://{os.getenv('GH_TOKEN')}@github.com/{gh_client.git_org}/{repo_name}.git"
-        repo.create_remote("origin", auth_repo_url)
-        repo.git.push("--set-upstream", "origin", "main")
-        log.info(
-            f"Project pushed to GitHub repository '{gh_client.git_org}/{repo_name}'."
-        )
-    except Exception as e:
-        raise ValueError(f"An error occurred while pushing to GitHub: {e}")
-
-    # Step 4: Apply the rule set for the repository
-    project_repo_ruleset_path = Path(project_dir).joinpath(
-        ".github", "branch_rules", "protect_main.json"
-    )
-    with project_repo_ruleset_path.open("r") as f:
-        project_repo_ruleset = json.load(f)
-
-    response = gh_client.create_repo_ruleset(repo_name, project_repo_ruleset)
-
-    if response:
-        log.info(f"Rule set applied for {repo_name}")
-    else:
-        raise ValueError(f"Failed to apply Repo rulesets: {response}")
-
-
-def check_and_create_teams(
-    gh_client: gh_rest_api_client.GHApiClient,
-    repo_name: str,
-) -> None:
-    """
-
-    Ensure GitHub teams exist and assign repository permissions.
-
-    Args:
-        gh_client (GHApiClient): The GitHub API client.
-        repo_name (str): The repository name.
-
-    """
-
-    contributor_team = f"{repo_name}-contributor"
-    # there is currently a single approver team for all projects
-    approver_team = "cr8-ALL-projects-approver"
-    devops_admin_team = "devops_admin"
-
-    team_response = gh_client.get_team(contributor_team)
-    team_slug = team_response["slug"] if team_response else None
-
-    if not team_slug:
-        team_slug = gh_client.create_team(
-            contributor_team, f"Team for contributor members for project {repo_name}"
-        )["slug"]
-        log.info(f"Created team {contributor_team}")
-
-        # wait 5 seconds for the team to be created in GitHub...
-        time.sleep(5)
-
-    else:
-        log.info(f"Team {contributor_team} already exists. Skipping creation...")
-
-    gh_client.add_or_update_team_repository_permission(
-        repo_name, devops_admin_team, permission="push"
-    )
-    log.info(
-        f"Added {repo_name} repository with 'push/write' permission to GitHub Team {devops_admin_team}"
-    )
-
-    gh_client.add_or_update_team_repository_permission(
-        repo_name, team_slug, permission="push"
-    )
-    log.info(
-        f"Added {repo_name} repository with 'push/write' permission to GitHub Team {contributor_team}"
-    )
-
-    gh_client.add_or_update_team_repository_permission(
-        repo_name, approver_team, permission="pull"
-    )
-    log.info(
-        f"Added {repo_name} repository with 'pull/read' permission to GitHub Team {approver_team}"
-    )
-
-
-def create_github_environments(
-    gh_client: gh_rest_api_client.GHApiClient, repo_name: str
-) -> None:
-    """
-    Create GitHub repository environments.
-
-    Args:
-        gh_client (GHApiClient): The GitHub API client.
-        repo_name (str): The repository name.
-    """
-
-    # Create signoff environment
-    gh_client.create_or_update_repo_env(
-        repo_name, "signoff", ["cr8-ALL-projects-approver"]
-    )
-    log.info(f"Created Signing Off environment for {repo_name}")
-
-    # Create the Production environment
-    gh_client.create_or_update_repo_env(
-        repo_name, "disclosure", ["cr8-ALL-projects-approver"]
-    )
-    log.info(f"Created Disclosure environment for {repo_name}")
+        gh_rest_api_client.create_github_environments(gh_client, repo_name)
