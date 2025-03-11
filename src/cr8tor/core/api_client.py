@@ -111,22 +111,22 @@ def get_service_api(service: str) -> APIClient:
     #    raise ValueError("GITHUB_TOKEN environment variable is not set")
     if service == "MetaDataService":
         base_url = os.getenv("METADATA_HOST")
-        port = os.getenv("METADATA_PORT", None)
-        if not base_url and not port:
-            raise ValueError("METADATA environment variables not set")
+        port = os.getenv("METADATA_PORT")
         token = os.getenv("METADATA_API_TOKEN")
+        if not base_url and not token:
+            raise ValueError("METADATA environment variables not set")
     elif service == "ApprovalService":
         base_url = os.getenv("APPROVALS_HOST")
-        port = os.getenv("APPROVALS_PORT", None)
-        if not base_url or not port:
-            raise ValueError("APPROVALS environments variable not set")
+        port = os.getenv("APPROVALS_PORT")
         token = os.getenv("APPROVALS_API_TOKEN")
+        if not base_url or not token:
+            raise ValueError("APPROVALS environments variable not set")
     elif service == "PublishService":
         base_url = os.getenv("PUBLISH_HOST")
-        port = os.getenv("PUBLISH_PORT", None)
-        if not base_url or not port:
-            raise ValueError("PUBLISH environments variable not set")
+        port = os.getenv("PUBLISH_PORT")
         token = os.getenv("PUBLISH_API_TOKEN")
+        if not base_url or not token:
+            raise ValueError("PUBLISH environments variable not set")
     else:
         raise ValueError(f"Unknown service: {service}")
 
