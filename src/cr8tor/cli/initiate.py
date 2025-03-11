@@ -8,8 +8,10 @@ import git
 import typer
 import json
 import os
+import re
 
 from cookiecutter.main import cookiecutter
+from cookiecutter.exceptions import OutputDirExistsException
 from cr8tor.utils import log
 import cr8tor.core.resourceops as project_resources
 import cr8tor.core.schema as schemas
@@ -98,13 +100,29 @@ def init(
     if project_name is not None:
         extra_context.update({"project_name": project_name})
         extra_context.update({"github_organization": git_org})
-        project_dir = cookiecutter(
-            template_path, checkout=checkout, extra_context=extra_context, no_input=True
-        )
+        try:
+            project_dir = cookiecutter(
+                template_path,
+                checkout=checkout,
+                extra_context=extra_context,
+                no_input=True,
+            )
+        except OutputDirExistsException as e:
+            log.info("Project directory already exists. Skipping creation...")
+            # Extract folder name from exception message
+            folder_name = re.search(r'"(.*?)"', str(e)).group(1)
+            project_dir = Path.cwd() / folder_name
     else:
-        project_dir = cookiecutter(
-            template_path, checkout=checkout, extra_context=extra_context
-        )
+        try:
+            project_dir = cookiecutter(
+                template_path, checkout=checkout, extra_context=extra_context
+            )
+        except OutputDirExistsException as e:
+            log.info("Project directory already exists. Skipping creation...")
+            # Extract folder name from exception message
+            folder_name = re.search(r'"(.*?)"', str(e)).group(1)
+            project_dir = Path.cwd() / folder_name
+
     resources_dir = Path(project_dir).joinpath("resources")
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
     project_dict = project_resources.read_resource_entity(

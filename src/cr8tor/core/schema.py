@@ -185,12 +185,12 @@ class CrateMeta(StrEnum):
 
 class ColumnMetadata(BaseModel):
     name: str
-    datatype: str
+    datatype: Optional[str] = None
 
 
 class TableMetadata(BaseModel):
     name: str
-    columns: List[ColumnMetadata]
+    columns: Optional[List[ColumnMetadata]] = None
 
 
 class DatasetMetadata(BaseModel):
@@ -244,8 +244,6 @@ class DatabricksSourceConnection(DataSourceConnection):
         default=443, description="Port for the db cluster (defaults to 443)"
     )
     catalog: str = Field(description="Unity catalog name")
-    schema_name: str = Field(description="Schema name in UC")
-    table: list[str] | None = Field(default=None, description="Target table names")
     http_path: str = Field(description="Schema name in UC")
 
 
