@@ -9,6 +9,7 @@ import typer
 import json
 import os
 import re
+import time
 
 from cookiecutter.main import cookiecutter
 from cookiecutter.exceptions import OutputDirExistsException
@@ -239,6 +240,10 @@ def check_and_create_teams(
             contributor_team, f"Team for contributor members for project {repo_name}"
         )["slug"]
         log.info(f"Created team {contributor_team}")
+
+        # wait 5 seconds for the team to be created in GitHub...
+        time.sleep(5)
+
     else:
         log.info(f"Team {contributor_team} already exists. Skipping creation...")
 
