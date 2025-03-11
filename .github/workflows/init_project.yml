@@ -1,4 +1,4 @@
-name: Init ROCrate Project
+name: Init RO-Crate Project
 
 on:
   workflow_dispatch:
@@ -7,9 +7,6 @@ on:
             description: Name of the new RO-Crate project
             type: string
             required: true
-  push:
-    branches:
-      - feature/pzm-testing
 
 env:
     GH_TOKEN: ${{ secrets.ORG_LVL_RW_REPOS_TEAMS }}
