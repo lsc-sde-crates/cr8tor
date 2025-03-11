@@ -1,0 +1,190 @@
+name: Orchestrate Data Load
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+         required: true
+         default: 'DEV'
+         type: string
+
+env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # we use LSC_CRATES_ROPROJECT_SCOPE token to PullRequest changes to main branch
+    # as GITHUB_TOKEN has PullRequests permissions disabled at enterprise level
+    # LSC_CRATES_ROPROJECT_SCOPE: ${{ secrets.LSC_CRATES_ROPROJECT_SCOPE }}
+    APPROVALS_API_TOKEN: ${{ secrets[format('APPROVALS_API_TOKEN_{0}', inputs.environment)] }}
+    APPROVALS_HOST: ${{ secrets[format('APPROVALS_HOST_{0}', inputs.environment)] }}
+
+permissions:
+    contents: write
+    issues: write
+    pull-requests: write
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: false
+
+jobs:
+    Validate:
+        #if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
+        runs-on: ${{ inputs.environment }}-cr8tor-vm
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            - name: Clone cr8tor repository
+              run: |
+                # Below command will install uv on Windows OS runner
+                powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+                $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
+                git clone --branch develop https://github.com/lsc-sde-crates/cr8tor.git
+                uv sync --directory cr8tor
+
+            - name: Cr8tor CLI Create & Validate
+              run: |
+                cr8tor\.venv\Scripts\activate
+                cr8tor create -a GithubAction -i ./resources
+                cr8tor validate -a GithubAction -i ./resources
+
+            - name: Create artifact for validated RO-Crate
+              uses: actions/upload-artifact@v4
+              with:
+                name: ro-crate-validated
+                path: |
+                    ./bagit
+                    ./resources
+                    ./config.toml
+
+    SignOff:
+        if: false
+        runs-on: ubuntu-latest
+        needs: Validate
+        environment: signoff
+        steps:
+            # COMMENTED trstringer/manual-approval
+            #  as it does not work easily with GitHub Teams (requires extended permissions)
+            #  and the timeout is 72 hours (3 days).
+            #  Applied instead GitHub environment approach.
+            #
+            # Creates GitHub Issue and pauses the workflow
+            # until the issue is resolved or 6hr timeout
+            # see details at https://github.com/trstringer/manual-approval
+            #- uses: trstringer/manual-approval@v1
+            #  if: ${{ !env.ACT }} # for debugging locally
+            #  with:
+            #    secret: ${{ github.TOKEN }}
+            #    approvers: cr8-ALL-projects-approver
+            #    issue-title: "ApprovalGate1 - SignOff stage"
+            #    issue-body: "The ro-crate is validated and includes metadata. Please review and approve or deny the to progress to Workflow Execution phase (data retrieval)."
+            #    minimum-approvals: 1
+            #    # exclude-workflow-initiator-as-approver: true # Uncomment in production
+
+            # TODO: Add Cr8tor CLI that will update the RO-Crate with the sign-off information
+            - name: Simulate sign-off cr8tor steps
+              run: echo "cr8tor will run sign-off steps and update ro-crate. No need to run microservices"
+
+    Workflow-Execution:
+        if: false
+        runs-on: dev-vm-01
+        needs: SignOff
+        steps:
+            - name: Download artifact
+              uses: actions/download-artifact@v4
+              with:
+                name: ro-crate-validated
+                path: .
+
+            - name: Clone cr8tor repository
+              run: |
+                # Below command will install uv on Windows OS runner
+                powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+                $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
+                git clone --branch feature/develop https://github.com/lsc-sde-crates/cr8tor.git
+                uv sync --directory cr8tor
+
+            - name: Cr8tor CLI Staging Data
+              run: |
+                cr8tor\.venv\Scripts\activate
+                cr8tor stage-transfer -a GithubAction -i ./resources
+
+            - name: Create artifact for staged RO-Crate
+              uses: actions/upload-artifact@v4
+              with:
+                name: ro-crate-staged
+                path: |
+                    ./bagit
+                    ./resources
+                    ./config.toml
+
+    Disclosure:
+        if: false
+        runs-on: ubuntu-latest
+        needs: Workflow-Execution
+        environment: disclosure
+        steps:
+            # TODO: Add Cr8tor CLI that will update the RO-Crate with the sign-off information
+            - name: Simulate sign-off cr8tor steps
+              run: echo "cr8tor will run sign-off steps and update ro-crate. No need to run microservices"
+
+
+    Publish:
+        if: false
+        runs-on: dev-vm-01
+        needs: Disclosure
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            - name: Set up git and take latest changes
+              run: |
+                git config --global user.name "LSCSDE Governance Actions"
+                git config --global user.email "lscsde-actions@github.com"
+
+                git fetch origin
+                git reset --hard origin/main
+
+            - name: Download artifact
+              uses: actions/download-artifact@v4
+              with:
+                name: ro-crate-staged
+                path: .
+
+            - name: Clone cr8tor repository
+              run: |
+                # Below command will install uv on Windows OS runner
+                powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+                $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
+                git clone --branch feature/develop https://github.com/lsc-sde-crates/cr8tor.git
+                uv sync --directory cr8tor
+
+            - name: Cr8tor CLI Publish Data
+              run: |
+                cr8tor\.venv\Scripts\activate
+                cr8tor publish -a GithubAction -i ./resources
+
+            - name: Create artifact for published RO-Crate
+              uses: actions/upload-artifact@v4
+              with:
+                name: ro-crate-published
+                path: |
+                    ./bagit
+                    ./resources
+                    ./config.toml
+
+
+            - name: Push changes to repository
+              run: |
+                BRANCH_NAME="temp-branch-$(date +%s)"
+                git checkout -b $BRANCH_NAME
+
+                git add ./bagit ./resources ./config.toml
+                git commit -m "Update bagit and resources"
+                git push origin $BRANCH_NAME
+
+                # export GH_TOKEN=$LSC_CRATES_ROPROJECT_SCOPE
+                gh pr create --base main --head $BRANCH_NAME \
+                  --title "Update project's repository for the published ro-crate details" \
+                  --body "Update project's repository for the published ro-crate details"
+
+                gh pr merge --delete-branch --merge --admin
