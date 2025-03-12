@@ -34,12 +34,6 @@ def publish(
             default="-i", help="Directory containing resources to include in RO-Crate."
         ),
     ] = "./resources",
-    agent_token: Annotated[
-        str,
-        typer.Option(
-            default="-a", help="Auth token for the agent triggering publish action."
-        ),
-    ] = None,
 ):
     if agent is None:
         agent = os.getenv("APP_NAME")
