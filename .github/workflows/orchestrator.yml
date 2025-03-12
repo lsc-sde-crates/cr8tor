@@ -37,9 +37,6 @@ jobs:
               with:
                 version: "0.5.16"
                 enable-cache: true
-                cache-dependency-glob: |
-                  requirements**.txt
-                  pyproject.toml
 
             - name: Clone cr8tor repository (specific branch)
               if: ${{ inputs.cr8tor_branch != '' }}
@@ -99,9 +96,8 @@ jobs:
               run: echo "cr8tor will run sign-off steps and update ro-crate. No need to run microservices"
 
     Workflow-Execution:
-        if: false
-        runs-on: dev-vm-01
-        needs: SignOff
+        runs-on: ${{ inputs.environment }}-cr8tor-vm
+        #needs: SignOff
         steps:
             - name: Download artifact
               uses: actions/download-artifact@v4
@@ -109,12 +105,24 @@ jobs:
                 name: ro-crate-validated
                 path: .
 
-            - name: Clone cr8tor repository
+            - name: Setup uv
+              uses: astral-sh/setup-uv@v5
+              with:
+                version: "0.5.16"
+                enable-cache: true
+
+            - name: Clone cr8tor repository (specific branch)
+              if: ${{ inputs.cr8tor_branch != '' }}
               run: |
-                # Below command will install uv on Windows OS runner
-                powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-                $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
-                git clone --branch feature/develop https://github.com/lsc-sde-crates/cr8tor.git
+                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+
+            - name: Clone cr8tor repository (default branch)
+              if: ${{ inputs.cr8tor_branch == '' }}
+              run: |
+                git clone https://github.com/lsc-sde-crates/cr8tor.git
+
+            - name: Sync cr8tor repository
+              run: |
                 uv sync --directory cr8tor
 
             - name: Cr8tor CLI Staging Data
@@ -143,12 +151,12 @@ jobs:
 
 
     Publish:
-        if: false
-        runs-on: dev-vm-01
-        needs: Disclosure
+        #if: false
+        runs-on: ${{ inputs.environment }}-cr8tor-vm
+        #needs: Disclosure
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Set up git and take latest changes
               run: |
@@ -164,12 +172,24 @@ jobs:
                 name: ro-crate-staged
                 path: .
 
-            - name: Clone cr8tor repository
+            - name: Setup uv
+              uses: astral-sh/setup-uv@v5
+              with:
+                version: "0.5.16"
+                enable-cache: true
+
+            - name: Clone cr8tor repository (specific branch)
+              if: ${{ inputs.cr8tor_branch != '' }}
               run: |
-                # Below command will install uv on Windows OS runner
-                powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-                $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
-                git clone --branch feature/develop https://github.com/lsc-sde-crates/cr8tor.git
+                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+
+            - name: Clone cr8tor repository (default branch)
+              if: ${{ inputs.cr8tor_branch == '' }}
+              run: |
+                git clone https://github.com/lsc-sde-crates/cr8tor.git
+
+            - name: Sync cr8tor repository
+              run: |
                 uv sync --directory cr8tor
 
             - name: Cr8tor CLI Publish Data
@@ -185,7 +205,6 @@ jobs:
                     ./bagit
                     ./resources
                     ./config.toml
-
 
             - name: Push changes to repository
               run: |

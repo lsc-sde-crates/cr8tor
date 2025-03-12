@@ -65,6 +65,13 @@ def init(
             show_choices=True,
         ),
     ] = "PROD",
+    cr8tor_branch: Annotated[
+        str,
+        typer.Option(
+            "-cb",
+            help="For developing and debugging. Provide the github cr8tor branch that should be used in orchestration layer.",
+        ),
+    ] = None,
 ):
     """
 
@@ -106,6 +113,7 @@ def init(
         "__timestamp": datetime.now().isoformat(timespec="seconds"),
         "__cr8_cc_template": template_path,
         "environment": environment.upper(),
+        "__github_cr8tor_branch": cr8tor_branch,
     }
 
     # Generate the project with cookiecutter
