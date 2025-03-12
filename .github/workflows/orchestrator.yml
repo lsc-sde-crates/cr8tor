@@ -105,22 +105,28 @@ jobs:
                 path: .
 
             - name: Setup uv
+              if: False
               uses: astral-sh/setup-uv@v5
               with:
                 version: "0.5.16"
                 enable-cache: true
 
             - name: Clone cr8tor repository (specific branch)
-              if: ${{ inputs.cr8tor_branch != '' }}
+              if: ${{ inputs.cr8tor_branch != '' }} && False
               run: |
-                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                if (-Not (Test-Path -Path "cr8tor" -PathType Container)) {
+                  git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                }
 
             - name: Clone cr8tor repository (default branch)
-              if: ${{ inputs.cr8tor_branch == '' }}
+              if: ${{ inputs.cr8tor_branch == '' }} && False
               run: |
-                git clone https://github.com/lsc-sde-crates/cr8tor.git
+                if (-Not (Test-Path -Path "cr8tor" -PathType Container)) {
+                  git clone https://github.com/lsc-sde-crates/cr8tor.git
+                }
 
             - name: Sync cr8tor repository
+              if: False
               run: |
                 uv sync --directory cr8tor
 
@@ -170,22 +176,28 @@ jobs:
                 path: .
 
             - name: Setup uv
+              if: False
               uses: astral-sh/setup-uv@v5
               with:
                 version: "0.5.16"
                 enable-cache: true
 
             - name: Clone cr8tor repository (specific branch)
-              if: ${{ inputs.cr8tor_branch != '' }}
+              if: ${{ inputs.cr8tor_branch != '' }} && False
               run: |
-                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                if (-Not (Test-Path -Path "cr8tor" -PathType Container)) {
+                  git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                }
 
             - name: Clone cr8tor repository (default branch)
-              if: ${{ inputs.cr8tor_branch == '' }}
+              if: ${{ inputs.cr8tor_branch == '' }} && False
               run: |
-                git clone https://github.com/lsc-sde-crates/cr8tor.git
+                if (-Not (Test-Path -Path "cr8tor" -PathType Container)) {
+                  git clone https://github.com/lsc-sde-crates/cr8tor.git
+                }
 
             - name: Sync cr8tor repository
+              if: False
               run: |
                 uv sync --directory cr8tor
 
