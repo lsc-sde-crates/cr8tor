@@ -42,18 +42,19 @@ jobs:
                   pyproject.toml
 
             - name: Clone cr8tor repository
+              if: ${{ inputs.cr8tor_branch != '' }}
               run: |
-                # Below command will install uv on Windows OS runner
-                # powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-                # $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
-                if ("${{ inputs.cr8tor_branch }}") {
-                  git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
-                } else {
-                  # print out hello world
-                  echo "Hello, world!"
-                  git clone https://github.com/lsc-sde-crates/cr8tor.git
-                }
-                #uv sync --directory cr8tor
+                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                echo "hello world"
+                # uv sync --directory cr8tor
+
+
+            - name: Clone cr8tor repository
+              if: ${{ inputs.cr8tor_branch == '' }}
+              run: |
+                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                echo "hello world2"
+                # uv sync --directory cr8tor
 
             - name: Cr8tor CLI Create & Validate
               run: |
