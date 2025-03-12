@@ -7,6 +7,9 @@ on:
          required: true
          default: 'DEV'
          type: string
+      cr8tor_branch:
+         required: false
+         type: string
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -27,14 +30,27 @@ jobs:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
+
+            - name: Setup uv
+              uses: astral-sh/setup-uv@v5
+              with:
+                version: "0.5.16"
+                enable-cache: true
+                cache-dependency-glob: |
+                  requirements**.txt
+                  pyproject.toml
 
             - name: Clone cr8tor repository
               run: |
                 # Below command will install uv on Windows OS runner
-                powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-                $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
-                git clone --branch develop https://github.com/lsc-sde-crates/cr8tor.git
+                # powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+                # $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
+                if [ -n "${{ inputs.cr8tor_branch }}" ]; then
+                  git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                else
+                  git clone https://github.com/lsc-sde-crates/cr8tor.git
+                fi
                 uv sync --directory cr8tor
 
             - name: Cr8tor CLI Create & Validate
