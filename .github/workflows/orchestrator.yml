@@ -49,6 +49,8 @@ jobs:
                 if ("${{ inputs.cr8tor_branch }}") {
                   git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
                 } else {
+                  # print out hello world
+                  echo "Hello, world!"
                   git clone https://github.com/lsc-sde-crates/cr8tor.git
                 }
                 #uv sync --directory cr8tor
