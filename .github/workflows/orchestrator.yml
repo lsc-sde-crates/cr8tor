@@ -41,26 +41,25 @@ jobs:
                   requirements**.txt
                   pyproject.toml
 
-            - name: Clone cr8tor repository
+            - name: Clone cr8tor repository (specific branch)
               if: ${{ inputs.cr8tor_branch != '' }}
               run: |
                 git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
-                echo "hello world"
-                # uv sync --directory cr8tor
 
-
-            - name: Clone cr8tor repository
+            - name: Clone cr8tor repository (default branch)
               if: ${{ inputs.cr8tor_branch == '' }}
               run: |
-                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
-                echo "hello world2"
-                # uv sync --directory cr8tor
+                git clone https://github.com/lsc-sde-crates/cr8tor.git
+
+            - name: Sync cr8tor repository
+              run: |
+                uv sync --directory cr8tor
 
             - name: Cr8tor CLI Create & Validate
               run: |
-                #cr8tor\.venv\Scripts\activate
-                #cr8tor create -a GithubAction -i ./resources
-                #cr8tor validate -a GithubAction -i ./resources
+                cr8tor\.venv\Scripts\activate
+                cr8tor create -a GithubAction -i ./resources
+                cr8tor validate -a GithubAction -i ./resources
 
             - name: Create artifact for validated RO-Crate
               uses: actions/upload-artifact@v4
