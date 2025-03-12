@@ -68,7 +68,6 @@ jobs:
                     ./config.toml
 
     SignOff:
-        if: false
         runs-on: ubuntu-latest
         needs: Validate
         environment: signoff
@@ -97,7 +96,7 @@ jobs:
 
     Workflow-Execution:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
-        #needs: SignOff
+        needs: SignOff
         steps:
             - name: Download artifact
               uses: actions/download-artifact@v4
@@ -140,7 +139,6 @@ jobs:
                     ./config.toml
 
     Disclosure:
-        if: false
         runs-on: ubuntu-latest
         needs: Workflow-Execution
         environment: disclosure
@@ -151,9 +149,8 @@ jobs:
 
 
     Publish:
-        #if: false
         runs-on: ${{ inputs.environment }}-cr8tor-vm
-        #needs: Disclosure
+        needs: Disclosure
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
