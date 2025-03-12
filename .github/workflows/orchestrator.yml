@@ -46,11 +46,11 @@ jobs:
                 # Below command will install uv on Windows OS runner
                 # powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
                 # $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
-                if [ -n "${{ inputs.cr8tor_branch }}" ]; then
+                if ("${{ inputs.cr8tor_branch }}") {
                   git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
-                else
+                } else {
                   git clone https://github.com/lsc-sde-crates/cr8tor.git
-                fi
+                }
                 uv sync --directory cr8tor
 
             - name: Cr8tor CLI Create & Validate
