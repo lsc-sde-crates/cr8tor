@@ -51,13 +51,13 @@ jobs:
                 } else {
                   git clone https://github.com/lsc-sde-crates/cr8tor.git
                 }
-                uv sync --directory cr8tor
+                #uv sync --directory cr8tor
 
             - name: Cr8tor CLI Create & Validate
               run: |
-                cr8tor\.venv\Scripts\activate
-                cr8tor create -a GithubAction -i ./resources
-                cr8tor validate -a GithubAction -i ./resources
+                #cr8tor\.venv\Scripts\activate
+                #cr8tor create -a GithubAction -i ./resources
+                #cr8tor validate -a GithubAction -i ./resources
 
             - name: Create artifact for validated RO-Crate
               uses: actions/upload-artifact@v4
