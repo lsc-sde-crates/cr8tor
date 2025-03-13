@@ -56,7 +56,7 @@ jobs:
                 cr8tor create -a GithubAction -i ./resources
                 cr8tor validate -a GithubAction -i ./resources
 
-            - name: Push changes to temp repo
+            - name: Push changes to repo
               run: |
                 git config --global user.name "LSCSDE Governance Actions"
                 git config --global user.email "lscsde-actions@github.com"
@@ -76,7 +76,7 @@ jobs:
 
             - name: Send sign-off message
               run: |
-                echo "::notice::Please verify and sign off ro-crate request in https://github.com/${{ github.repository }}/tree/${{ needs.CreateTempBranch.outputs.branch_name }}. Please create pull request against 'main' branch for improved user experience"
+                echo "::notice::Please verify and sign off ro-crate request in https://github.com/${{ github.workflow }}/tree/${{ github.ref_name }}. Please create pull request against 'main' branch for improved user experience"
 
     SignOff:
         runs-on: ubuntu-latest
@@ -109,7 +109,7 @@ jobs:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         needs: [SignOff]
         steps:
-            - name: Checkout temp repository
+            - name: Checkout repository
               uses: actions/checkout@v4
               with:
                 clean: false
@@ -119,7 +119,7 @@ jobs:
                 cr8tor\.venv\Scripts\activate
                 cr8tor stage-transfer -a GithubAction -i ./resources
 
-            - name: Push changes to temp repo
+            - name: Push changes to repo
               run: |
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
@@ -136,7 +136,7 @@ jobs:
 
             - name: Send sign-off message
               run: |
-                echo "::notice::Please verify and sign off ro-crate request in https://github.com/${{ github.repository }}/tree/${{ needs.CreateTempBranch.outputs.branch_name }}. Please create pull request against 'main' branch for improved user experience"
+                echo "::notice::Please verify and sign off ro-crate request in https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}. Please create pull request against 'main' branch for improved user experience"
 
     Disclosure:
         runs-on: ubuntu-latest
@@ -152,7 +152,7 @@ jobs:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         needs: [Disclosure]
         steps:
-            - name: Checkout temp repository
+            - name: Checkout repository
               uses: actions/checkout@v4
               with:
                 clean: false
