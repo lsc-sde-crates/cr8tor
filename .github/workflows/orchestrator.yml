@@ -25,8 +25,7 @@ permissions:
     pull-requests: write
 
 jobs:
-    Validate:
-        #if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
+    CreateTempBranch:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         outputs:
           branch_name: ${{ steps.create_branch.outputs.branch_name }}  # Store step output at job level
@@ -45,6 +44,15 @@ jobs:
                 $branchName = "temp-branch-$((Get-Date).ToString('yyyyMMddHHmmss'))"
                 git checkout -b $branchName
                 echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
+
+    Validate:
+        #if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
+        runs-on: ${{ inputs.environment }}-cr8tor-vm
+        steps:
+            - name: Checkout main repository
+              uses: actions/checkout@v4
+              with:
+                ref: "main"
 
             - name: Setup uv
               uses: astral-sh/setup-uv@v5
@@ -76,7 +84,7 @@ jobs:
               run: |
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin $BRANCH_NAME
+                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
 
             - name: Create artifact for validated RO-Crate
               uses: actions/upload-artifact@v4
@@ -121,7 +129,7 @@ jobs:
             - name: Checkout temp repository
               uses: actions/checkout@v4
               with:
-                ref: "${{ needs.Validate.outputs.branch_name }}"
+                ref: "${{ needs.CreateTempBranch.outputs.branch_name }}"
                 clean: false
 
             - name: Cr8tor CLI Staging Data
@@ -133,7 +141,7 @@ jobs:
               run: |
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin $BRANCH_NAME
+                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
 
             - name: Create artifact for staged RO-Crate
               uses: actions/upload-artifact@v4
@@ -161,7 +169,7 @@ jobs:
             - name: Checkout temp repository
               uses: actions/checkout@v4
               with:
-                ref: "${{ needs.Validate.outputs.branch_name }}"
+                ref: "${{ needs.CreateTempBranch.outputs.branch_name }}"
                 clean: false
 
             - name: Cr8tor CLI Publish Data
@@ -182,10 +190,10 @@ jobs:
               run: |
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin $BRANCH_NAME
+                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
 
                 # export GH_TOKEN=$LSC_CRATES_ROPROJECT_SCOPE
-                gh pr create --base main --head $BRANCH_NAME \
+                gh pr create --base main --head ${{ needs.CreateTempBranch.outputs.branch_name }} \
                   --title "Update project's repository for the published ro-crate details" \
                   --body "Update project's repository for the published ro-crate details"
 
