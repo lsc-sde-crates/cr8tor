@@ -28,9 +28,23 @@ jobs:
     Validate:
         #if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
         runs-on: ${{ inputs.environment }}-cr8tor-vm
+        outputs:
+          branch_name: ${{ steps.create_branch.outputs.branch_name }}  # Store step output at job level
         steps:
-            - name: Checkout repository
+            - name: Checkout main repository
               uses: actions/checkout@v4
+              with:
+                ref: "main"
+
+            - name: Create a new temp branch
+              id: create_branch
+              run: |
+                git config --global user.name "LSCSDE Governance Actions"
+                git config --global user.email "lscsde-actions@github.com"
+
+                $branchName = "temp-branch-$((Get-Date).ToString('yyyyMMddHHmmss'))"
+                git checkout -b $branchName
+                echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
 
             - name: Setup uv
               uses: astral-sh/setup-uv@v5
@@ -41,12 +55,12 @@ jobs:
             - name: Clone cr8tor repository (specific branch)
               if: ${{ inputs.cr8tor_branch != '' }}
               run: |
-                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git --no-checkout
 
             - name: Clone cr8tor repository (default branch)
               if: ${{ inputs.cr8tor_branch == '' }}
               run: |
-                git clone https://github.com/lsc-sde-crates/cr8tor.git
+                git clone https://github.com/lsc-sde-crates/cr8tor.git --no-checkout
 
             - name: Sync cr8tor repository
               run: |
@@ -57,6 +71,12 @@ jobs:
                 cr8tor\.venv\Scripts\activate
                 cr8tor create -a GithubAction -i ./resources
                 cr8tor validate -a GithubAction -i ./resources
+
+            - name: Push changes to temp repo
+              run: |
+                git add ./bagit ./resources ./config.toml
+                git commit -m "Update bagit and resources"
+                git push origin $BRANCH_NAME
 
             - name: Create artifact for validated RO-Crate
               uses: actions/upload-artifact@v4
@@ -98,42 +118,22 @@ jobs:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         needs: SignOff
         steps:
-            - name: Download artifact
-              uses: actions/download-artifact@v4
+            - name: Checkout temp repository
+              uses: actions/checkout@v4
               with:
-                name: ro-crate-validated
-                path: .
-
-            - name: Setup uv
-              if: False
-              uses: astral-sh/setup-uv@v5
-              with:
-                version: "0.5.16"
-                enable-cache: true
-
-            - name: Clone cr8tor repository (specific branch)
-              if: ${{ inputs.cr8tor_branch != '' }} && False
-              run: |
-                if (-Not (Test-Path -Path "cr8tor" -PathType Container)) {
-                  git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
-                }
-
-            - name: Clone cr8tor repository (default branch)
-              if: ${{ inputs.cr8tor_branch == '' }} && False
-              run: |
-                if (-Not (Test-Path -Path "cr8tor" -PathType Container)) {
-                  git clone https://github.com/lsc-sde-crates/cr8tor.git
-                }
-
-            - name: Sync cr8tor repository
-              if: False
-              run: |
-                uv sync --directory cr8tor
+                ref: "${{ needs.Validate.outputs.branch_name }}"
+                clean: false
 
             - name: Cr8tor CLI Staging Data
               run: |
                 cr8tor\.venv\Scripts\activate
                 cr8tor stage-transfer -a GithubAction -i ./resources
+
+            - name: Push changes to temp repo
+              run: |
+                git add ./bagit ./resources ./config.toml
+                git commit -m "Update bagit and resources"
+                git push origin $BRANCH_NAME
 
             - name: Create artifact for staged RO-Crate
               uses: actions/upload-artifact@v4
@@ -158,48 +158,11 @@ jobs:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         needs: Disclosure
         steps:
-            - name: Checkout repository
+            - name: Checkout temp repository
               uses: actions/checkout@v4
-
-            - name: Set up git and take latest changes
-              run: |
-                git config --global user.name "LSCSDE Governance Actions"
-                git config --global user.email "lscsde-actions@github.com"
-
-                git fetch origin
-                git reset --hard origin/main
-
-            - name: Download artifact
-              uses: actions/download-artifact@v4
               with:
-                name: ro-crate-staged
-                path: .
-
-            - name: Setup uv
-              if: False
-              uses: astral-sh/setup-uv@v5
-              with:
-                version: "0.5.16"
-                enable-cache: true
-
-            - name: Clone cr8tor repository (specific branch)
-              if: ${{ inputs.cr8tor_branch != '' }} && False
-              run: |
-                if (-Not (Test-Path -Path "cr8tor" -PathType Container)) {
-                  git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
-                }
-
-            - name: Clone cr8tor repository (default branch)
-              if: ${{ inputs.cr8tor_branch == '' }} && False
-              run: |
-                if (-Not (Test-Path -Path "cr8tor" -PathType Container)) {
-                  git clone https://github.com/lsc-sde-crates/cr8tor.git
-                }
-
-            - name: Sync cr8tor repository
-              if: False
-              run: |
-                uv sync --directory cr8tor
+                ref: "${{ needs.Validate.outputs.branch_name }}"
+                clean: false
 
             - name: Cr8tor CLI Publish Data
               run: |
@@ -217,9 +180,6 @@ jobs:
 
             - name: Push changes to repository
               run: |
-                BRANCH_NAME="temp-branch-$(date +%s)"
-                git checkout -b $BRANCH_NAME
-
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
                 git push origin $BRANCH_NAME
