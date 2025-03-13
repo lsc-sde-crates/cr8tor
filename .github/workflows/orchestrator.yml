@@ -52,8 +52,6 @@ jobs:
         steps:
             - name: Checkout main repository
               uses: actions/checkout@v4
-              with:
-                ref: "${{ needs.CreateTempBranch.outputs.branch_name }}"
 
             - name: Setup uv
               uses: astral-sh/setup-uv@v5
@@ -83,6 +81,7 @@ jobs:
 
             - name: Push changes to temp repo
               run: |
+                git checkout -B ${{ needs.CreateTempBranch.outputs.branch_name }}
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
                 git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
