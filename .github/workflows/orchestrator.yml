@@ -94,14 +94,15 @@ jobs:
                     ./resources
                     ./config.toml
 
+            - name: Send sign-off message
+              run: |
+                echo "::notice::Please verify and sign off ro-crate request in https://github.com/${{ github.repository }}/tree/${{ needs.CreateTempBranch.outputs.branch_name }}. Please create pull request against 'main' branch for improved user experience"
+
     SignOff:
         runs-on: ubuntu-latest
         needs: [Validate, CreateTempBranch]
         environment: signoff
         steps:
-            - name: Send sign-off message
-              run: |
-                echo "::notice::Please verify and sign off ro-crate request in https://github.com/${{ github.repository }}/tree/${{ needs.CreateTempBranch.outputs.branch_name }}. Please create pull request against 'main' branch for improved user experience"
             # COMMENTED trstringer/manual-approval
             #  as it does not work easily with GitHub Teams (requires extended permissions)
             #  and the timeout is 72 hours (3 days).
@@ -154,14 +155,15 @@ jobs:
                     ./resources
                     ./config.toml
 
+            - name: Send sign-off message
+              run: |
+                echo "::notice::Please verify and sign off ro-crate request in https://github.com/${{ github.repository }}/tree/${{ needs.CreateTempBranch.outputs.branch_name }}. Please create pull request against 'main' branch for improved user experience"
+
     Disclosure:
         runs-on: ubuntu-latest
         needs: [Workflow-Execution, CreateTempBranch]
         environment: disclosure
         steps:
-            - name: Send sign-off message
-              run: |
-                echo "::notice::Please verify and sign off ro-crate request in https://github.com/${{ github.repository }}/tree/${{ needs.CreateTempBranch.outputs.branch_name }}. Please create pull request against 'main' branch for improved user experience"
             # TODO: Add Cr8tor CLI that will update the RO-Crate with the sign-off information
             - name: Simulate sign-off cr8tor steps
               run: echo "cr8tor will run sign-off steps and update ro-crate. No need to run microservices"
