@@ -97,7 +97,7 @@ jobs:
 
     SignOff:
         runs-on: ubuntu-latest
-        needs: Validate
+        needs: [Validate, CreateTempBranch]
         environment: signoff
         steps:
             # COMMENTED trstringer/manual-approval
@@ -124,7 +124,7 @@ jobs:
 
     Workflow-Execution:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
-        needs: SignOff
+        needs: [SignOff, CreateTempBranch]
         steps:
             - name: Checkout temp repository
               uses: actions/checkout@v4
@@ -154,7 +154,7 @@ jobs:
 
     Disclosure:
         runs-on: ubuntu-latest
-        needs: Workflow-Execution
+        needs: [Workflow-Execution, CreateTempBranch]
         environment: disclosure
         steps:
             # TODO: Add Cr8tor CLI that will update the RO-Crate with the sign-off information
@@ -164,7 +164,7 @@ jobs:
 
     Publish:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
-        needs: Disclosure
+        needs: [Disclosure, CreateTempBranch]
         steps:
             - name: Checkout temp repository
               uses: actions/checkout@v4
