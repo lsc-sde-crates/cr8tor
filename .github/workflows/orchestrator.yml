@@ -192,9 +192,9 @@ jobs:
                 git commit -m "Update bagit and resources"
                 git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
 
-                # export GH_TOKEN=$LSC_CRATES_ROPROJECT_SCOPE
-                gh pr create --base main --head ${{ needs.CreateTempBranch.outputs.branch_name }} \
-                  --title "Update project's repository for the published ro-crate details" \
-                  --body "Update project's repository for the published ro-crate details"
+                # TODO: Ask to install GitHub CLI on the runner
+                # gh pr create --base main --head ${{ needs.CreateTempBranch.outputs.branch_name }} `
+                #  --title "Update project's repository for the published ro-crate details" `
+                #  --body "Update project's repository for the published ro-crate details"
 
-                gh pr merge --delete-branch --merge --admin
+                # gh pr merge --delete-branch --merge --admin
