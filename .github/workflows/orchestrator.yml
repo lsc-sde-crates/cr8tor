@@ -82,7 +82,7 @@ jobs:
 
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin HEAD:refs/heads/${{ github.head_ref }}
+                git push
 
             - name: Create artifact for validated RO-Crate
               uses: actions/upload-artifact@v4
