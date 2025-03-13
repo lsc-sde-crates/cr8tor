@@ -47,6 +47,7 @@ jobs:
 
     Validate:
         #if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
+        needs: CreateTempBranch
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         steps:
             - name: Checkout main repository
