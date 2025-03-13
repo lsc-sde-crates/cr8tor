@@ -96,7 +96,7 @@ jobs:
             - name: Send sign-off message
               run: |
                 $message = "Please verify RO-Crate and sign off Data Access Request at https://github.com/${{ github.repository }}/tree/${{ github.ref_name }} ."
-                if (${{ github.event_name }} -eq "pull_request") {
+                if ("${{ github.event_name }}" -eq "pull_request") {
                     $message = $message + "Pull Request: https://github.com/${{ github.repository }}/pull/${{ github.ref_name }}"
                 } else {
                     $message = $message + "Please create pull request against 'main' branch for improved user experience"
@@ -163,7 +163,7 @@ jobs:
             - name: Send sign-off message
               run: |
                 $message = "Please verify RO-Crate and sign off Data Access Request at https://github.com/${{ github.repository }}/tree/${{ github.ref_name }} ."
-                if (${{ github.event_name }} -eq "pull_request") {
+                if ("${{ github.event_name }}" -eq "pull_request") {
                     $message = $message + "Pull Request: https://github.com/${{ github.repository }}/pull/${{ github.ref_name }}"
                 } else {
                     $message = $message + "Please create pull request against 'main' branch for improved user experience"
