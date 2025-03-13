@@ -55,12 +55,12 @@ jobs:
             - name: Clone cr8tor repository (specific branch)
               if: ${{ inputs.cr8tor_branch != '' }}
               run: |
-                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git --no-checkout
+                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
 
             - name: Clone cr8tor repository (default branch)
               if: ${{ inputs.cr8tor_branch == '' }}
               run: |
-                git clone https://github.com/lsc-sde-crates/cr8tor.git --no-checkout
+                git clone https://github.com/lsc-sde-crates/cr8tor.git
 
             - name: Sync cr8tor repository
               run: |
