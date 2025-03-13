@@ -28,7 +28,7 @@ jobs:
         #if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         steps:
-            - name: Checkout main repository
+            - name: Checkout repository
               uses: actions/checkout@v4
 
             - name: Setup uv
