@@ -22,32 +22,10 @@ env:
 permissions:
     contents: write
     issues: write
-    pull-requests: write
 
 jobs:
-    CreateTempBranch:
-        runs-on: ${{ inputs.environment }}-cr8tor-vm
-        outputs:
-          branch_name: ${{ steps.create_branch.outputs.branch_name }}  # Store step output at job level
-        steps:
-            - name: Checkout main repository
-              uses: actions/checkout@v4
-              with:
-                ref: "main"
-
-            - name: Create a new temp branch
-              id: create_branch
-              run: |
-                git config --global user.name "LSCSDE Governance Actions"
-                git config --global user.email "lscsde-actions@github.com"
-
-                $branchName = "temp-$((Get-Date).ToString('yyyyMMddHHmmss'))"
-                git checkout -b $branchName
-                echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
-
     Validate:
         #if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
-        needs: CreateTempBranch
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         steps:
             - name: Checkout main repository
@@ -80,10 +58,12 @@ jobs:
 
             - name: Push changes to temp repo
               run: |
-                git checkout -B ${{ needs.CreateTempBranch.outputs.branch_name }}
+                git config --global user.name "LSCSDE Governance Actions"
+                git config --global user.email "lscsde-actions@github.com"
+
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
+                git push
 
             - name: Create artifact for validated RO-Crate
               uses: actions/upload-artifact@v4
@@ -100,7 +80,7 @@ jobs:
 
     SignOff:
         runs-on: ubuntu-latest
-        needs: [Validate, CreateTempBranch]
+        needs: [Validate]
         environment: signoff
         steps:
             # COMMENTED trstringer/manual-approval
@@ -127,12 +107,11 @@ jobs:
 
     Workflow-Execution:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
-        needs: [SignOff, CreateTempBranch]
+        needs: [SignOff]
         steps:
             - name: Checkout temp repository
               uses: actions/checkout@v4
               with:
-                ref: "${{ needs.CreateTempBranch.outputs.branch_name }}"
                 clean: false
 
             - name: Cr8tor CLI Staging Data
@@ -144,7 +123,7 @@ jobs:
               run: |
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
+                git push
 
             - name: Create artifact for staged RO-Crate
               uses: actions/upload-artifact@v4
@@ -161,7 +140,7 @@ jobs:
 
     Disclosure:
         runs-on: ubuntu-latest
-        needs: [Workflow-Execution, CreateTempBranch]
+        needs: [Workflow-Execution]
         environment: disclosure
         steps:
             # TODO: Add Cr8tor CLI that will update the RO-Crate with the sign-off information
@@ -171,12 +150,11 @@ jobs:
 
     Publish:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
-        needs: [Disclosure, CreateTempBranch]
+        needs: [Disclosure]
         steps:
             - name: Checkout temp repository
               uses: actions/checkout@v4
               with:
-                ref: "${{ needs.CreateTempBranch.outputs.branch_name }}"
                 clean: false
 
             - name: Cr8tor CLI Publish Data
@@ -197,11 +175,4 @@ jobs:
               run: |
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
-
-                # TODO: Ask to install GitHub CLI on the runner
-                # gh pr create --base main --head ${{ needs.CreateTempBranch.outputs.branch_name }} `
-                #  --title "Update project's repository for the published ro-crate details" `
-                #  --body "Update project's repository for the published ro-crate details"
-
-                # gh pr merge --delete-branch --merge --admin
+                git push
