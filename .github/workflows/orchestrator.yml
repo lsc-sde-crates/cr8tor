@@ -31,6 +31,26 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
 
+            - name: Show github context
+              run: |
+                echo "GITHUB_REPOSITORY: ${{ github.repository }}"
+                echo "GITHUB_REF: ${{ github.ref }}"
+                echo "GITHUB_REF_NAME: ${{ github.ref_name }}"
+                echo "GITHUB_BASE_REF: ${{ github.base_ref }}"
+                echo "GITHUB_HEAD_REF: ${{ github.head_ref }}"
+                echo "GITHUB_EVENT_NAME: ${{ github.event_name }}"
+                echo "GITHUB_EVENT_PATH: ${{ github.event_path }}"
+                echo "GITHUB_WORKSPACE: ${{ github.workspace }}"
+                echo "GITHUB_SHA: ${{ github.sha }}"
+                echo "GITHUB_ACTOR: ${{ github.actor }}"
+                echo "GITHUB_JOB: ${{ github.job }}"
+                echo "GITHUB_RUN_ID: ${{ github.run_id }}"
+                echo "GITHUB_RUN_NUMBER: ${{ github.run_number }}"
+                echo "GITHUB_ACTION: ${{ github.action }}"
+                echo "GITHUB_ACTION_REF: ${{ github.action_ref }}"
+                echo "GITHUB_ACTION_REPOSITORY: ${{ github.action_repository }}"
+                echo "GITHUB_ACTION_WORKFLOW: ${{ github.action_workflow }}"
+
             - name: Setup uv
               uses: astral-sh/setup-uv@v5
               with:
@@ -63,7 +83,7 @@ jobs:
 
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin HEAD:refs/heads/${{ github.ref_name }}
+                git push origin HEAD:refs/heads/${{ github.base_ref }}
 
             - name: Create artifact for validated RO-Crate
               uses: actions/upload-artifact@v4
