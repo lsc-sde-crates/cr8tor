@@ -95,7 +95,7 @@ jobs:
 
             - name: Send sign-off message
               run: |
-                $message = "Please verify RO-Crate and sign off Data Access Request at https://github.com/${{ github.repository }}/tree/${{ github.ref_name }} ."
+                $message = "Please verify RO-Crate and sign off Data Access Request at https://github.com/${{ github.repository }}/tree/${{ github.head_ref }} ."
                 if ("${{ github.event_name }}" -eq "pull_request") {
                     $message = $message + "Pull Request: https://github.com/${{ github.repository }}/pull/${{ github.ref_name }}"
                 } else {
@@ -162,7 +162,7 @@ jobs:
 
             - name: Send sign-off message
               run: |
-                $message = "Please verify RO-Crate and sign off Data Access Request at https://github.com/${{ github.repository }}/tree/${{ github.ref_name }} ."
+                $message = "Please verify RO-Crate and sign off Data Access Request at https://github.com/${{ github.repository }}/tree/${{ github.head_ref }} ."
                 if ("${{ github.event_name }}" -eq "pull_request") {
                     $message = $message + "Pull Request: https://github.com/${{ github.repository }}/pull/${{ github.ref_name }}"
                 } else {
