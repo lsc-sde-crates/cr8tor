@@ -1,4 +1,4 @@
-"""Module with functions to initiate a CR8 project"""
+"""Command to initialize a new CR8 project using a specified cookiecutter template."""
 
 from datetime import datetime
 from typing import Annotated
@@ -17,8 +17,8 @@ import cr8tor.core.gh_rest_api_client as gh_rest_api_client
 app = typer.Typer()
 
 
-@app.command(name="init")
-def init(
+@app.command(name="initiate")
+def initiate(
     template_path: Annotated[
         str,
         typer.Option(
@@ -78,12 +78,15 @@ def init(
     Initialize a new CR8 project using a specified cookiecutter template.
 
     Args:
-        template_path (str): The GitHub URL or relative path to the cr8-cookiecutter template.
-                            This is prompted from the user if not provided.
+        template_path (Optional[str]): The GitHub URL or relative path to the cr8-cookiecutter template.
+                                       This is prompted from the user if not provided.
         push_to_github (bool): Flag to indicate if the project should be pushed to GitHub.
         git_org (Optional[str]): The target GitHub organization name.
         checkout (Optional[str]): The branch, tag, or commit to checkout from the cookiecutter template.
         project_name (Optional[str]): The name of the project to be created. If provided, cookiecutter will skip the prompt for other values.
+        environment (str): The environment to use (DEV, TEST, PROD). Defaults to "DEV".
+        cr8tor_branch (Optional[str]): For developing and debugging. Provide the GitHub cr8tor branch that should be used in orchestration layer.
+
 
     The function generates a new project by applying the specified cookiecutter template.
     It also adds a timestamp to the context used by the template.
@@ -93,15 +96,15 @@ def init(
 
     Example usage:
 
-        cr8tor init -t https://github.com/lsc-sde-crates/cr8-cookiecutter
+        cr8tor initiate -t https://github.com/lsc-sde-crates/cr8-cookiecutter
 
         or
 
-        cr8tor init -t path-to-local-cr8-cookiecutter-dir
+        cr8tor initiate -t path-to-local-cr8-cookiecutter-dir
 
         or
 
-        cr8tor init -t path-to-local-cr8-cookiecutter-dir -n "my-project" -org "lsc-sde-crates" --push
+        cr8tor initiate -t path-to-local-cr8-cookiecutter-dir -n "my-project" -org "lsc-sde-crates" --push
     """
     valid_environments = ["DEV", "TEST", "PROD"]
     if environment.upper() not in valid_environments:

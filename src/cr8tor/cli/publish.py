@@ -35,6 +35,18 @@ def publish(
         ),
     ] = "./resources",
 ):
+    """
+    Transfers the data from staging to production storage that is accessible to a TRE and/or authorised TRE workspace.
+
+    Args:
+        agent (str): The agent label triggering the validation. Defaults to None.
+        bagit_dir (Path): Bagit directory containing RO-Crate data directory. Defaults to "./bagit".
+        resources_dir (Path): Directory containing resources to include in RO-Crate. Defaults to "./resources".
+
+    Example usage:
+
+        cr8tor publish -a agent_label -b path-to-bagit-dir -i path-to-resources-dir
+    """
     if agent is None:
         agent = os.getenv("APP_NAME")
 

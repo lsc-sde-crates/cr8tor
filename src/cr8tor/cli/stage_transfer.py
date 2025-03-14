@@ -35,6 +35,22 @@ def stage_transfer(
         ),
     ] = "./resources",
 ):
+    """
+    Stages the data by transferring it from the specified source to sink TRE.
+
+    Args:
+        agent (str): The agent label triggering the validation. Defaults to None.
+        bagit_dir (Path): Bagit directory containing RO-Crate data directory. Defaults to "./bagit".
+        resources_dir (Path): Directory containing resources to include in RO-Crate. Defaults to "./resources".
+
+    The function stages the data transfer for the specified CR8 project by validating the current RO-Crate graph
+    and ensuring that the necessary resources are included.
+
+    Example usage:
+
+        cr8tor stage-transfer -a agent_label -b path-to-bagit-dir -i path-to-resources-dir
+    """
+
     if agent is None:
         agent = os.getenv("APP_NAME")
 
