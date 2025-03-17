@@ -1,15 +1,15 @@
-## cr8tor.cli.initiate
+## Initiate Project
 
-:::cr8tor.cli.initiate
+:::cr8tor.cli.initiate.initiate
 
-## cr8tor.cli.create
+## Create Project Ro-Crate
 
-:::cr8tor.cli.create
+:::cr8tor.cli.create.create
 
-## cr8tor.cli.validate
+## Validate Project Metadata
 
-:::cr8tor.cli.validate
+:::cr8tor.cli.validate.validate
 
-## cr8tor.cli.stage_transfer
+## Stage Project Dataset
 
-:::cr8tor.cli.stage_transfer
+:::cr8tor.cli.stage_transfer.stage_transfer
