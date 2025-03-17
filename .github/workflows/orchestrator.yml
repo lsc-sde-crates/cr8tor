@@ -13,9 +13,6 @@ on:
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    # we use LSC_CRATES_ROPROJECT_SCOPE token to PullRequest changes to main branch
-    # as GITHUB_TOKEN has PullRequests permissions disabled at enterprise level
-    # LSC_CRATES_ROPROJECT_SCOPE: ${{ secrets.LSC_CRATES_ROPROJECT_SCOPE }}
     APPROVALS_API_TOKEN: ${{ secrets[format('APPROVALS_API_TOKEN_{0}', inputs.environment)] }}
     APPROVALS_HOST: ${{ secrets[format('APPROVALS_HOST_{0}', inputs.environment)] }}
 
@@ -25,7 +22,6 @@ permissions:
 
 jobs:
     Validate:
-        #if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         steps:
             - name: Checkout repository
@@ -108,24 +104,6 @@ jobs:
         needs: [Validate]
         environment: signoff
         steps:
-            # COMMENTED trstringer/manual-approval
-            #  as it does not work easily with GitHub Teams (requires extended permissions)
-            #  and the timeout is 72 hours (3 days).
-            #  Applied instead GitHub environment approach.
-            #
-            # Creates GitHub Issue and pauses the workflow
-            # until the issue is resolved or 6hr timeout
-            # see details at https://github.com/trstringer/manual-approval
-            #- uses: trstringer/manual-approval@v1
-            #  if: ${{ !env.ACT }} # for debugging locally
-            #  with:
-            #    secret: ${{ github.TOKEN }}
-            #    approvers: cr8-ALL-projects-approver
-            #    issue-title: "ApprovalGate1 - SignOff stage"
-            #    issue-body: "The ro-crate is validated and includes metadata. Please review and approve or deny the to progress to Workflow Execution phase (data retrieval)."
-            #    minimum-approvals: 1
-            #    # exclude-workflow-initiator-as-approver: true # Uncomment in production
-
             # TODO: Add Cr8tor CLI that will update the RO-Crate with the sign-off information
             - name: Simulate sign-off cr8tor steps
               run: echo "cr8tor will run sign-off steps and update ro-crate. No need to run microservices"
@@ -209,3 +187,5 @@ jobs:
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
                 git push
+
+            # TODO: Once github cli is available in the runner, we can use it to create a merge & close PR
