@@ -37,13 +37,22 @@ def create(
     dryrun: Annotated[bool, typer.Option(default="--dryrun")] = False,
 ):
     """
-    Create initialises a 5-Safes Research Object Crate (RO-Crate) from specified metadata resources.
-    This function generates a uuid for the project and then builds a RO-Crate along with knowledge graph which is then packaged
-    as a BagIt Archive in the "bagit/" directory. If the `dryrun` argument is provided, the function will print the crate
+    Create generates the initial RO-Crate data crate within the target Cr8tor project from the specified metadata resources.
+    This function generates a uuid for the project and then builds a RO-Crate along with RO-Crate knowledge graph which is further packaged
+    as a non-serialised BagIt Archive in the "bagit/" directory. If the `dryrun` argument is provided, the function will print the crate
     details without writing to the "crate/" directory.
 
-    Example:
-        $ cr8tor create -a GithubAction -i /path/to/resources
+    Args:
+        agent (str): The agent label triggering the validation. Defaults to None.
+        resources_dir (Path): Directory containing resources to include in RO-Crate. Defaults to "./resources".
+        bagit_dir (Path): Bagit directory containing RO-Crate data directory. Defaults to "./bagit".
+        config_file (Path): Location of configuration TOML file. Defaults to "./config.toml".
+        dryrun (bool): If provided, the function will print the crate details without writing to the "crate/" directory. Defaults to False.
+
+    Example usage:
+
+        cr8tor create -a agent_label -i path-to-resources-dir -b path-to-bagit-dir -c path-to-config-file --dryrun
+
     """
 
     if agent is None:

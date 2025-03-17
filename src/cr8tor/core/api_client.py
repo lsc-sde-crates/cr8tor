@@ -37,7 +37,8 @@ class APIClient:
     def __init__(self, base_url: str, token: str, port: Optional[int] = None):
         self.base_url = f"{base_url}:{port}" if port else base_url
         self.token = token
-        self.client = httpx.AsyncClient(timeout=60 * 60)
+        # TODO: the micro service endpoints are http, not https yet. We need verify=False
+        self.client = httpx.AsyncClient(timeout=60 * 60, verify=False, follow_redirects=True)
 
     def get_headers(self) -> dict:
         return {
@@ -112,15 +113,21 @@ def get_service_api(service: str) -> APIClient:
     if service == "MetaDataService":
         base_url = os.getenv("METADATA_HOST")
         port = os.getenv("METADATA_PORT")
-        if not base_url and not port:
-            raise ValueError("METADATA environment variables not set")
         token = os.getenv("METADATA_API_TOKEN")
+        if not base_url and not token:
+            raise ValueError("METADATA environment variables not set")
     elif service == "ApprovalService":
         base_url = os.getenv("APPROVALS_HOST")
         port = os.getenv("APPROVALS_PORT")
-        if not base_url or not port:
-            raise ValueError("APPROVALS environments variable not set")
         token = os.getenv("APPROVALS_API_TOKEN")
+        if not base_url or not token:
+            raise ValueError("APPROVALS environments variable not set")
+    elif service == "PublishService":
+        base_url = os.getenv("PUBLISH_HOST")
+        port = os.getenv("PUBLISH_PORT")
+        token = os.getenv("PUBLISH_API_TOKEN")
+        if not base_url or not token:
+            raise ValueError("PUBLISH environments variable not set")
     else:
         raise ValueError(f"Unknown service: {service}")
 
