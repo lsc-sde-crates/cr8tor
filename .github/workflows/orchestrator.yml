@@ -13,45 +13,38 @@ on:
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    # we use LSC_CRATES_ROPROJECT_SCOPE token to PullRequest changes to main branch
-    # as GITHUB_TOKEN has PullRequests permissions disabled at enterprise level
-    # LSC_CRATES_ROPROJECT_SCOPE: ${{ secrets.LSC_CRATES_ROPROJECT_SCOPE }}
     APPROVALS_API_TOKEN: ${{ secrets[format('APPROVALS_API_TOKEN_{0}', inputs.environment)] }}
     APPROVALS_HOST: ${{ secrets[format('APPROVALS_HOST_{0}', inputs.environment)] }}
 
 permissions:
     contents: write
     issues: write
-    pull-requests: write
 
 jobs:
-    CreateTempBranch:
+    Validate:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
-        outputs:
-          branch_name: ${{ steps.create_branch.outputs.branch_name }}  # Store step output at job level
         steps:
-            - name: Checkout main repository
+            - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                ref: "main"
+                ref: ${{ github.head_ref }}
 
-            - name: Create a new temp branch
-              id: create_branch
+            - name: Show github context
               run: |
-                git config --global user.name "LSCSDE Governance Actions"
-                git config --global user.email "lscsde-actions@github.com"
-
-                $branchName = "temp-$((Get-Date).ToString('yyyyMMddHHmmss'))"
-                git checkout -b $branchName
-                echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
-
-    Validate:
-        #if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
-        needs: CreateTempBranch
-        runs-on: ${{ inputs.environment }}-cr8tor-vm
-        steps:
-            - name: Checkout main repository
-              uses: actions/checkout@v4
+                echo "GITHUB_REPOSITORY: ${{ github.repository }}"
+                echo "GITHUB_REF: ${{ github.ref }}"
+                echo "GITHUB_REF_NAME: ${{ github.ref_name }}"
+                echo "GITHUB_BASE_REF: ${{ github.base_ref }}"
+                echo "GITHUB_HEAD_REF: ${{ github.head_ref }}"
+                echo "GITHUB_EVENT_NAME: ${{ github.event_name }}"
+                echo "GITHUB_EVENT_PATH: ${{ github.event_path }}"
+                echo "GITHUB_WORKSPACE: ${{ github.workspace }}"
+                echo "GITHUB_SHA: ${{ github.sha }}"
+                echo "GITHUB_ACTOR: ${{ github.actor }}"
+                echo "GITHUB_JOB: ${{ github.job }}"
+                echo "GITHUB_RUN_ID: ${{ github.run_id }}"
+                echo "GITHUB_RUN_NUMBER: ${{ github.run_number }}"
+                echo "GITHUB_ACTION: ${{ github.action }}"
 
             - name: Setup uv
               uses: astral-sh/setup-uv@v5
@@ -78,12 +71,14 @@ jobs:
                 cr8tor create -a GithubAction -i ./resources
                 cr8tor validate -a GithubAction -i ./resources
 
-            - name: Push changes to temp repo
+            - name: Push changes to repo
               run: |
-                git checkout -B ${{ needs.CreateTempBranch.outputs.branch_name }}
+                git config --global user.name "LSCSDE Governance Actions"
+                git config --global user.email "lscsde-actions@github.com"
+
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
+                git push
 
             - name: Create artifact for validated RO-Crate
               uses: actions/upload-artifact@v4
@@ -96,43 +91,31 @@ jobs:
 
             - name: Send sign-off message
               run: |
-                echo "::notice::Please verify and sign off ro-crate request in https://github.com/${{ github.repository }}/tree/${{ needs.CreateTempBranch.outputs.branch_name }}. Please create pull request against 'main' branch for improved user experience"
+                $message = "Please verify RO-Crate and sign off Data Access Request at https://github.com/${{ github.repository }}/tree/${{ github.head_ref }} ."
+                if ("${{ github.event_name }}" -eq "pull_request") {
+                    $message = $message + "Pull Request: https://github.com/${{ github.repository }}/pull/${{ github.ref_name }}"
+                } else {
+                    $message = $message + "Please create pull request against 'main' branch for improved user experience"
+                }
+                echo "::notice::$message"
 
     SignOff:
         runs-on: ubuntu-latest
-        needs: [Validate, CreateTempBranch]
+        needs: [Validate]
         environment: signoff
         steps:
-            # COMMENTED trstringer/manual-approval
-            #  as it does not work easily with GitHub Teams (requires extended permissions)
-            #  and the timeout is 72 hours (3 days).
-            #  Applied instead GitHub environment approach.
-            #
-            # Creates GitHub Issue and pauses the workflow
-            # until the issue is resolved or 6hr timeout
-            # see details at https://github.com/trstringer/manual-approval
-            #- uses: trstringer/manual-approval@v1
-            #  if: ${{ !env.ACT }} # for debugging locally
-            #  with:
-            #    secret: ${{ github.TOKEN }}
-            #    approvers: cr8-ALL-projects-approver
-            #    issue-title: "ApprovalGate1 - SignOff stage"
-            #    issue-body: "The ro-crate is validated and includes metadata. Please review and approve or deny the to progress to Workflow Execution phase (data retrieval)."
-            #    minimum-approvals: 1
-            #    # exclude-workflow-initiator-as-approver: true # Uncomment in production
-
             # TODO: Add Cr8tor CLI that will update the RO-Crate with the sign-off information
             - name: Simulate sign-off cr8tor steps
               run: echo "cr8tor will run sign-off steps and update ro-crate. No need to run microservices"
 
     Workflow-Execution:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
-        needs: [SignOff, CreateTempBranch]
+        needs: [SignOff]
         steps:
-            - name: Checkout temp repository
+            - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                ref: "${{ needs.CreateTempBranch.outputs.branch_name }}"
+                ref: ${{ github.head_ref }}
                 clean: false
 
             - name: Cr8tor CLI Staging Data
@@ -140,11 +123,11 @@ jobs:
                 cr8tor\.venv\Scripts\activate
                 cr8tor stage-transfer -a GithubAction -i ./resources
 
-            - name: Push changes to temp repo
+            - name: Push changes to repo
               run: |
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
+                git push
 
             - name: Create artifact for staged RO-Crate
               uses: actions/upload-artifact@v4
@@ -157,11 +140,17 @@ jobs:
 
             - name: Send sign-off message
               run: |
-                echo "::notice::Please verify and sign off ro-crate request in https://github.com/${{ github.repository }}/tree/${{ needs.CreateTempBranch.outputs.branch_name }}. Please create pull request against 'main' branch for improved user experience"
+                $message = "Please verify RO-Crate and sign off Data Access Request at https://github.com/${{ github.repository }}/tree/${{ github.head_ref }} ."
+                if ("${{ github.event_name }}" -eq "pull_request") {
+                    $message = $message + "Pull Request: https://github.com/${{ github.repository }}/pull/${{ github.ref_name }}"
+                } else {
+                    $message = $message + "Please create pull request against 'main' branch for improved user experience"
+                }
+                echo "::notice::$message"
 
     Disclosure:
         runs-on: ubuntu-latest
-        needs: [Workflow-Execution, CreateTempBranch]
+        needs: [Workflow-Execution]
         environment: disclosure
         steps:
             # TODO: Add Cr8tor CLI that will update the RO-Crate with the sign-off information
@@ -171,12 +160,12 @@ jobs:
 
     Publish:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
-        needs: [Disclosure, CreateTempBranch]
+        needs: [Disclosure]
         steps:
-            - name: Checkout temp repository
+            - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                ref: "${{ needs.CreateTempBranch.outputs.branch_name }}"
+                ref: ${{ github.head_ref }}
                 clean: false
 
             - name: Cr8tor CLI Publish Data
@@ -197,11 +186,6 @@ jobs:
               run: |
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
-                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
+                git push
 
-                # TODO: Ask to install GitHub CLI on the runner
-                # gh pr create --base main --head ${{ needs.CreateTempBranch.outputs.branch_name }} `
-                #  --title "Update project's repository for the published ro-crate details" `
-                #  --body "Update project's repository for the published ro-crate details"
-
-                # gh pr merge --delete-branch --merge --admin
+            # TODO: Once github cli is available in the runner, we can use it to create a merge & close PR
