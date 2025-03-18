@@ -72,7 +72,6 @@ jobs:
 
             - name: Push changes to repo
               run: |
-                echo "Pushing changes to repository" > ./bagit/README.md
                 echo "Pushing changes to repository" > ./resources/README.md
 
             - name: Push changes to repo
