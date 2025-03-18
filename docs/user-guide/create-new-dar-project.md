@@ -7,11 +7,11 @@ There are two ways we can create a new Data Access Request (DAR) project:
 2.) [GitHub Action Init RO-Crate project](#github-action-init-ro-crate-project)
 
 ## Cr8tor CLI `Initiate` command
-Details of `cr8tor initiate` command can be found here: [Initiate command](./../commands.md#cr8torcliinitiate).
+Details of `cr8tor initiate` command can be found here: [Initiate command](./../commands.md#initiate-project).
 
 Steps:
 
-1. Instal uv and cr8tor cli following [Readme](./../../README.md)
+1. Instal uv and cr8tor cli following [Readme](https://github.com/lsc-sde-crates/cr8tor/blob/main/README.md)
 2. Activate virtual environment
 3. Change directory using `cd` command to the place you want to store your new project's folder
 4. Run `cr8tor initiate` command providing template (`-t`) argument.

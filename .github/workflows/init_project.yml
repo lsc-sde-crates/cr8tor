@@ -7,6 +7,10 @@ on:
             description: Name of the new RO-Crate project
             type: string
             required: true
+        environment:
+          required: true
+          default: 'PROD'
+          type: string
 
 env:
     GH_TOKEN: ${{ secrets.ORG_LVL_RW_REPOS_TEAMS }}
@@ -34,4 +38,4 @@ jobs:
           git config --global user.email "lscsde-actions@github.com"
 
           ORG=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)
-          cr8tor initiate -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -n "${{inputs.new_project_name}}" -org $ORG --push
+          cr8tor initiate -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -n "${{inputs.new_project_name}}" -org $ORG -e "${{inputs.environment}}" --push
