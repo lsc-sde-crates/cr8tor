@@ -39,6 +39,7 @@ jobs:
 
                 $branchName = "temp-$((Get-Date).ToString('yyyyMMddHHmmss'))"
                 git checkout -B $branchName
+                git push origin $branchName
                 echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
 
 
