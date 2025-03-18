@@ -92,9 +92,10 @@ jobs:
             - name: Create PR from temp branch to main
               id: create_pr
               run: |
-                $pr_url = (gh pr create --base main --head ${{ steps.create_branch.outputs.branch_name }} `
+                gh pr create --base main --head ${{ steps.create_branch.outputs.branch_name }} `
                   --title "Update main repository for the validated ro-crate details" `
-                  --body "Update main repository for the validated ro-crate details" )
+                  --body "Update main repository for the validated ro-crate details"
+                $pr_url = "abc"
                 echo "pr_url=$pr_url" >> $env:GITHUB_OUTPUT
 
             - name: Create artifact for validated RO-Crate
