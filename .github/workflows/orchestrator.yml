@@ -46,13 +46,6 @@ jobs:
                 git push origin $branchName
                 echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
 
-            - name: Checkout repository
-              if: false
-              uses: actions/checkout@v4
-              with:
-                ref: "${{ steps.create_branch.outputs.branch_name }}"
-                clean: false
-
             - name: Setup uv
               uses: astral-sh/setup-uv@v5
               with:
@@ -61,22 +54,22 @@ jobs:
             - name: Clone cr8tor repository (specific branch)
               if: ${{ inputs.cr8tor_branch != '' }}
               run: |
-                #git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
 
             - name: Clone cr8tor repository (default branch)
               if: ${{ inputs.cr8tor_branch == '' }}
               run: |
-                #git clone https://github.com/lsc-sde-crates/cr8tor.git
+                git clone --branch develop https://github.com/lsc-sde-crates/cr8tor.git
 
             - name: Sync cr8tor repository
               run: |
-                #uv sync --directory cr8tor
+                uv sync --directory cr8tor
 
             - name: Cr8tor CLI Create & Validate
               run: |
-                #cr8tor\.venv\Scripts\activate
-                #cr8tor create -a GithubAction -i ./resources
-                #cr8tor validate -a GithubAction -i ./resources
+                cr8tor\.venv\Scripts\activate
+                cr8tor create -a GithubAction -i ./resources
+                cr8tor validate -a GithubAction -i ./resources
 
             - name: Push changes to repo
               run: |
@@ -87,8 +80,7 @@ jobs:
                 git config --global user.name "LSCSDE Governance Actions"
                 git config --global user.email "lscsde-actions@github.com"
 
-                #git add ./bagit ./resources ./config.toml
-                git add ./resources
+                git add ./bagit ./resources ./config.toml
                 git commit -m "Update after create and validate action"
                 git push origin ${{ steps.create_branch.outputs.branch_name }}
 
@@ -137,10 +129,6 @@ jobs:
                 if (-not ( $env:Path -split ";" -contains "C:\Program Files\GitHub CLI\" )) {
                   echo "PATH=$env:Path;C:\Program Files\GitHub CLI\" | Out-File -Append -FilePath $env:GITHUB_ENV
                 }
-
-            - name: Merge test
-              run: |
-                gh pr merge --delete-branch --merge --admin
 
             - name: Cr8tor CLI Sign-Off
               run: |
