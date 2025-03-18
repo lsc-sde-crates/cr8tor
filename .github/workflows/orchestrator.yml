@@ -45,6 +45,12 @@ jobs:
                 git push origin $branchName
                 echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
 
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                ref: "${{ steps.create_branch.outputs.branch_name }}"
+                clean: false
+
             - name: Setup uv
               uses: astral-sh/setup-uv@v5
               with:
@@ -72,7 +78,7 @@ jobs:
 
             - name: Push changes to repo
               run: |
-                echo "Pushing changes to repository" > ./resources/README.md
+                echo "Pushing changes to repository $((Get-Date).ToString('yyyyMMddHHmmss'))" > ./resources/README.md
 
             - name: Push changes to repo
               run: |
@@ -88,12 +94,6 @@ jobs:
                 if (-not ( $env:Path -split ";" -contains "C:\Program Files\GitHub CLI\" )) {
                   echo "PATH=$env:Path;C:\Program Files\GitHub CLI\" | Out-File -Append -FilePath $env:GITHUB_ENV
                 }
-
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                ref: "${{ steps.create_branch.outputs.branch_name }}"
-                clean: false
 
             - name: Create PR from temp branch to main
               id: create_pr
