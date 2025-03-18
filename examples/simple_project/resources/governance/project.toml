@@ -1,14 +1,54 @@
 [[actions]]
-id = "create-project-action-cc4e87e9-961e-42a6-8a38-2a560df16367"
+id = "create-project-action-1b19474a-fefd-41ca-85b7-190c771ba7a0"
 type = "CreateAction"
 name = "Create LSC Project Action"
-start_time = 2025-03-04T15:34:58.253188
-end_time = 2025-03-04T15:34:58.256602
+start_time = 2025-03-17T16:27:04.377193
+end_time = 2025-03-17T16:27:05.121532
 action_status = "CompletedActionStatus"
 agent = "cr8tor-cli"
 instrument = "cr8tor"
 [[actions.result]]
-"@id" = "cc4e87e9-961e-42a6-8a38-2a560df16367"
+"@id" = "1b19474a-fefd-41ca-85b7-190c771ba7a0"
+
+
+[[actions]]
+id = "validate-sem-1b19474a-fefd-41ca-85b7-190c771ba7a0"
+type = "AssessAction"
+name = "Validate LSC Project Action"
+start_time = 2025-03-17T16:27:09.207967
+end_time = 2025-03-17T16:27:09.774443
+action_status = "CompletedActionStatus"
+result = []
+agent = "cr8tor-cli"
+instrument = "MetadataService"
+additional_type = "Semantic Validation"
+
+[[actions]]
+id = "sign-off-1b19474a-fefd-41ca-85b7-190c771ba7a0"
+type = "AssessAction"
+name = "IG Sign-Off Project Action"
+start_time = 2025-03-17T16:27:40.272873
+end_time = 2025-03-17T16:27:40.834433
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "mikeyharding@gmail.com"
+additional_type = "Sign off"
+[[actions.result]]
+"@id" = "http://github.com/pull/12"
+
+
+[[actions]]
+id = "stage-transfer-action-1b19474a-fefd-41ca-85b7-190c771ba7a0"
+type = "CreateAction"
+name = "Stage Data Transfer Action"
+start_time = 2025-03-17T16:40:07.317842
+end_time = 2025-03-17T16:40:07.327062
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "PublishService"
+[[actions.result]]
+file_path = "lsc/staging/data/outputs/database.duckdb"
+"@id" = "2d06afb8-e7ff-476d-95ea-2fdf26c5fd17"
 
 
 [[metadata_sources]]
@@ -22,7 +62,7 @@ project_name = "Pr002"
 project_start_time = "20250201_010101"
 destination_type = "LSC"
 destination_format = "DUCKDB"
-id = "cc4e87e9-961e-42a6-8a38-2a560df16367"
+id = "1b19474a-fefd-41ca-85b7-190c771ba7a0"
 
 [repository]
 codeRepository = "https://github.com/lsc-sde-crates/"
