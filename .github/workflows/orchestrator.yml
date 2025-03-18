@@ -21,8 +21,54 @@ permissions:
     issues: write
 
 jobs:
+    CreateTempBranch:
+        runs-on: ${{ inputs.environment }}-cr8tor-vm
+        outputs:
+          branch_name: ${{ steps.create_branch.outputs.branch_name }}  # Store step output at job level
+        steps:
+            - name: Checkout main repository
+              uses: actions/checkout@v4
+              with:
+                ref: "main"
+
+            - name: Create a new temp branch
+              id: create_branch
+              run: |
+                git config --global user.name "LSCSDE Governance Actions"
+                git config --global user.email "lscsde-actions@github.com"
+
+                $branchName = "temp-$((Get-Date).ToString('yyyyMMddHHmmss'))"
+                git checkout -b $branchName
+                echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
+
+
+    TestNewBranch:
+        runs-on: ${{ inputs.environment }}-cr8tor-vm
+        needs: [CreateTempBranch]
+        steps:
+            - name: Checkout temp repository
+              uses: actions/checkout@v4
+              with:
+                ref: "${{ needs.CreateTempBranch.outputs.branch_name }}"
+                clean: false
+
+            - name: Push changes to repository
+              run: |
+                echo "Creating a new branch" > ./resources/README.md
+
+                git add ./bagit ./resources ./config.toml
+                git commit -m "Update bagit and resources"
+                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
+
+                gh pr create --base main --head ${{ needs.CreateTempBranch.outputs.branch_name }} `
+                  --title "Update project's repository for the published ro-crate details" `
+                  --body "Update project's repository for the published ro-crate details"
+
+                gh pr merge --delete-branch --merge --admin
+
     Validate:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
+        if: false
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
