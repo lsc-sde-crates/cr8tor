@@ -77,7 +77,7 @@ jobs:
 
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update after create and validate action"
-                git push origin $branchName
+                git push origin ${{ steps.create_branch.outputs.branch_name }}
 
             - name: Add GitHub CLI to PATH
               run: |
