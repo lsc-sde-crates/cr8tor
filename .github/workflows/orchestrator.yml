@@ -132,6 +132,12 @@ jobs:
                 ref: "${{ needs.Validate.outputs.branch_name }}"
                 clean: false
 
+            - name: Add GitHub CLI to PATH
+              run: |
+                if (-not ( $env:Path -split ";" -contains "C:\Program Files\GitHub CLI\" )) {
+                  echo "PATH=$env:Path;C:\Program Files\GitHub CLI\" | Out-File -Append -FilePath $env:GITHUB_ENV
+                }
+
             - name: Merge test
               run: |
                 gh pr merge --delete-branch --merge --admin
@@ -234,6 +240,12 @@ jobs:
             with:
               ref: "${{ needs.Workflow-Execution.outputs.branch_name }}"
               clean: false
+
+          - name: Add GitHub CLI to PATH
+            run: |
+              if (-not ( $env:Path -split ";" -contains "C:\Program Files\GitHub CLI\" )) {
+                echo "PATH=$env:Path;C:\Program Files\GitHub CLI\" | Out-File -Append -FilePath $env:GITHUB_ENV
+              }
 
           - name: Cr8tor CLI Sign-Off
             run: |
