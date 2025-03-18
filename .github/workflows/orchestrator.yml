@@ -218,7 +218,7 @@ jobs:
                 echo "::notice::$message"
 
     Disclosure:
-        runs-on: ubuntu-latest
+        runs-on: ${{ inputs.environment }}-cr8tor-vm
         needs: [Workflow-Execution]
         environment: disclosure
         steps:
