@@ -85,7 +85,8 @@ jobs:
                 git config --global user.name "LSCSDE Governance Actions"
                 git config --global user.email "lscsde-actions@github.com"
 
-                git add ./bagit ./resources ./config.toml
+                #git add ./bagit ./resources ./config.toml
+                git add ./resources
                 git commit -m "Update after create and validate action"
                 git push origin ${{ steps.create_branch.outputs.branch_name }}
 
