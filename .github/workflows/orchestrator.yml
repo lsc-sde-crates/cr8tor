@@ -89,13 +89,18 @@ jobs:
                   echo "PATH=$env:Path;C:\Program Files\GitHub CLI\" | Out-File -Append -FilePath $env:GITHUB_ENV
                 }
 
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                ref: "${{ steps.create_branch.outputs.branch_name }}"
+                clean: false
+
             - name: Create PR from temp branch to main
               id: create_pr
               run: |
-                gh pr create --base main --head ${{ steps.create_branch.outputs.branch_name }} `
+                $pr_url = (gh pr create --base main --head ${{ steps.create_branch.outputs.branch_name }} `
                   --title "Update main repository for the validated ro-crate details" `
-                  --body "Update main repository for the validated ro-crate details"
-                $pr_url = "abc"
+                  --body "Update main repository for the validated ro-crate details")
                 echo "pr_url=$pr_url" >> $env:GITHUB_OUTPUT
 
             - name: Create artifact for validated RO-Crate
