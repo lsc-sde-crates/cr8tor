@@ -22,8 +22,69 @@ permissions:
     issues: write
 
 jobs:
+
+    CreateTempBranch:
+      runs-on: dev-cr8tor-vm
+      outputs:
+          branch_name: ${{ steps.create_branch.outputs.branch_name }}  # Store step output at job level
+      steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                ref: ${{ github.head_ref }}
+
+            - name: Checkout main repository
+              uses: actions/checkout@v4
+              with:
+                ref: "main"
+
+            - name: Create a new temp branch
+              id: create_branch
+              run: |
+                git config --global user.name "LSCSDE Governance Actions"
+                git config --global user.email "lscsde-actions@github.com"
+
+                $branchName = "temp-$((Get-Date).ToString('yyyyMMddHHmmss'))"
+                git checkout -B $branchName
+                git push origin $branchName
+                echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
+
+
+    TestNewBranch:
+      runs-on: dev-cr8tor-vm
+      needs: [CreateTempBranch]
+      steps:
+            - name: Add GitHub CLI to PATH
+              run: |
+                if (-not ( $env:Path -split ";" -contains "C:\Program Files\GitHub CLI\" )) {
+                  echo "PATH=$env:Path;C:\Program Files\GitHub CLI\" | Out-File -Append -FilePath $env:GITHUB_ENV
+                }
+            - name: Show path
+              run: |
+                $env:Path
+
+            - name: Checkout temp repository
+              uses: actions/checkout@v4
+              with:
+                ref: "${{ needs.CreateTempBranch.outputs.branch_name }}"
+                clean: false
+
+            - name: Push changes to repository
+              run: |
+                echo "Creating a new branch $((Get-Date).ToString('yyyyMMddHHmmss'))" > ./resources/README.md
+
+                git add ./resources
+                git commit -m "Update bagit and resources"
+                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
+
+                gh pr create --base main --head ${{ needs.CreateTempBranch.outputs.branch_name }} `
+                  --title "Update project's repository for the published ro-crate details" `
+                  --body "Update project's repository for the published ro-crate details"
+
+                gh pr merge --delete-branch --merge --admin
     Validate:
-        if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
+        if: False
+        #if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         outputs:
           branch_name: ${{ steps.create_branch.outputs.branch_name }}
