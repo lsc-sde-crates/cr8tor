@@ -1,8 +1,12 @@
 # Ignore generated bagit
 /examples/simple_project/bagit/
 
+# Ignore vscode settings
 .vscode/
 .qodo/
+
+# Ignore ruff files
+.ruff_cache/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
