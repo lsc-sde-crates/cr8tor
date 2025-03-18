@@ -132,6 +132,10 @@ jobs:
                 ref: "${{ needs.Validate.outputs.branch_name }}"
                 clean: false
 
+            - name: Merge test
+              run: |
+                gh pr merge --delete-branch --merge --admin
+
             - name: Cr8tor CLI Sign-Off
               run: |
                 cr8tor\.venv\Scripts\activate
