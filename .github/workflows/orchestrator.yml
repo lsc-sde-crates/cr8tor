@@ -13,6 +13,7 @@ on:
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set GH_TOKEN for GitHub CLI authentication
     APPROVALS_API_TOKEN: ${{ secrets[format('APPROVALS_API_TOKEN_{0}', inputs.environment)] }}
     APPROVALS_HOST: ${{ secrets[format('APPROVALS_HOST_{0}', inputs.environment)] }}
 
@@ -21,15 +22,17 @@ permissions:
     issues: write
 
 jobs:
-    CreateTempBranch:
+    Validate:
+        if: github.ref == 'refs/heads/main' # Ensures the workflow only runs on the main branch
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         outputs:
-          branch_name: ${{ steps.create_branch.outputs.branch_name }}  # Store step output at job level
+          branch_name: ${{ steps.create_branch.outputs.branch_name }}
+          pr_url: ${{ steps.create_pr.outputs.pr_url }}
         steps:
-            - name: Checkout main repository
+            - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                ref: "main"
+                ref: ${{ github.head_ref }}
 
             - name: Create a new temp branch
               id: create_branch
@@ -41,57 +44,6 @@ jobs:
                 git checkout -B $branchName
                 git push origin $branchName
                 echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
-
-
-    TestNewBranch:
-        runs-on: ${{ inputs.environment }}-cr8tor-vm
-        needs: [CreateTempBranch]
-        steps:
-            - name: Checkout temp repository
-              uses: actions/checkout@v4
-              with:
-                ref: "${{ needs.CreateTempBranch.outputs.branch_name }}"
-                clean: false
-
-            - name: Push changes to repository
-              run: |
-                echo "Creating a new branch" > ./resources/README.md
-
-                git add ./bagit ./resources ./config.toml
-                git commit -m "Update bagit and resources"
-                git push origin ${{ needs.CreateTempBranch.outputs.branch_name }}
-
-                gh pr create --base main --head ${{ needs.CreateTempBranch.outputs.branch_name }} `
-                  --title "Update project's repository for the published ro-crate details" `
-                  --body "Update project's repository for the published ro-crate details"
-
-                gh pr merge --delete-branch --merge --admin
-
-    Validate:
-        runs-on: ${{ inputs.environment }}-cr8tor-vm
-        if: false
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                ref: ${{ github.head_ref }}
-
-            - name: Show github context
-              run: |
-                echo "GITHUB_REPOSITORY: ${{ github.repository }}"
-                echo "GITHUB_REF: ${{ github.ref }}"
-                echo "GITHUB_REF_NAME: ${{ github.ref_name }}"
-                echo "GITHUB_BASE_REF: ${{ github.base_ref }}"
-                echo "GITHUB_HEAD_REF: ${{ github.head_ref }}"
-                echo "GITHUB_EVENT_NAME: ${{ github.event_name }}"
-                echo "GITHUB_EVENT_PATH: ${{ github.event_path }}"
-                echo "GITHUB_WORKSPACE: ${{ github.workspace }}"
-                echo "GITHUB_SHA: ${{ github.sha }}"
-                echo "GITHUB_ACTOR: ${{ github.actor }}"
-                echo "GITHUB_JOB: ${{ github.job }}"
-                echo "GITHUB_RUN_ID: ${{ github.run_id }}"
-                echo "GITHUB_RUN_NUMBER: ${{ github.run_number }}"
-                echo "GITHUB_ACTION: ${{ github.action }}"
 
             - name: Setup uv
               uses: astral-sh/setup-uv@v5
@@ -124,8 +76,22 @@ jobs:
                 git config --global user.email "lscsde-actions@github.com"
 
                 git add ./bagit ./resources ./config.toml
-                git commit -m "Update bagit and resources"
+                git commit -m "Update after create and validate action"
                 git push
+
+            - name: Add GitHub CLI to PATH
+              run: |
+                if (-not ( $env:Path -split ";" -contains "C:\Program Files\GitHub CLI\" )) {
+                  echo "PATH=$env:Path;C:\Program Files\GitHub CLI\" | Out-File -Append -FilePath $env:GITHUB_ENV
+                }
+
+            - name: Create PR from temp branch to main
+              id: create_pr
+              run: |
+                $pr_url = (gh pr create --base main --head ${{ steps.create_branch.outputs.branch_name }}
+                  --title "Update main repository for the validated ro-crate details" `
+                  --body "Update main repository for the validated ro-crate details" )
+                echo "pr_url=$pr_url" >> $env:GITHUB_OUTPUT
 
             - name: Create artifact for validated RO-Crate
               uses: actions/upload-artifact@v4
@@ -138,32 +104,68 @@ jobs:
 
             - name: Send sign-off message
               run: |
-                $message = "Please verify RO-Crate and sign off Data Access Request at https://github.com/${{ github.repository }}/tree/${{ github.head_ref }} ."
-                if ("${{ github.event_name }}" -eq "pull_request") {
-                    $message = $message + "Pull Request: https://github.com/${{ github.repository }}/pull/${{ github.ref_name }}"
-                } else {
-                    $message = $message + "Please create pull request against 'main' branch for improved user experience"
-                }
+                $message = "Please verify and sign off DAR project at https://github.com/${{ github.repository }}/tree/${{ steps.create_branch.outputs.branch_name }}."
+                $message = $message + " Pull Request: ${{ steps.create_pr.outputs.pr_url }}"
                 echo "::notice::$message"
 
     SignOff:
-        runs-on: ubuntu-latest
+        runs-on: ${{ inputs.environment }}-cr8tor-vm
         needs: [Validate]
         environment: signoff
         steps:
-            # TODO: Add Cr8tor CLI that will update the RO-Crate with the sign-off information
-            - name: Simulate sign-off cr8tor steps
-              run: echo "cr8tor will run sign-off steps and update ro-crate. No need to run microservices"
+            - name: Checkout temp repository
+              uses: actions/checkout@v4
+              with:
+                ref: "${{ needs.Validate.outputs.branch_name }}"
+                clean: false
+
+            - name: Cr8tor CLI Sign-Off
+              run: |
+                cr8tor\.venv\Scripts\activate
+                cr8tor sign-off -a GithubAction -i ./resources -agreement ${{ needs.Validate.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver"
+
+            - name: Push changes to repository
+              run: |
+                git add ./bagit ./resources ./config.toml
+                git commit -m "Update after sign off action"
+                git push origin ${{ needs.Validate.outputs.branch_name }}
+
+            - name: Delete Pull Request
+              run: |
+                gh pr merge --delete-branch --merge --admin
+
+            - name: Create artifact for signed off RO-Crate
+              uses: actions/upload-artifact@v4
+              with:
+                name: ro-crate-signed-off
+                path: |
+                    ./bagit
+                    ./resources
+                    ./config.toml
 
     Workflow-Execution:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
         needs: [SignOff]
+        outputs:
+          branch_name: ${{ steps.create_branch.outputs.branch_name }}
+          pr_url: ${{ steps.create_pr.outputs.pr_url }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
                 ref: ${{ github.head_ref }}
                 clean: false
+
+            - name: Create a new temp branch
+              id: create_branch
+              run: |
+                git config --global user.name "LSCSDE Governance Actions"
+                git config --global user.email "lscsde-actions@github.com"
+
+                $branchName = "temp-$((Get-Date).ToString('yyyyMMddHHmmss'))"
+                git checkout -B $branchName
+                git push origin $branchName
+                echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
 
             - name: Cr8tor CLI Staging Data
               run: |
@@ -173,8 +175,22 @@ jobs:
             - name: Push changes to repo
               run: |
                 git add ./bagit ./resources ./config.toml
-                git commit -m "Update bagit and resources"
+                git commit -m "Update after staging action"
                 git push
+
+            - name: Add GitHub CLI to PATH
+              run: |
+                if (-not ( $env:Path -split ";" -contains "C:\Program Files\GitHub CLI\" )) {
+                  echo "PATH=$env:Path;C:\Program Files\GitHub CLI\" | Out-File -Append -FilePath $env:GITHUB_ENV
+                }
+
+            - name: Create PR from temp branch to main
+              id: create_pr
+              run: |
+                $pr_url = (gh pr create --base main --head ${{ steps.create_branch.outputs.branch_name }}
+                  --title "Update main repository for the staged ro-crate details" `
+                  --body "Update main repository for the staged ro-crate details" )
+                echo "pr_url=$pr_url" >> $env:GITHUB_OUTPUT
 
             - name: Create artifact for staged RO-Crate
               uses: actions/upload-artifact@v4
@@ -187,12 +203,8 @@ jobs:
 
             - name: Send sign-off message
               run: |
-                $message = "Please verify RO-Crate and sign off Data Access Request at https://github.com/${{ github.repository }}/tree/${{ github.head_ref }} ."
-                if ("${{ github.event_name }}" -eq "pull_request") {
-                    $message = $message + "Pull Request: https://github.com/${{ github.repository }}/pull/${{ github.ref_name }}"
-                } else {
-                    $message = $message + "Please create pull request against 'main' branch for improved user experience"
-                }
+                $message = "Please verify and approve Disclosure stage of DAR project at https://github.com/${{ github.repository }}/tree/${{ steps.create_branch.outputs.branch_name }}."
+                $message = $message + " Pull Request: ${{ steps.create_pr.outputs.pr_url }}"
                 echo "::notice::$message"
 
     Disclosure:
@@ -200,9 +212,35 @@ jobs:
         needs: [Workflow-Execution]
         environment: disclosure
         steps:
-            # TODO: Add Cr8tor CLI that will update the RO-Crate with the sign-off information
-            - name: Simulate sign-off cr8tor steps
-              run: echo "cr8tor will run sign-off steps and update ro-crate. No need to run microservices"
+          - name: Checkout temp repository
+            uses: actions/checkout@v4
+            with:
+              ref: "${{ needs.Workflow-Execution.outputs.branch_name }}"
+              clean: false
+
+          - name: Cr8tor CLI Sign-Off
+            run: |
+              cr8tor\.venv\Scripts\activate
+              cr8tor sign-off -a GithubAction -i ./resources -agreement ${{ needs.Workflow-Execution.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver"
+
+          - name: Push changes to repository
+            run: |
+              git add ./bagit ./resources ./config.toml
+              git commit -m "Update after sign off action"
+              git push origin ${{ needs.Workflow-Execution.outputs.branch_name }}
+
+          - name: Delete Pull Request
+            run: |
+              gh pr merge --delete-branch --merge --admin
+
+          - name: Create artifact for signed off RO-Crate
+            uses: actions/upload-artifact@v4
+            with:
+              name: ro-crate-signed-off
+              path: |
+                  ./bagit
+                  ./resources
+                  ./config.toml
 
 
     Publish:
@@ -234,5 +272,3 @@ jobs:
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update bagit and resources"
                 git push
-
-            # TODO: Once github cli is available in the runner, we can use it to create a merge & close PR
