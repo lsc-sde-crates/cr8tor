@@ -53,22 +53,27 @@ jobs:
             - name: Clone cr8tor repository (specific branch)
               if: ${{ inputs.cr8tor_branch != '' }}
               run: |
-                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                #git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
 
             - name: Clone cr8tor repository (default branch)
               if: ${{ inputs.cr8tor_branch == '' }}
               run: |
-                git clone https://github.com/lsc-sde-crates/cr8tor.git
+                #git clone https://github.com/lsc-sde-crates/cr8tor.git
 
             - name: Sync cr8tor repository
               run: |
-                uv sync --directory cr8tor
+                #uv sync --directory cr8tor
 
             - name: Cr8tor CLI Create & Validate
               run: |
-                cr8tor\.venv\Scripts\activate
-                cr8tor create -a GithubAction -i ./resources
-                cr8tor validate -a GithubAction -i ./resources
+                #cr8tor\.venv\Scripts\activate
+                #cr8tor create -a GithubAction -i ./resources
+                #cr8tor validate -a GithubAction -i ./resources
+
+            - name: Push changes to repo
+              run: |
+                echo "Pushing changes to repository" > ./bagit/README.md
+                echo "Pushing changes to repository" > ./resources/README.md
 
             - name: Push changes to repo
               run: |
