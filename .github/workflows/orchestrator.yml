@@ -33,7 +33,7 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                ref: ${{ github.head_ref }}
+                ref: main
 
             - name: Create a new temp branch
               id: create_branch
@@ -164,7 +164,7 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                ref: ${{ github.head_ref }}
+                ref: main
                 clean: false
 
             - name: Create a new temp branch
@@ -267,7 +267,7 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                ref: ${{ github.head_ref }}
+                ref: main
                 clean: false
 
             - name: Cr8tor CLI Publish Data
