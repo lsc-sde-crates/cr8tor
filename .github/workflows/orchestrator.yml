@@ -38,7 +38,7 @@ jobs:
                 git config --global user.email "lscsde-actions@github.com"
 
                 $branchName = "temp-$((Get-Date).ToString('yyyyMMddHHmmss'))"
-                git checkout -b $branchName
+                git checkout -B $branchName
                 echo "branch_name=$branchName" >> $env:GITHUB_OUTPUT
 
 
