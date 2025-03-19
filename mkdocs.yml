@@ -12,10 +12,11 @@ nav:
   - Home: index.md
   - User Guide:
     - Create New DAR Project: user-guide/create-new-dar-project.md
-    - Updating resource files: user-guide/update-resources-files.md
+    - Update DAR files: user-guide/update-resources-files.md
     - Orchestrate DAR: user-guide/orchestrate-dar.md
     - Approve DAR: user-guide/approve-dar.md
     - Environments: user-guide/environments.md
+    - Troubleshooting: user-guide/troubleshooting.md
   - Developer Guide:
     - Overview: developer-guide/overview.md
     - Install cr8tor cli: developer-guide/install-cr8tor-cli.md
