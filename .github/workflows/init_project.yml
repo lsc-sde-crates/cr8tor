@@ -8,8 +8,20 @@ on:
             type: string
             required: true
         environment:
-          required: true
+          required: false
           default: 'PROD'
+          type: choice
+          options:
+            - 'PROD'
+            - 'DEV'
+            - 'TEST'
+        cr8tor_branch:
+          required: false
+          default: 'main'
+          type: string
+        cookiecutter_branch:
+          required: false
+          default: 'main'
           type: string
 
 env:
@@ -38,4 +50,4 @@ jobs:
           git config --global user.email "lscsde-actions@github.com"
 
           ORG=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)
-          cr8tor initiate -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -n "${{inputs.new_project_name}}" -org $ORG -e "${{inputs.environment}}" --push
+          cr8tor initiate -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -chk "${{inputs.cookiecutter_branch}}" -cb "${{inputs.cr8tor_branch}}" -n "${{inputs.new_project_name}}" -org $ORG -e "${{inputs.environment}}" --push
