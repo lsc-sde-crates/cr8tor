@@ -59,16 +59,12 @@ def stage_transfer(
     project_info = project_resources.read_resource(project_resource_path)
 
     current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
-    if not current_rocrate_graph.is_validated():
+    if not current_rocrate_graph.is_signed():
         typer.echo(
             "The validate command must be successfully run on the target project before staging the data transfer",
             err=True,
         )
         raise typer.Exit(code=1)
-
-    #
-    # TODO: Add check on sign-off of data transfer here
-    #
 
     staging_results = []
     status = schemas.ActionStatusType.ACTIVE

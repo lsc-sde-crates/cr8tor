@@ -62,8 +62,24 @@ class ROCrateGraph:
             return row.result
         return False
 
+    def is_signed(self) -> bool:
+        """Check if project has been signed successfully"""
+        query = """
+          PREFIX schema: <http://schema.org/>
+          PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+          SELECT (IF(COUNT(?action) > 0, "True", "False") AS ?result) WHERE {
+            ?action rdf:type schema:AssessAction ;
+                    schema:name 'IG Sign-Off Project Action';
+                    schema:actionStatus 'CompletedActionStatus' .
+          }
+        """
+        result = self.run_query(query)
+        for row in result:
+            return row.result
+        return False
+
     def is_staged(self) -> bool:
-        """Check if project has been validated successfully"""
+        """Check if project has been staged successfully"""
         query = """
           PREFIX schema: <http://schema.org/>
           PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -79,7 +95,7 @@ class ROCrateGraph:
         return False
 
     def get_validate_status(self) -> bool:
-        """Check if project has been validated successfully"""
+        """Get validation status of project"""
         query = """
           PREFIX schema: <http://schema.org/>
           PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
