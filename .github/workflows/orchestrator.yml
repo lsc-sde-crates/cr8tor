@@ -237,7 +237,7 @@ jobs:
           - name: Cr8tor CLI Sign-Off
             run: |
               cr8tor\.venv\Scripts\activate
-              cr8tor sign-off -a GithubAction -i ./resources -agreement ${{ needs.Workflow-Execution.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver"
+              cr8tor disclosure -a GithubAction -i ./resources -agreement ${{ needs.Workflow-Execution.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver"
 
           - name: Push changes to repository
             run: |
