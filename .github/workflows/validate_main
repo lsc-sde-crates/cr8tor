@@ -3,9 +3,8 @@ name: Validate PR to Main
 on:
   pull_request:
     types: [opened, edited, reopened, ready_for_review]
-    #branches:
-    #  - main
-  push:  # Allow running on push to any branch
+    branches:
+      - main
 
 jobs:
   validate:
