@@ -1,0 +1,17 @@
+name: Validate PR to Main
+
+on:
+  pull_request:
+    types: [opened, edited, ready_for_review]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          if [[ ! ${{ github.head_ref }} =~ ^(develop|release/.*|hotfix/.*)$ ]]; then
+            echo "Pull request source branch must be 'develop', 'release/*', or 'hotfix/*'."
+            exit 1
+          fi
