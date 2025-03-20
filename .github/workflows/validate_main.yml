@@ -8,10 +8,10 @@ on:
 
 jobs:
   validate:
-    if: "! ( startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'develop') || startsWith(github.head_ref, 'hotfix/') )"
+    if: "! ( startsWith(github.head_ref, 'develop') || startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/') || startsWith(github.head_ref, 'bugfix/') )"
     runs-on: ubuntu-latest
     steps:
       - name: Check branch name
         run: |
-          echo "Pull request source branch must be 'develop', 'release/*', or 'hotfix/*'."
+          echo "Pull request source branch must be 'develop', 'release/*', 'bugfix/*', or 'hotfix/*'."
           exit 1
