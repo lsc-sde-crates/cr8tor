@@ -2,6 +2,10 @@
 
 :::cr8tor.cli.initiate.initiate
 
+???+ warning
+
+    **--push** argument requires a fine-grained PAT token generated in GitHub. It must be stored under local environment variable GH_TOKEN. See [minimum PAT token permissions defined here](./../developer-guide/orchestration-layer-setup.md#cr8tor-repository-secrets).
+
 ## Create Project Ro-Crate
 
 :::cr8tor.cli.create.create

@@ -12,6 +12,7 @@ This section explains key setup up requirements for the Orchestration layer of C
   - [GitHub Teams](#github-teams)
     - [Adding new members](#adding-new-members)
   - [DAR Project Repo settings](#dar-project-repo-settings)
+  - [CR8TOR Repository Secrets](#cr8tor-repository-secrets)
 
 ## GitHub Runners
 
@@ -78,3 +79,25 @@ This is all **automatically set up** on DAR repository creation when [cr8tor ini
 
 ![project repo settings environments](./../assets/screenshots/project_repo_settings_env.png)
 ![project repo settings environments protection rules](./../assets/screenshots/project_repo_settings_env_rules.png)
+
+## CR8TOR Repository Secrets
+
+[Cr8tor Initiate command](./../cr8tor-cli/commands.md#initiate-project) uses a Fine-grained Personal access token (PAT) to create a DAR project repository in GitHub, to create a new GitHub Team for DAR project's contributors and assigning other organisational and repository level settings.
+
+The fine-grained PAT token needs to be created by GitHub Organisation administrator. It should have the following permissions:
+
+**Repository permissions**:
+
+- Administration: Read and write
+- Contents: Read and write
+- Metadata: Read-only
+- Pull requests: Read and write
+- Workflows: Read and write
+
+**Organization permissions**:
+
+- Members: Read and write
+
+The token should be stored in CR8TOR Repository Secret named **ORG_LVL_RW_REPOS_TEAMS**, so that it can be used by Init RO-Crate Project workflow and passed to cr8tor initiate command. **ORG_LVL_RW_REPOS_TEAMS is only at cr8tor repository level, not organisational level**.
+![cr8tor repo secrets](./../assets/screenshots/cr8tor_repo_secrets.png)
+![cr8tor workflow github token](./../assets/screenshots/cr8tor_workflow_init_token.png)
