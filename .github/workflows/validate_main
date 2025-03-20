@@ -1,17 +1,20 @@
-name: Validate PR to Main
+name: Project Loader
 
 on:
   pull_request:
-    types: [opened, edited, ready_for_review]
+    types: [opened, edited, reopened, ready_for_review]
+    #branches:
+    #  - main
   workflow_dispatch:
 
 jobs:
   validate:
+    if: not(startsWith(github.head_ref, 'feature/') \
+            || startsWith(github.head_ref, 'release/') \
+            || startsWith(github.head_ref, 'develop'))
     runs-on: ubuntu-latest
     steps:
       - name: Check branch name
         run: |
-          if [[ ! ${{ github.head_ref }} =~ ^(develop|release/.*|hotfix/.*)$ ]]; then
-            echo "Pull request source branch must be 'develop', 'release/*', or 'hotfix/*'."
-            exit 1
-          fi
+          echo "Pull request source branch must be 'develop', 'release/*', or 'hotfix/*'."
+          exit 1
