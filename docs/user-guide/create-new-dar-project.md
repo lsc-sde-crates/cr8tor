@@ -42,7 +42,7 @@ Steps:
 
 ???+ warning
 
-    *--push* argument requires GitHub PAT token with the necessary organisation level permission. See **TODO** for token permission details. Store the token under GH_TOKEN Environment Variable (expected by *gh_rest_api_client* module)
+    *--push* argument requires GitHub PAT token with the necessary organisation level permission. See [minimum PAT token permissions defined here](./../developer-guide/orchestration-layer-setup.md#cr8tor-repository-secrets) for token permission details. Store the token under GH_TOKEN Environment Variable (expected by *gh_rest_api_client* module)
 
 
    On successful run, we should see the new project's folder with sample access, governance and metadata files. If it is not already linked to the remote GitHub repository, link it. If remote does not exist, create/request it following [below steps](#github-action-init-ro-crate-project).
@@ -57,11 +57,11 @@ Your local project should be linked to the remote repository. If it is not, foll
 
 If we do not have a PAT token or we do not want to use Cr8tor CLI Initate command to create for us GitHub's repository, then we can use the GitHub Action which runs the Initiate command for us.
 Workflow is located in the main cr8tor repository: [Init RO-Crate project](https://github.com/lsc-sde-crates/cr8tor/actions/workflows/init_project.yml)
-![alt text](./../assets/screenshots/workflow_init_1.png)
+![alt text](./../assets/screenshots/cr8tor_workflow_init_1.png)
 
 Then, we need to provide the requested project name
 
-![alt text](./../assets/screenshots/workflow_init_2.png)
+![alt text](./../assets/screenshots/cr8tor_workflow_init_2.png)
 
 If the project name is e.g. `project001`, the **GitHub repository** created will be named `cr8-project001`.
 

@@ -1,0 +1,19 @@
+name: Validate PR to Main
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, ready_for_review]
+    branches:
+      - main
+
+jobs:
+  validate:
+    if: not(startsWith(github.head_ref, 'feature/') \
+            || startsWith(github.head_ref, 'release/') \
+            || startsWith(github.head_ref, 'develop'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          echo "Pull request source branch must be 'develop', 'release/*', or 'hotfix/*'."
+          exit 1
