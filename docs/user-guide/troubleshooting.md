@@ -3,7 +3,7 @@
 ## Local project folder not linked to remote GitHub repository
 
 If we created a new project using cr8tor cli initiate command, but not used --push argument, we might end up with the new project folder but unlinked to its remote GitHub repository.
-In this situation, first make sure that the remote GitHub repository exists. If it does not, request from Organisation's  administrator a new repository. Administrator needs the project name and enviornment you intend to use (PROD by default, DEV and TEST are dedicated for Developers). Administrator will run dedicated workflow as explain in [Create a new DAR project - GitHub Action Init RO Crate Project](create-new-dar-project.md#github-action-init-ro-crate-project).
+In this situation, first make sure that the remote GitHub repository exists. If it does not, request from Organisation's  administrator a new repository. Administrator needs the project name and environment you intend to use (PROD by default, DEV and TEST are dedicated for Developers). Administrator will run dedicated workflow as explain in [Create a new DAR project - GitHub Action Init RO Crate Project](create-new-dar-project.md#github-action-init-ro-crate-project).
 
 Then, we need to initiate the git. You can do it, e.g. using your IDE UI or with below git commands.
 
