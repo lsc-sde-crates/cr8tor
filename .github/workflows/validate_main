@@ -1,11 +1,11 @@
-name: Project Loader
+name: Validate PR to Main
 
 on:
   pull_request:
     types: [opened, edited, reopened, ready_for_review]
     #branches:
     #  - main
-  workflow_dispatch:
+  push:  # Allow running on push to any branch
 
 jobs:
   validate:
