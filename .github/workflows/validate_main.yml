@@ -8,7 +8,7 @@ on:
 
 jobs:
   validate:
-    if: not(startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'develop') || startsWith(github.head_ref, 'hotfix'))
+    if: "! ( startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'develop') || startsWith(github.head_ref, 'hotfix/') )"
     runs-on: ubuntu-latest
     steps:
       - name: Check branch name
