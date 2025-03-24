@@ -33,7 +33,7 @@ The changes to the files in the .github folder are restricted by the CODEOWNERS 
 
 During Validation or WorkflowExecution(Stage-Transfer) jobs microservices and Cr8tor can return errors:
 
-- *Databricks API error: User does not have SELECT on*,
-- *Databricks API error: User does not have USE SCHEMA on Schema*
+- *Databricks API error: User does not have SELECT on <table/schema\>*,
+- *Databricks API error: User does not have USE SCHEMA on <schema\>*
 
 The error means that serviceprincipal specified in the [access/access configuration](./update-resources-files.md#accessaccess) does not have correct permission on the given datasource. [Follow this guide](./../developer-guide/source-setup.md#databricks-unity-catalog) for how to set up and assign correct permissions.
