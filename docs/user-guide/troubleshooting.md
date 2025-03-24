@@ -29,8 +29,11 @@ The changes to the files in the .github folder are restricted by the CODEOWNERS 
 
 ![alt text](./../assets/screenshots/project_pull_request_codeowners_review_required.png)
 
-## Databricks API error: User does not have SELECT on...
+## Databricks API errors thrown by cr8tor
 
-Microservices and Cr8tor can return error "*Databricks API error: User does not have SELECT on*" during Validation or WorkflowExecution(Stage-Transfer) jobs.
+During Validation or WorkflowExecution(Stage-Transfer) jobs microservices and Cr8tor can return errors:
+
+- *Databricks API error: User does not have SELECT on*,
+- *Databricks API error: User does not have USE SCHEMA on Schema*
 
 The error means that serviceprincipal specified in the [access/access configuration](./update-resources-files.md#accessaccess) does not have correct permission on the given datasource. [Follow this guide](./../developer-guide/source-setup.md#databricks-unity-catalog) for how to set up and assign correct permissions.
