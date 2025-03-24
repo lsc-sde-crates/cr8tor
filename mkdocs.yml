@@ -21,7 +21,7 @@ nav:
     - Overview: developer-guide/overview.md
     - Install cr8tor cli: developer-guide/install-cr8tor-cli.md
     - Orchestration layer setup: developer-guide/orchestration-layer-setup.md
-    - Branching Strategy: developer-guide/branching-strategy.md
+    - Source setup: developer-guide/source-setup.md
   - Cr8tor CLI App:
     - CLI Commands: cr8tor-cli/commands.md
   - Cr8tor Publisher App:
