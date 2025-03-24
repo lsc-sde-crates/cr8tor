@@ -28,3 +28,12 @@ Resolve any merge conflicts between origin/main and your local branch, then push
 The changes to the files in the .github folder are restricted by the CODEOWNERS feature, which allows repository owners to define individuals or teams responsible for approving changes to specific files. Approval by the devops_admin GitHub team is required.
 
 ![alt text](./../assets/screenshots/project_pull_request_codeowners_review_required.png)
+
+## Databricks API errors thrown by cr8tor
+
+During Validation or WorkflowExecution(Stage-Transfer) jobs microservices and Cr8tor can return errors:
+
+- *Databricks API error: User does not have SELECT on <table/schema\>*,
+- *Databricks API error: User does not have USE SCHEMA on <schema\>*
+
+The error means that serviceprincipal specified in the [access/access configuration](./update-resources-files.md#accessaccess) does not have correct permission on the given datasource. [Follow this guide](./../developer-guide/source-setup.md#databricks-unity-catalog) for how to set up and assign correct permissions.
