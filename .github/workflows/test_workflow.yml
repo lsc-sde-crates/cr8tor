@@ -1,0 +1,55 @@
+name: Testwf
+
+on:
+  workflow_dispatch:
+    inputs:
+        new_project_name:
+            description: Name of the new RO-Crate project
+            type: string
+            default: 'someproject'
+            required: true
+        environment:
+          required: false
+          default: 'ABC'
+          type: choice
+          options:
+            - 'ABC'
+        cr8tor_branch:
+          required: false
+          default: 'main'
+          type: string
+        cookiecutter_branch:
+          required: false
+          default: 'main'
+          type: string
+
+env:
+    GH_TOKEN: ${{ secrets.ORG_LVL_RW_REPOS_TEAMS }}
+
+jobs:
+  init-project:
+    runs-on: dev-cr8tor-vm
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.16"
+                
+      - name: Run cr8tor Init
+        run: |
+          uv sync
+          
+          git config --global user.name "LSCSDE Governance Actions"
+          git config --global user.email "lscsde-actions@github.com"
+
+          ORG=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)
+          uv run cr8tor initiate -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -chk "${{inputs.cookiecutter_branch}}" -cb "${{inputs.cr8tor_branch}}" -n "${{inputs.new_project_name}}" -org $ORG -e "${{inputs.environment}}"
