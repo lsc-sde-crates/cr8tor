@@ -1,6 +1,7 @@
 name: Testwf
 
 on:
+  push:
   workflow_dispatch:
     inputs:
         new_project_name:
