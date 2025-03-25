@@ -81,7 +81,7 @@ def validate(
         agent = os.getenv("APP_NAME")
 
     exit_msg = "Validation complete"
-    exit_code = s.Cr8torErrorCode.SUCCESS
+    exit_code = s.Cr8torReturnCode.SUCCESS
 
     start_time = datetime.now()
     access_resource_path = resources_dir.joinpath("access", "access.toml")
@@ -100,7 +100,7 @@ def validate(
             project_resource_path,
             resources_dir,
             "Error: The create command must be run on the target project before validation",
-            s.Cr8torErrorCode.INCOMPLETE_ACTION_ERROR,
+            s.Cr8torReturnCode.INCOMPLETE_ACTION_ERROR,
         )
 
     for dataset_meta_file in resources_dir.joinpath("metadata").glob("dataset_*.toml"):
@@ -125,7 +125,7 @@ def validate(
                 project_resource_path,
                 resources_dir,
                 f"Error: {str(e)}",
-                s.Cr8torErrorCode.UNKNOWN_ERROR,
+                s.Cr8torReturnCode.UNKNOWN_ERROR,
             )
 
         metadata = asyncio.run(api.validate_access(access_contract))
@@ -136,7 +136,7 @@ def validate(
         )
         if not is_valid:
             exit_msg = err
-            exit_code = s.Cr8torErrorCode.VALIDATION_ERROR
+            exit_code = s.Cr8torReturnCode.VALIDATION_ERROR
             break
 
     close_command(
@@ -159,7 +159,28 @@ def close_command(
     exit_msg: str,
     exit_code: int,
 ):
-    if exit_code == s.Cr8torErrorCode.SUCCESS:
+    """
+    Completes the execution of the validate command/action by updating the data project resources,
+    rebuilding the project ro-crate and providing return/exit code status to calling agent. It
+    handles both successful and failed validations to enable workflow error handling.
+
+    Args:
+        start_time: The timestamp when the validation process started
+        project_info: Project properties containing metadata about the project
+        agent: The agent name or identifier that initiated the validation
+        project_resource_path: Path to the project resource file (project.toml)
+        resources_dir: Directory containing resources to include in the RO-Crate
+        exit_msg: Message describing the validation result (error message if validation failed)
+        exit_code: Exit code indicating success (0) or specific error type (non-zero)
+
+    The function determines the action status based on the exit code, creates a schema.org
+    AssessAction object with validation results, updates the project metadata resources,
+    and rebuilds the RO-Crate. If validation failed, the function exits with the
+    appropriate error code after new action state has been stored.
+
+    """
+
+    if exit_code == s.Cr8torReturnCode.SUCCESS:
         status_type = s.ActionStatusType.COMPLETED
         err = None
     else:
@@ -194,7 +215,7 @@ def close_command(
 
     ro_crate_builder.build(resources_dir)
 
-    if exit_code == s.Cr8torErrorCode.SUCCESS:
+    if exit_code == s.Cr8torReturnCode.SUCCESS:
         typer.echo("Validation completed successfully")
     else:
         typer.echo(

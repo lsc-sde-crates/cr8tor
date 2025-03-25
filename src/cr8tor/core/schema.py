@@ -369,7 +369,7 @@ class HTTPPayloadResponse(BaseModel):
     payload: Union[StageTransferPayload, PublishPayload]
 
 
-class Cr8torErrorCode(IntEnum):
+class Cr8torReturnCode(IntEnum):
     SUCCESS = 0
     INCOMPLETE_ACTION_ERROR = 1
     VALIDATION_ERROR = 2
