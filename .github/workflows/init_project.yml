@@ -1,4 +1,4 @@
-name: Init RO-Crate Project
+name: Testing
 
 on:
   workflow_dispatch:
