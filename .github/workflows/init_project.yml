@@ -1,4 +1,4 @@
-name: Testing
+name: Project Loader
 
 on:
   workflow_dispatch:
