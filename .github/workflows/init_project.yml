@@ -6,15 +6,14 @@ on:
         new_project_name:
             description: Name of the new RO-Crate project
             type: string
+            default: 'someproject'
             required: true
         environment:
           required: false
-          default: 'PROD'
+          default: 'ABC'
           type: choice
           options:
-            - 'PROD'
-            - 'DEV'
-            - 'TEST'
+            - 'ABC'
         cr8tor_branch:
           required: false
           default: 'main'
@@ -50,4 +49,4 @@ jobs:
           git config --global user.email "lscsde-actions@github.com"
 
           ORG=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)
-          cr8tor initiate -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -chk "${{inputs.cookiecutter_branch}}" -cb "${{inputs.cr8tor_branch}}" -n "${{inputs.new_project_name}}" -org $ORG -e "${{inputs.environment}}" --push
+          cr8tor initiate -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -chk "${{inputs.cookiecutter_branch}}" -cb "${{inputs.cr8tor_branch}}" -n "${{inputs.new_project_name}}" -org $ORG -e "${{inputs.environment}}"
