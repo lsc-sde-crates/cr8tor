@@ -1,55 +1,27 @@
 [[actions]]
-id = "create-project-action-1b19474a-fefd-41ca-85b7-190c771ba7a0"
+id = "create-project-action-20304a94-c327-4e39-a4ba-d63596ca6e21"
 type = "CreateAction"
 name = "Create LSC Project Action"
-start_time = 2025-03-17T16:27:04.377193
-end_time = 2025-03-17T16:27:05.121532
+start_time = 2025-03-25T14:46:12.669176
+end_time = 2025-03-25T14:46:12.673224
 action_status = "CompletedActionStatus"
 agent = "cr8tor-cli"
 instrument = "cr8tor"
 [[actions.result]]
-"@id" = "1b19474a-fefd-41ca-85b7-190c771ba7a0"
+"@id" = "20304a94-c327-4e39-a4ba-d63596ca6e21"
 
 
 [[actions]]
-id = "validate-sem-1b19474a-fefd-41ca-85b7-190c771ba7a0"
+id = "validate-sem-20304a94-c327-4e39-a4ba-d63596ca6e21"
 type = "AssessAction"
 name = "Validate LSC Project Action"
-start_time = 2025-03-17T16:27:09.207967
-end_time = 2025-03-17T16:27:09.774443
+start_time = 2025-03-25T14:59:28.930274
+end_time = 2025-03-25T14:59:29.495384
 action_status = "CompletedActionStatus"
 result = []
 agent = "cr8tor-cli"
 instrument = "MetadataService"
 additional_type = "Semantic Validation"
-
-[[actions]]
-id = "sign-off-1b19474a-fefd-41ca-85b7-190c771ba7a0"
-type = "AssessAction"
-name = "IG Sign-Off Project Action"
-start_time = 2025-03-17T16:27:40.272873
-end_time = 2025-03-17T16:27:40.834433
-action_status = "CompletedActionStatus"
-agent = "cr8tor-cli"
-instrument = "mikeyharding@gmail.com"
-additional_type = "Sign off"
-[[actions.result]]
-"@id" = "http://github.com/pull/12"
-
-
-[[actions]]
-id = "stage-transfer-action-1b19474a-fefd-41ca-85b7-190c771ba7a0"
-type = "CreateAction"
-name = "Stage Data Transfer Action"
-start_time = 2025-03-17T16:40:07.317842
-end_time = 2025-03-17T16:40:07.327062
-action_status = "CompletedActionStatus"
-agent = "cr8tor-cli"
-instrument = "PublishService"
-[[actions.result]]
-file_path = "lsc/staging/data/outputs/database.duckdb"
-"@id" = "2d06afb8-e7ff-476d-95ea-2fdf26c5fd17"
-
 
 [[metadata_sources]]
 file = "metadata/dataset_1.toml"
@@ -62,7 +34,7 @@ project_name = "Pr002"
 project_start_time = "20250201_010101"
 destination_type = "LSC"
 destination_format = "DUCKDB"
-id = "1b19474a-fefd-41ca-85b7-190c771ba7a0"
+id = "20304a94-c327-4e39-a4ba-d63596ca6e21"
 
 [repository]
 codeRepository = "https://github.com/lsc-sde-crates/"

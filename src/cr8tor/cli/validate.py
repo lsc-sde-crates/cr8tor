@@ -80,6 +80,9 @@ def validate(
     if agent is None:
         agent = os.getenv("APP_NAME")
 
+    exit_msg = "Validation complete"
+    exit_code = s.Cr8torErrorCode.SUCCESS
+
     start_time = datetime.now()
     access_resource_path = resources_dir.joinpath("access", "access.toml")
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
@@ -90,19 +93,20 @@ def validate(
 
     current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
     if not current_rocrate_graph.is_created():
-        typer.echo(
-            "The create command must be run on the target project before validation",
-            err=True,
+        close_command(
+            start_time,
+            project_info,
+            agent,
+            project_resource_path,
+            resources_dir,
+            "Error: The create command must be run on the target project before validation",
+            s.Cr8torErrorCode.INCOMPLETE_ACTION_ERROR,
         )
-        raise typer.Exit(code=1)
-
-    is_valid = True
 
     for dataset_meta_file in resources_dir.joinpath("metadata").glob("dataset_*.toml"):
         try:
             access = project_resources.read_resource(access_resource_path)
             dataset_meta = project_resources.read_resource(dataset_meta_file)
-
             access_contract = s.DataContractValidateRequest(
                 source=s.DatabricksSourceConnection(**access["source"]),
                 credentials=s.SourceAccessCredential(**access["credentials"]),
@@ -114,8 +118,15 @@ def validate(
                 dataset=s.DatasetMetadata(**dataset_meta),
             )
         except Exception as e:
-            typer.echo("Error", err=e)
-            raise typer.Exit(code=1)
+            close_command(
+                start_time,
+                project_info,
+                agent,
+                project_resource_path,
+                resources_dir,
+                f"Error: {str(e)}",
+                s.Cr8torErrorCode.UNKNOWN_ERROR,
+            )
 
         metadata = asyncio.run(api.validate_access(access_contract))
         validate_dataset_info = s.DatasetMetadata(**metadata)
@@ -124,16 +135,43 @@ def validate(
             validate_dataset_info.tables, access_contract.dataset.tables
         )
         if not is_valid:
+            exit_msg = err
+            exit_code = s.Cr8torErrorCode.VALIDATION_ERROR
             break
 
-    statusType = s.ActionStatusType.COMPLETED if is_valid else s.ActionStatusType.FAILED
+    close_command(
+        start_time,
+        project_info,
+        agent,
+        project_resource_path,
+        resources_dir,
+        exit_msg,
+        exit_code,
+    )
+
+
+def close_command(
+    start_time: datetime,
+    project_info: s.ProjectProps,
+    agent: str,
+    project_resource_path: Path,
+    resources_dir: Path,
+    exit_msg: str,
+    exit_code: int,
+):
+    if exit_code == s.Cr8torErrorCode.SUCCESS:
+        status_type = s.ActionStatusType.COMPLETED
+        err = None
+    else:
+        status_type = s.ActionStatusType.FAILED
+        err = exit_msg
 
     assess_action_props = s.AssessActionProps(
         id=f"validate-sem-{project_info.id}",
         name="Validate LSC Project Action",
         start_time=start_time,
         end_time=datetime.now(),
-        action_status=statusType,
+        action_status=status_type,
         agent=agent,
         error=err,
         instrument=os.getenv("METADATA_NAME"),
@@ -155,3 +193,11 @@ def validate(
     )
 
     ro_crate_builder.build(resources_dir)
+
+    if exit_code == s.Cr8torErrorCode.SUCCESS:
+        typer.echo("Validation completed successfully")
+    else:
+        typer.echo(
+            f"Validation failed with error code {exit_code}: {exit_msg}", err=True
+        )
+        raise typer.Exit(code=exit_code)
