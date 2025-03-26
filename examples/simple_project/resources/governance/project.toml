@@ -1,3 +1,86 @@
+[[actions]]
+id = "Create-15a23742-647e-4c68-b2e6-1a8463053789"
+type = "CreateAction"
+name = "Create Data Project Action"
+start_time = 2025-03-26T14:30:54.973321
+end_time = 2025-03-26T14:30:54.981403
+action_status = "CompletedActionStatus"
+agent = "m.harding@lancaster.ac.uk"
+instrument = "cr8tor-cli"
+[[actions.result]]
+"@id" = "15a23742-647e-4c68-b2e6-1a8463053789"
+
+
+[[actions]]
+id = "Validate-15a23742-647e-4c68-b2e6-1a8463053789"
+type = "AssessAction"
+name = "Validate Data Project Action"
+start_time = 2025-03-26T14:40:43.009206
+end_time = 2025-03-26T14:40:43.628216
+action_status = "CompletedActionStatus"
+result = []
+agent = "m.harding@lancaster.ac.uk"
+instrument = "MetadataService"
+additional_type = "Semantic Validation"
+
+[[actions]]
+id = "Sign-Off-15a23742-647e-4c68-b2e6-1a8463053789"
+type = "AssessAction"
+name = "Sign-Off Data Project Action"
+start_time = 2025-03-26T14:42:54.787066
+end_time = 2025-03-26T14:42:55.337401
+action_status = "CompletedActionStatus"
+agent = "cr8tor-cli"
+instrument = "dd"
+additional_type = "Sign off"
+[[actions.result]]
+"@id" = "sdf"
+
+
+[[actions]]
+id = "Stage-Transfer-15a23742-647e-4c68-b2e6-1a8463053789"
+type = "CreateAction"
+name = "Stage-Transfer Data Project Action"
+start_time = 2025-03-26T14:43:02.735584
+end_time = 2025-03-26T14:43:03.295536
+action_status = "CompletedActionStatus"
+agent = "m.harding@lancaster.ac.uk"
+instrument = "PublishService"
+[[actions.result]]
+file_path = "lsc/staging/data/outputs/database.duckdb"
+"@id" = "18796ba7-1a79-4bb6-8ae2-d64256ba3fa7"
+
+
+[[actions]]
+id = "Disclosure-Check-15a23742-647e-4c68-b2e6-1a8463053789"
+type = "AssessAction"
+name = "Disclosure-Check Data Project Action"
+start_time = 2025-03-26T14:43:18.477534
+end_time = 2025-03-26T14:43:21.194764
+action_status = "CompletedActionStatus"
+agent = "m.harding@lancaster.ac.uk"
+instrument = "dd"
+additional_type = "Disclosure Check"
+[[actions.result]]
+"@id" = "sdf"
+
+
+[[actions]]
+id = "Publish-15a23742-647e-4c68-b2e6-1a8463053789"
+type = "CreateAction"
+name = "Publish Data Project Action"
+start_time = 2025-03-26T14:43:33.964451
+end_time = 2025-03-26T14:43:34.519291
+action_status = "CompletedActionStatus"
+agent = "m.harding@lancaster.ac.uk"
+instrument = "PublishService"
+[[actions.result]]
+file_path = "lsc/production/data/outputs/database.duckdb"
+hash_value = "f12190d5b8bd373103a6ecbd3e6f059d211c85fc3843888115c53f647c806afffdb2a55a6d98af4c78ecf5ee534d044a708240696a5852b484928ee10580f087"
+total_bytes = 1585152
+"@id" = "5fc0da21-18b0-43f7-91cf-e01f1aad7fcf"
+
+
 [[metadata_sources]]
 file = "metadata/dataset_1.toml"
 
@@ -9,6 +92,7 @@ project_name = "Pr002"
 project_start_time = "20250201_010101"
 destination_type = "LSC"
 destination_format = "DUCKDB"
+id = "15a23742-647e-4c68-b2e6-1a8463053789"
 
 [repository]
 codeRepository = "https://github.com/lsc-sde-crates/"

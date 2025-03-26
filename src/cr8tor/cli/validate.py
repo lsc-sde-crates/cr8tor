@@ -2,7 +2,7 @@ import os
 import typer
 import asyncio
 import cr8tor.core.api_client as api
-import cr8tor.core.schema as s
+import cr8tor.core.schema as schemas
 import cr8tor.core.resourceops as project_resources
 import cr8tor.core.crate_graph as proj_graph
 import cr8tor.cli.utils as cli_utils
@@ -15,7 +15,8 @@ app = typer.Typer()
 
 
 def verify_tables_metadata(
-    remote_metadata: List[s.TableMetadata], local_metadata: List[s.TableMetadata]
+    remote_metadata: List[schemas.TableMetadata],
+    local_metadata: List[schemas.TableMetadata],
 ) -> Tuple[bool, Optional[str]]:
     remote_lookup = {
         table.name: {col.name for col in table.columns} for table in remote_metadata
@@ -81,7 +82,7 @@ def validate(
         agent = os.getenv("AGENT_USER")
 
     exit_msg = "Validation complete"
-    exit_code = s.Cr8torReturnCode.SUCCESS
+    exit_code = schemas.Cr8torReturnCode.SUCCESS
 
     start_time = datetime.now()
     access_resource_path = resources_dir.joinpath("access", "access.toml")
@@ -89,19 +90,23 @@ def validate(
     project_dict = project_resources.read_resource_entity(
         project_resource_path, "project"
     )
-    project_info = s.ProjectProps(**project_dict)
+    project_info = schemas.ProjectProps(**project_dict)
 
     current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
-    if not current_rocrate_graph.is_created():
+    if not current_rocrate_graph.is_project_action_complete(
+        command_type=schemas.Cr8torCommandType.CREATE,
+        action_type=schemas.RoCrateActionType.CREATE,
+        project_id=project_info.id,
+    ):
         cli_utils.close_assess_action_command(
-            command_type=s.Cr8torCommandType.VALIDATE,
+            command_type=schemas.Cr8torCommandType.VALIDATE,
             start_time=start_time,
             project_id=project_info.id,
             agent=agent,
             project_resource_path=project_resource_path,
             resources_dir=resources_dir,
             exit_msg="The create command must be run on the target project before validation",
-            exit_code=s.Cr8torReturnCode.ACTION_WORKFLOW_ERROR,
+            exit_code=schemas.Cr8torReturnCode.ACTION_WORKFLOW_ERROR,
             instrument=os.getenv("METADATA_NAME"),
         )
 
@@ -109,30 +114,30 @@ def validate(
         try:
             access = project_resources.read_resource(access_resource_path)
             dataset_meta = project_resources.read_resource(dataset_meta_file)
-            access_contract = s.DataContractValidateRequest(
-                source=s.DatabricksSourceConnection(**access["source"]),
-                credentials=s.SourceAccessCredential(**access["credentials"]),
+            access_contract = schemas.DataContractValidateRequest(
+                source=schemas.DatabricksSourceConnection(**access["source"]),
+                credentials=schemas.SourceAccessCredential(**access["credentials"]),
                 # TODO: Validate & select against porject pydantic model
                 project_name=project_dict["project_name"],
                 project_start_time=project_dict["project_start_time"],
                 destination_type=project_dict["destination_type"],
                 destination_format=project_dict["destination_format"],
-                dataset=s.DatasetMetadata(**dataset_meta),
+                dataset=schemas.DatasetMetadata(**dataset_meta),
             )
 
             metadata = asyncio.run(api.validate_access(access_contract))
-            validate_dataset_info = s.DatasetMetadata(**metadata)
+            validate_dataset_info = schemas.DatasetMetadata(**metadata)
 
         except Exception as e:
             cli_utils.close_assess_action_command(
-                command_type=s.Cr8torCommandType.VALIDATE,
+                command_type=schemas.Cr8torCommandType.VALIDATE,
                 start_time=start_time,
                 project_id=project_info.id,
                 agent=agent,
                 project_resource_path=project_resource_path,
                 resources_dir=resources_dir,
                 exit_msg=f"{str(e)}",
-                exit_code=s.Cr8torReturnCode.UNKNOWN_ERROR,
+                exit_code=schemas.Cr8torReturnCode.UNKNOWN_ERROR,
                 instrument=os.getenv("METADATA_NAME"),
             )
 
@@ -141,7 +146,7 @@ def validate(
         )
         if not is_valid:
             exit_msg = err
-            exit_code = s.Cr8torReturnCode.VALIDATION_ERROR
+            exit_code = schemas.Cr8torReturnCode.VALIDATION_ERROR
             break
 
     #
@@ -151,7 +156,7 @@ def validate(
     #
 
     cli_utils.close_assess_action_command(
-        command_type=s.Cr8torCommandType.VALIDATE,
+        command_type=schemas.Cr8torCommandType.VALIDATE,
         start_time=start_time,
         project_id=project_info.id,
         agent=agent,
