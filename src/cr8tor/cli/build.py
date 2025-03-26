@@ -122,7 +122,7 @@ def build(
     #
     # Load requesting agent info and init RC 'Person' entity
     #
-    requesting_agent_props = s.RequestingAgentProps(**governance["requesting_agent"])
+    requesting_agent_props = s.AgentProps(**governance["requesting_agent"])
     person_entity = m.Person(
         crate,
         identifier=f"requesting-agent-{project_props.id}",

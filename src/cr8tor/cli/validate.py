@@ -119,6 +119,10 @@ def validate(
                 destination_format=project_dict["destination_format"],
                 dataset=s.DatasetMetadata(**dataset_meta),
             )
+
+            metadata = asyncio.run(api.validate_access(access_contract))
+            validate_dataset_info = s.DatasetMetadata(**metadata)
+
         except Exception as e:
             cli_utils.close_assess_action_command(
                 command_type=s.Cr8torCommandType.VALIDATE,
@@ -131,9 +135,6 @@ def validate(
                 exit_code=s.Cr8torReturnCode.UNKNOWN_ERROR,
                 instrument=os.getenv("METADATA_NAME"),
             )
-
-        metadata = asyncio.run(api.validate_access(access_contract))
-        validate_dataset_info = s.DatasetMetadata(**metadata)
 
         is_valid, err = verify_tables_metadata(
             validate_dataset_info.tables, access_contract.dataset.tables
