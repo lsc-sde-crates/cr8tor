@@ -1,4 +1,5 @@
 APP_NAME=cr8tor-cli
+AGENT_USER=j.bloggs@cr8tor.co.uk
 APPROVALS_NAME=ApprovalsService
 APPROVALS_HOST=http://localhost
 APPROVALS_PORT=8000

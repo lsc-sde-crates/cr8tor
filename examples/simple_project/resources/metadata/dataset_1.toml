@@ -16,4 +16,10 @@ datatype = "STRING"
 
 [staging_path]
 file_path = "lsc/staging/data/outputs/database.duckdb"
-"@id" = "2d06afb8-e7ff-476d-95ea-2fdf26c5fd17"
+"@id" = "148d5dac-4ede-48c4-a20f-04c10a902606"
+
+[publish_path]
+file_path = "lsc/production/data/outputs/database.duckdb"
+hash_value = "f12190d5b8bd373103a6ecbd3e6f059d211c85fc3843888115c53f647c806afffdb2a55a6d98af4c78ecf5ee534d044a708240696a5852b484928ee10580f087"
+total_bytes = 1585152
+"@id" = "5807d847-ff3c-4eca-a473-a7ab26cbb65e"

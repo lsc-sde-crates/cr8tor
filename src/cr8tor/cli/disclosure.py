@@ -1,7 +1,7 @@
 import os
 import typer
 import cr8tor.core.schema as s
-import cr8tor.cli.build as ro_crate_builder
+import cr8tor.cli.utils as cli_utils
 import cr8tor.core.resourceops as project_resources
 import cr8tor.core.crate_graph as proj_graph
 
@@ -65,7 +65,7 @@ def disclosure(
     """
 
     if agent is None:
-        agent = os.getenv("APP_NAME")
+        agent = os.getenv("AGENT_USER")
 
     start_time = datetime.now()
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
@@ -74,41 +74,42 @@ def disclosure(
     )
     project_info = s.ProjectProps(**project_dict)
 
+    if not bagit_dir.exists():
+        cli_utils.exit_command(
+            s.Cr8torCommandType.DISCLOSURE_CHECK,
+            s.Cr8torReturnCode.ACTION_EXECUTION_ERROR,
+            f"Missing bagit directory at: {bagit_dir}",
+        )
+
     current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
     if not current_rocrate_graph.is_staged():
-        typer.echo(
-            "The project data must be staged before disclosure can be completed.",
-            err=True,
+        cli_utils.close_assess_action_command(
+            command_type=s.Cr8torCommandType.DISCLOSURE_CHECK,
+            start_time=start_time,
+            project_id=project_info.id,
+            agent=agent,
+            project_resource_path=project_resource_path,
+            resources_dir=resources_dir,
+            exit_msg="The project data must be staged before disclosure checks can be completed.",
+            exit_code=s.Cr8torReturnCode.ACTION_WORKFLOW_ERROR,
+            instrument=f"{signing_entity}",
+            additional_type="Discloure Check",
         )
-        raise typer.Exit(code=1)
-
-    is_valid = True
-    err = None
 
     #
     # Should we verify that the disclosure PR ?
     #
 
-    statusType = s.ActionStatusType.COMPLETED if is_valid else s.ActionStatusType.FAILED
-
-    assess_action_props = s.AssessActionProps(
-        id=f"disclosure-{project_info.id}",
-        name="Disclosure Project Action",
+    cli_utils.close_assess_action_command(
+        command_type=s.Cr8torCommandType.DISCLOSURE_CHECK,
         start_time=start_time,
-        end_time=datetime.now(),
-        action_status=statusType,
+        project_id=project_info.id,
         agent=agent,
-        error=err,
+        project_resource_path=project_resource_path,
+        resources_dir=resources_dir,
+        exit_msg="Disclosure checks complete",
+        exit_code=s.Cr8torReturnCode.SUCCESS,
         instrument=f"{signing_entity}",
-        additional_type="Disclosure",
+        additional_type="Disclosure Check",
         result=[{"@id": agreement_url}],
     )
-
-    project_resources.delete_resource_entity(
-        project_resource_path, "actions", "id", f"disclosure-{project_info.id}"
-    )
-    project_resources.update_resource_entity(
-        project_resource_path, "actions", assess_action_props.model_dump()
-    )
-
-    ro_crate_builder.build(resources_dir)

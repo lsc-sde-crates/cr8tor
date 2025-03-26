@@ -3,9 +3,9 @@ import typer
 import asyncio
 import cr8tor.core.api_client as api
 import cr8tor.core.schema as s
-import cr8tor.cli.build as ro_crate_builder
 import cr8tor.core.resourceops as project_resources
 import cr8tor.core.crate_graph as proj_graph
+import cr8tor.cli.utils as cli_utils
 
 from pathlib import Path
 from typing import Annotated, List, Tuple, Optional
@@ -78,7 +78,7 @@ def validate(
     """
 
     if agent is None:
-        agent = os.getenv("APP_NAME")
+        agent = os.getenv("AGENT_USER")
 
     exit_msg = "Validation complete"
     exit_code = s.Cr8torReturnCode.SUCCESS
@@ -93,14 +93,16 @@ def validate(
 
     current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
     if not current_rocrate_graph.is_created():
-        close_command(
-            start_time,
-            project_info,
-            agent,
-            project_resource_path,
-            resources_dir,
-            "Error: The create command must be run on the target project before validation",
-            s.Cr8torReturnCode.INCOMPLETE_ACTION_ERROR,
+        cli_utils.close_assess_action_command(
+            command_type=s.Cr8torCommandType.VALIDATE,
+            start_time=start_time,
+            project_id=project_info.id,
+            agent=agent,
+            project_resource_path=project_resource_path,
+            resources_dir=resources_dir,
+            exit_msg="The create command must be run on the target project before validation",
+            exit_code=s.Cr8torReturnCode.ACTION_WORKFLOW_ERROR,
+            instrument=os.getenv("METADATA_NAME"),
         )
 
     for dataset_meta_file in resources_dir.joinpath("metadata").glob("dataset_*.toml"):
@@ -118,14 +120,16 @@ def validate(
                 dataset=s.DatasetMetadata(**dataset_meta),
             )
         except Exception as e:
-            close_command(
-                start_time,
-                project_info,
-                agent,
-                project_resource_path,
-                resources_dir,
-                f"Error: {str(e)}",
-                s.Cr8torReturnCode.UNKNOWN_ERROR,
+            cli_utils.close_assess_action_command(
+                command_type=s.Cr8torCommandType.VALIDATE,
+                start_time=start_time,
+                project_id=project_info.id,
+                agent=agent,
+                project_resource_path=project_resource_path,
+                resources_dir=resources_dir,
+                exit_msg=f"{str(e)}",
+                exit_code=s.Cr8torReturnCode.UNKNOWN_ERROR,
+                instrument=os.getenv("METADATA_NAME"),
             )
 
         metadata = asyncio.run(api.validate_access(access_contract))
@@ -139,86 +143,21 @@ def validate(
             exit_code = s.Cr8torReturnCode.VALIDATION_ERROR
             break
 
-    close_command(
-        start_time,
-        project_info,
-        agent,
-        project_resource_path,
-        resources_dir,
-        exit_msg,
-        exit_code,
-    )
-
-
-def close_command(
-    start_time: datetime,
-    project_info: s.ProjectProps,
-    agent: str,
-    project_resource_path: Path,
-    resources_dir: Path,
-    exit_msg: str,
-    exit_code: int,
-):
-    """
-    Completes the execution of the validate command/action by updating the data project resources,
-    rebuilding the project ro-crate and providing return/exit code status to calling agent. It
-    handles both successful and failed validations to enable workflow error handling.
-
-    Args:
-        start_time: The timestamp when the validation process started
-        project_info: Project properties containing metadata about the project
-        agent: The agent name or identifier that initiated the validation
-        project_resource_path: Path to the project resource file (project.toml)
-        resources_dir: Directory containing resources to include in the RO-Crate
-        exit_msg: Message describing the validation result (error message if validation failed)
-        exit_code: Exit code indicating success (0) or specific error type (non-zero)
-
-    The function determines the action status based on the exit code, creates a schema.org
-    AssessAction object with validation results, updates the project metadata resources,
-    and rebuilds the RO-Crate. If validation failed, the function exits with the
-    appropriate error code after new action state has been stored.
-
-    """
-
-    if exit_code == s.Cr8torReturnCode.SUCCESS:
-        status_type = s.ActionStatusType.COMPLETED
-        err = None
-    else:
-        status_type = s.ActionStatusType.FAILED
-        err = exit_msg
-
-    assess_action_props = s.AssessActionProps(
-        id=f"validate-sem-{project_info.id}",
-        name="Validate LSC Project Action",
-        start_time=start_time,
-        end_time=datetime.now(),
-        action_status=status_type,
-        agent=agent,
-        error=err,
-        instrument=os.getenv("METADATA_NAME"),
-        additional_type="Semantic Validation",
-        result=[],
-    )
-
     #
     # This assumes validate can be run multiple times on a project
     # Ensures previous run entities for this action are cleared in "actions" before
     # actions is updated with the new action entity
     #
 
-    project_resources.delete_resource_entity(
-        project_resource_path, "actions", "id", f"validate-sem-{project_info.id}"
+    cli_utils.close_assess_action_command(
+        command_type=s.Cr8torCommandType.VALIDATE,
+        start_time=start_time,
+        project_id=project_info.id,
+        agent=agent,
+        project_resource_path=project_resource_path,
+        resources_dir=resources_dir,
+        exit_msg=exit_msg,
+        exit_code=exit_code,
+        instrument=os.getenv("METADATA_NAME"),
+        additional_type="Semantic Validation",
     )
-    project_resources.update_resource_entity(
-        project_resource_path, "actions", assess_action_props.model_dump()
-    )
-
-    ro_crate_builder.build(resources_dir)
-
-    if exit_code == s.Cr8torReturnCode.SUCCESS:
-        typer.echo("Validation completed successfully")
-    else:
-        typer.echo(
-            f"Validation failed with error code {exit_code}: {exit_msg}", err=True
-        )
-        raise typer.Exit(code=exit_code)

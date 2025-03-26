@@ -37,13 +37,13 @@ class ROCrateGraph:
           PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
           SELECT (IF(COUNT(?action) > 0, "True", "False") AS ?result) WHERE {
             ?action rdf:type schema:CreateAction ;
-                    schema:name 'Create LSC Project Action';
+                    schema:name 'Create Data Project Action';
                     schema:actionStatus 'CompletedActionStatus' .
           }
         """
         result = self.run_query(query)
         for row in result:
-            return row.result
+            return str(row.result.value).strip().lower() == "true"
         return False
 
     def is_validated(self) -> bool:
@@ -53,13 +53,13 @@ class ROCrateGraph:
           PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
           SELECT (IF(COUNT(?action) > 0, "True", "False") AS ?result) WHERE {
             ?action rdf:type schema:AssessAction ;
-                    schema:name 'Validate LSC Project Action';
+                    schema:name 'Validate Data Project Action';
                     schema:actionStatus 'CompletedActionStatus' .
           }
         """
         result = self.run_query(query)
         for row in result:
-            return row.result
+            return str(row.result.value).strip().lower() == "true"
         return False
 
     def is_signed(self) -> bool:
@@ -69,13 +69,13 @@ class ROCrateGraph:
           PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
           SELECT (IF(COUNT(?action) > 0, "True", "False") AS ?result) WHERE {
             ?action rdf:type schema:AssessAction ;
-                    schema:name 'IG Sign-Off Project Action';
+                    schema:name 'Sign-Off Data Project Action';
                     schema:actionStatus 'CompletedActionStatus' .
           }
         """
         result = self.run_query(query)
         for row in result:
-            return row.result
+            return str(row.result.value).strip().lower() == "true"
         return False
 
     def is_staged(self) -> bool:
@@ -84,14 +84,30 @@ class ROCrateGraph:
           PREFIX schema: <http://schema.org/>
           PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
           SELECT (IF(COUNT(?action) > 0, "True", "False") AS ?result) WHERE {
-            ?action rdf:type schema:AssessAction ;
-                    schema:name 'Stage Data Transfer Action';
+            ?action rdf:type schema:CreateAction ;
+                    schema:name 'Stage-Transfer Data Project Action';
                     schema:actionStatus 'CompletedActionStatus' .
           }
         """
         result = self.run_query(query)
         for row in result:
-            return row.result
+            return str(row.result.value).strip().lower() == "true"
+        return False
+
+    def is_disclosed(self) -> bool:
+        """Check if project has been disclosed successfully"""
+        query = """
+            PREFIX schema: <http://schema.org/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            SELECT (IF(COUNT(?action) > 0, "True", "False") AS ?result) WHERE {
+            ?action rdf:type schema:AssessAction ;
+                    schema:name 'Disclosure-Check Data Project Action';
+                    schema:actionStatus 'CompletedActionStatus' .
+            }
+        """
+        result = self.run_query(query)
+        for row in result:
+            return str(row.result.value).strip().lower() == "true"
         return False
 
     def get_validate_status(self) -> bool:
@@ -119,6 +135,6 @@ if __name__ == "__main__":
     rocrate_metadata_path = sys.argv[1]
     graph = ROCrateGraph(rocrate_metadata_path)
 
-    print("\n=== Running get_validate_status() test ===")
-    created = graph.get_validate_status()
-    print(f"\nResult: get_validate_status() -> {created}")
+    print("\n=== Running is_validated() test ===")
+    created = graph.is_validated()
+    print(f"\nResult: is_validated() -> {created}")
