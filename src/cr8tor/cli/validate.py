@@ -3,9 +3,9 @@ import typer
 import asyncio
 import cr8tor.core.api_client as api
 import cr8tor.core.schema as s
-import cr8tor.cli.build as ro_crate_builder
 import cr8tor.core.resourceops as project_resources
 import cr8tor.core.crate_graph as proj_graph
+import cr8tor.cli.utils as cli_utils
 
 from pathlib import Path
 from typing import Annotated, List, Tuple, Optional
@@ -78,7 +78,10 @@ def validate(
     """
 
     if agent is None:
-        agent = os.getenv("APP_NAME")
+        agent = os.getenv("AGENT_USER")
+
+    exit_msg = "Validation complete"
+    exit_code = s.Cr8torReturnCode.SUCCESS
 
     start_time = datetime.now()
     access_resource_path = resources_dir.joinpath("access", "access.toml")
@@ -90,19 +93,22 @@ def validate(
 
     current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
     if not current_rocrate_graph.is_created():
-        typer.echo(
-            "The create command must be run on the target project before validation",
-            err=True,
+        cli_utils.close_assess_action_command(
+            command_type=s.Cr8torCommandType.VALIDATE,
+            start_time=start_time,
+            project_id=project_info.id,
+            agent=agent,
+            project_resource_path=project_resource_path,
+            resources_dir=resources_dir,
+            exit_msg="The create command must be run on the target project before validation",
+            exit_code=s.Cr8torReturnCode.ACTION_WORKFLOW_ERROR,
+            instrument=os.getenv("METADATA_NAME"),
         )
-        raise typer.Exit(code=1)
-
-    is_valid = True
 
     for dataset_meta_file in resources_dir.joinpath("metadata").glob("dataset_*.toml"):
         try:
             access = project_resources.read_resource(access_resource_path)
             dataset_meta = project_resources.read_resource(dataset_meta_file)
-
             access_contract = s.DataContractValidateRequest(
                 source=s.DatabricksSourceConnection(**access["source"]),
                 credentials=s.SourceAccessCredential(**access["credentials"]),
@@ -114,8 +120,17 @@ def validate(
                 dataset=s.DatasetMetadata(**dataset_meta),
             )
         except Exception as e:
-            typer.echo("Error", err=e)
-            raise typer.Exit(code=1)
+            cli_utils.close_assess_action_command(
+                command_type=s.Cr8torCommandType.VALIDATE,
+                start_time=start_time,
+                project_id=project_info.id,
+                agent=agent,
+                project_resource_path=project_resource_path,
+                resources_dir=resources_dir,
+                exit_msg=f"{str(e)}",
+                exit_code=s.Cr8torReturnCode.UNKNOWN_ERROR,
+                instrument=os.getenv("METADATA_NAME"),
+            )
 
         metadata = asyncio.run(api.validate_access(access_contract))
         validate_dataset_info = s.DatasetMetadata(**metadata)
@@ -124,22 +139,9 @@ def validate(
             validate_dataset_info.tables, access_contract.dataset.tables
         )
         if not is_valid:
+            exit_msg = err
+            exit_code = s.Cr8torReturnCode.VALIDATION_ERROR
             break
-
-    statusType = s.ActionStatusType.COMPLETED if is_valid else s.ActionStatusType.FAILED
-
-    assess_action_props = s.AssessActionProps(
-        id=f"validate-sem-{project_info.id}",
-        name="Validate LSC Project Action",
-        start_time=start_time,
-        end_time=datetime.now(),
-        action_status=statusType,
-        agent=agent,
-        error=err,
-        instrument=os.getenv("METADATA_NAME"),
-        additional_type="Semantic Validation",
-        result=[],
-    )
 
     #
     # This assumes validate can be run multiple times on a project
@@ -147,11 +149,15 @@ def validate(
     # actions is updated with the new action entity
     #
 
-    project_resources.delete_resource_entity(
-        project_resource_path, "actions", "id", f"validate-sem-{project_info.id}"
+    cli_utils.close_assess_action_command(
+        command_type=s.Cr8torCommandType.VALIDATE,
+        start_time=start_time,
+        project_id=project_info.id,
+        agent=agent,
+        project_resource_path=project_resource_path,
+        resources_dir=resources_dir,
+        exit_msg=exit_msg,
+        exit_code=exit_code,
+        instrument=os.getenv("METADATA_NAME"),
+        additional_type="Semantic Validation",
     )
-    project_resources.update_resource_entity(
-        project_resource_path, "actions", assess_action_props.model_dump()
-    )
-
-    ro_crate_builder.build(resources_dir)

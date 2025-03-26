@@ -1,6 +1,6 @@
 """Pydantic models to validate properties of schema.org entities and other resources that will go within the RO-Crate"""
 
-from enum import StrEnum
+from enum import StrEnum, IntEnum
 from typing import List
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 from datetime import datetime
@@ -367,3 +367,26 @@ class PublishPayload(BaseModel):
 class HTTPPayloadResponse(BaseModel):
     status: str
     payload: Union[StageTransferPayload, PublishPayload]
+
+
+class Cr8torReturnCode(IntEnum):
+    SUCCESS = 0
+    ACTION_WORKFLOW_ERROR = 1
+    VALIDATION_ERROR = 2
+    ACTION_EXECUTION_ERROR = 3
+    UNKNOWN_ERROR = 3
+
+
+class Cr8torCommandType(StrEnum):
+    INITIATE: str = "Initiate"
+    CREATE: str = "Create"
+    VALIDATE: str = "Validate"
+    SIGN_OFF: str = "Sign-Off"
+    STAGE_TRANSFER: str = "Stage-Transfer"
+    DISCLOSURE_CHECK: str = "Disclosure-Check"
+    PUBLISH: str = "Publish"
+
+
+class RoCrateActionType(StrEnum):
+    CREATE: str = "CreateAction"
+    ASSESS: str = "AssessAction"

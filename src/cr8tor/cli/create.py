@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Annotated
 from datetime import datetime
 import cr8tor.core.resourceops as project_resources
-import cr8tor.cli.build as ro_crate_builder
 import cr8tor.core.crate_graph as proj_graph
+import cr8tor.cli.utils as cli_utils
 
 app = typer.Typer()
 
@@ -56,7 +56,10 @@ def create(
     """
 
     if agent is None:
-        agent = os.getenv("APP_NAME")
+        agent = os.getenv("AGENT_USER")
+
+    exit_msg = "Create complete"
+    exit_code = schemas.Cr8torReturnCode.SUCCESS
 
     create_start_dt = datetime.now()
     project_uuid: Annotated[
@@ -65,21 +68,23 @@ def create(
     ] = os.getenv("PROJECT_UUID", str(uuid.uuid4()))
 
     if not resources_dir.exists():
-        typer.echo(f"Missing resrouces directory at: {resources_dir}", err=True)
-        raise typer.Exit(code=1)
+        cli_utils.exit_command(
+            schemas.Cr8torCommandType.CREATE,
+            schemas.Cr8torReturnCode.ACTION_EXECUTION_ERROR,
+            f"Missing resources directory at: {resources_dir}",
+        )
 
     project_resource_path = resources_dir.joinpath("governance", "project.toml")
     governance = project_resources.read_resource(project_resource_path)
 
     if bagit_dir.exists():
         current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
-
         if current_rocrate_graph.is_created() and "id" in governance["project"]:
-            typer.echo(
-                f"A create action has already been run on this project. Project ID: {governance['project']['id']}",
-                err=True,
+            cli_utils.exit_command(
+                schemas.Cr8torCommandType.CREATE,
+                schemas.Cr8torReturnCode.ACTION_EXECUTION_ERROR,
+                "Create command can only be run once on a project",
             )
-            raise typer.Exit(code=1)
 
     governance["project"].setdefault("id", project_uuid)
     governance["project"].setdefault(
@@ -89,21 +94,19 @@ def create(
         project_resource_path, "project", governance["project"]
     )
 
-    create_action_props = schemas.CreateActionProps(
-        id=f"create-project-action-{project_uuid}",
-        name="Create LSC Project Action",
-        start_time=create_start_dt,
-        end_time=datetime.now(),
-        action_status=schemas.ActionStatusType.COMPLETED,
-        agent=agent,
-        error=None,
-        instrument="cr8tor",
-        result=[{"@id": project_uuid}],
-    )
-
     project_resources.create_resource_entity(project_resource_path, "actions", [])
-    project_resources.update_resource_entity(
-        project_resource_path, "actions", create_action_props.model_dump()
-    )
 
-    ro_crate_builder.build(resources_dir, config_file, dryrun)
+    cli_utils.close_create_action_command(
+        command_type=schemas.Cr8torCommandType.CREATE,
+        start_time=create_start_dt,
+        project_id=project_uuid,
+        agent=agent,
+        project_resource_path=project_resource_path,
+        resources_dir=resources_dir,
+        exit_msg=exit_msg,
+        exit_code=exit_code,
+        instrument=os.getenv("APP_NAME"),
+        result=[{"@id": project_uuid}],
+        dryrun=dryrun,
+        config_file=config_file,
+    )

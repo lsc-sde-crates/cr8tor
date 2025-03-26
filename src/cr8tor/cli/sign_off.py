@@ -1,9 +1,9 @@
 import os
 import typer
 import cr8tor.core.schema as s
-import cr8tor.cli.build as ro_crate_builder
 import cr8tor.core.resourceops as project_resources
 import cr8tor.core.crate_graph as proj_graph
+import cr8tor.cli.utils as cli_utils
 
 from pathlib import Path
 from typing import Annotated
@@ -74,41 +74,42 @@ def sign_off(
     )
     project_info = s.ProjectProps(**project_dict)
 
-    current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
-    if not current_rocrate_graph.is_validated():
-        typer.echo(
-            "The project must be validated before sign off / approval can be completed.",
-            err=True,
+    if not bagit_dir.exists():
+        cli_utils.exit_command(
+            s.Cr8torCommandType.SIGN_OFF,
+            s.Cr8torReturnCode.ACTION_EXECUTION_ERROR,
+            f"Missing bagit directory at: {bagit_dir}",
         )
-        raise typer.Exit(code=1)
 
-    is_valid = True
-    err = None
+    current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
 
+    if not current_rocrate_graph.is_validated():
+        cli_utils.close_assess_action_command(
+            command_type=s.Cr8torCommandType.SIGN_OFF,
+            start_time=start_time,
+            project_id=project_info.id,
+            agent=agent,
+            project_resource_path=project_resource_path,
+            resources_dir=resources_dir,
+            exit_msg="The project must be validated before sign off / approval",
+            exit_code=s.Cr8torReturnCode.ACTION_WORKFLOW_ERROR,
+            instrument=f"{signing_entity}",
+            additional_type="Sign off",
+        )
     #
-    # Should we verify that the approved PR URI exists?
+    # Should we verify that the approved PR URI exists here?
     #
 
-    statusType = s.ActionStatusType.COMPLETED if is_valid else s.ActionStatusType.FAILED
-
-    assess_action_props = s.AssessActionProps(
-        id=f"sign-off-{project_info.id}",
-        name="IG Sign-Off Project Action",
+    cli_utils.close_assess_action_command(
+        command_type=s.Cr8torCommandType.SIGN_OFF,
         start_time=start_time,
-        end_time=datetime.now(),
-        action_status=statusType,
+        project_id=project_info.id,
         agent=agent,
-        error=err,
+        project_resource_path=project_resource_path,
+        resources_dir=resources_dir,
+        exit_msg="Sign off complete",
+        exit_code=s.Cr8torReturnCode.SUCCESS,
         instrument=f"{signing_entity}",
         additional_type="Sign off",
         result=[{"@id": agreement_url}],
     )
-
-    project_resources.delete_resource_entity(
-        project_resource_path, "actions", "id", f"sign-off-{project_info.id}"
-    )
-    project_resources.update_resource_entity(
-        project_resource_path, "actions", assess_action_props.model_dump()
-    )
-
-    ro_crate_builder.build(resources_dir)
