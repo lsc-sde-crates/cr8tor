@@ -1,86 +1,3 @@
-[[actions]]
-id = "Create-a0a2b8a5-df48-4c87-9254-f4b65a08c837"
-type = "CreateAction"
-name = "Create Data Project Action"
-start_time = 2025-03-26T00:18:19.245947
-end_time = 2025-03-26T00:18:19.253536
-action_status = "CompletedActionStatus"
-agent = "m.harding@lancaster.ac.uk"
-instrument = "cr8tor-cli"
-[[actions.result]]
-"@id" = "a0a2b8a5-df48-4c87-9254-f4b65a08c837"
-
-
-[[actions]]
-id = "Validate-a0a2b8a5-df48-4c87-9254-f4b65a08c837"
-type = "AssessAction"
-name = "Validate Data Project Action"
-start_time = 2025-03-26T00:18:31.590313
-end_time = 2025-03-26T00:18:32.253052
-action_status = "CompletedActionStatus"
-result = []
-agent = "m.harding@lancaster.ac.uk"
-instrument = "MetadataService"
-additional_type = "Semantic Validation"
-
-[[actions]]
-id = "Sign-Off-a0a2b8a5-df48-4c87-9254-f4b65a08c837"
-type = "AssessAction"
-name = "Sign-Off Data Project Action"
-start_time = 2025-03-26T00:18:56.960361
-end_time = 2025-03-26T00:18:57.478308
-action_status = "CompletedActionStatus"
-agent = "cr8tor-cli"
-instrument = "IG"
-additional_type = "Sign off"
-[[actions.result]]
-"@id" = "http://fff.com"
-
-
-[[actions]]
-id = "Stage-Transfer-a0a2b8a5-df48-4c87-9254-f4b65a08c837"
-type = "CreateAction"
-name = "Stage-Transfer Data Project Action"
-start_time = 2025-03-26T00:20:18.850187
-end_time = 2025-03-26T00:20:19.354465
-action_status = "CompletedActionStatus"
-agent = "m.harding@lancaster.ac.uk"
-instrument = "PublishService"
-[[actions.result]]
-file_path = "lsc/staging/data/outputs/database.duckdb"
-"@id" = "148d5dac-4ede-48c4-a20f-04c10a902606"
-
-
-[[actions]]
-id = "Disclosure-Check-a0a2b8a5-df48-4c87-9254-f4b65a08c837"
-type = "AssessAction"
-name = "Disclosure-Check Data Project Action"
-start_time = 2025-03-26T00:21:57.614231
-end_time = 2025-03-26T00:21:58.086889
-action_status = "CompletedActionStatus"
-agent = "m.harding@lancaster.ac.uk"
-instrument = "IG"
-additional_type = "Disclosure Check"
-[[actions.result]]
-"@id" = "http://fff.com"
-
-
-[[actions]]
-id = "Publish-a0a2b8a5-df48-4c87-9254-f4b65a08c837"
-type = "CreateAction"
-name = "Publish Data Project Action"
-start_time = 2025-03-26T00:23:12.929909
-end_time = 2025-03-26T00:23:13.421237
-action_status = "CompletedActionStatus"
-agent = "m.harding@lancaster.ac.uk"
-instrument = "PublishService"
-[[actions.result]]
-file_path = "lsc/production/data/outputs/database.duckdb"
-hash_value = "f12190d5b8bd373103a6ecbd3e6f059d211c85fc3843888115c53f647c806afffdb2a55a6d98af4c78ecf5ee534d044a708240696a5852b484928ee10580f087"
-total_bytes = 1585152
-"@id" = "5807d847-ff3c-4eca-a473-a7ab26cbb65e"
-
-
 [[metadata_sources]]
 file = "metadata/dataset_1.toml"
 
@@ -92,7 +9,6 @@ project_name = "Pr002"
 project_start_time = "20250201_010101"
 destination_type = "LSC"
 destination_format = "DUCKDB"
-id = "a0a2b8a5-df48-4c87-9254-f4b65a08c837"
 
 [repository]
 codeRepository = "https://github.com/lsc-sde-crates/"
