@@ -71,8 +71,22 @@ jobs:
             - name: Cr8tor CLI Create & Validate
               run: |
                 cr8tor\.venv\Scripts\activate
-                cr8tor create -a GithubAction -i ./resources
-                cr8tor validate -a GithubAction -i ./resources
+
+                # run cr8tor create and capture the error message
+                $errorMessage = cr8tor create -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+                if ($LASTEXITCODE -ne 0) {
+                  echo "::error::Cr8tor create failed: $errorMessage"
+                  echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+                }
+                else {
+                  # run cr8tor validate and capture the error message
+                  $errorMessage = cr8tor validate -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+                  if ($LASTEXITCODE -ne 0) {
+                    echo "::error::Cr8tor validate failed: $errorMessage"
+                    echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+                  }
+                }
+              continue-on-error: true
 
             - name: Push changes to repo
               run: |
@@ -108,9 +122,20 @@ jobs:
 
             - name: Send sign-off message
               run: |
-                $message = "Please verify and sign off DAR project at https://github.com/${{ github.repository }}/tree/${{ steps.create_branch.outputs.branch_name }}."
-                $message = $message + " Pull Request: ${{ steps.create_pr.outputs.pr_url }}"
-                echo "::notice::$message"
+                $repo_url = "https://github.com/${{ github.repository }}/tree/${{ steps.create_branch.outputs.branch_name }}"
+                if ($env:CR8TOR_ERROR -eq "1") {
+                  # Merge PR and delete temp branch
+                  gh pr merge --delete-branch --merge --admin
+
+                  $message = "Please analyse failures logged in the main branch."
+                  echo "::error::$message"
+                  exit 1
+                }
+                else {
+                  $message = "Please verify and sign off DAR project at $repo_url."
+                  $message = $message + " Pull Request: ${{ steps.create_pr.outputs.pr_url }}"
+                  echo "::notice::$message"
+                }
 
     SignOff:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
@@ -132,7 +157,14 @@ jobs:
             - name: Cr8tor CLI Sign-Off
               run: |
                 cr8tor\.venv\Scripts\activate
-                cr8tor sign-off -a GithubAction -i ./resources -agreement ${{ needs.Validate.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver"
+
+                # run cr8tor sign-off and capture the error message
+                $errorMessage = cr8tor sign-off -a GithubAction -i ./resources -agreement ${{ needs.Validate.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver" 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+                if ($LASTEXITCODE -ne 0) {
+                  echo "::error::Cr8tor sign-off failed: $errorMessage"
+                  echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+                }
+              continue-on-error: true
 
             - name: Push changes to repository
               run: |
@@ -142,7 +174,14 @@ jobs:
 
             - name: Merge Pull Request and delete temp branch
               run: |
+                # Merge PR and delete temp branch
                 gh pr merge --delete-branch --merge --admin
+
+                if ($env:CR8TOR_ERROR -eq "1") {
+                  $message = "Please analyse failures logged in the main branch."
+                  echo "::error::$message"
+                  exit 1
+                }
 
             - name: Create artifact for signed off RO-Crate
               uses: actions/upload-artifact@v4
@@ -180,7 +219,15 @@ jobs:
             - name: Cr8tor CLI Staging Data
               run: |
                 cr8tor\.venv\Scripts\activate
-                cr8tor stage-transfer -a GithubAction -i ./resources
+
+                # run cr8tor stage-transfer and capture the error message
+                $errorMessage = cr8tor stage-transfer -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+                if ($LASTEXITCODE -ne 0) {
+                  echo "::error::Cr8tor stage-transfer failed: $errorMessage"
+                  echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+                }
+              continue-on-error: true
+
 
             - name: Push changes to repo
               run: |
@@ -211,11 +258,22 @@ jobs:
                     ./resources
                     ./config.toml
 
-            - name: Send sign-off message
+            - name: Send disclosure message
               run: |
-                $message = "Please verify and approve Disclosure stage of DAR project at https://github.com/${{ github.repository }}/tree/${{ steps.create_branch.outputs.branch_name }}."
-                $message = $message + " Pull Request: ${{ steps.create_pr.outputs.pr_url }}"
-                echo "::notice::$message"
+                $repo_url = "https://github.com/${{ github.repository }}/tree/${{ steps.create_branch.outputs.branch_name }}"
+                if ($env:CR8TOR_ERROR -eq "1") {
+                  # Merge PR and delete temp branch
+                  gh pr merge --delete-branch --merge --admin
+
+                  $message = "Please analyse failures logged in the main branch."
+                  echo "::error::$message"
+                  exit 1
+                }
+                else {
+                  $message = "Please verify and approve Disclosure stage of DAR project at $repo_url."
+                  $message = $message + " Pull Request: ${{ steps.create_pr.outputs.pr_url }}"
+                  echo "::notice::$message"
+                }
 
     Disclosure:
         runs-on: ${{ inputs.environment }}-cr8tor-vm
@@ -237,7 +295,15 @@ jobs:
           - name: Cr8tor CLI Sign-Off
             run: |
               cr8tor\.venv\Scripts\activate
-              cr8tor disclosure -a GithubAction -i ./resources -agreement ${{ needs.Workflow-Execution.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver"
+
+              # run cr8tor disclosure and capture the error message
+              $errorMessage = cr8tor disclosure -a GithubAction -i ./resources -agreement ${{ needs.Workflow-Execution.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver" 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+              if ($LASTEXITCODE -ne 0) {
+                echo "::error::Cr8tor disclosure failed: $errorMessage"
+                echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+              }
+            continue-on-error: true
+
 
           - name: Push changes to repository
             run: |
@@ -247,7 +313,14 @@ jobs:
 
           - name: Merge Pull Request and delete temp branch
             run: |
+              # Merge PR and delete temp branch
               gh pr merge --delete-branch --merge --admin
+
+              if ($env:CR8TOR_ERROR -eq "1") {
+                $message = "Please analyse failures logged in the main branch."
+                echo "::error::$message"
+                exit 1
+              }
 
           - name: Create artifact for signed off RO-Crate
             uses: actions/upload-artifact@v4
@@ -283,7 +356,14 @@ jobs:
             - name: Cr8tor CLI Publish Data
               run: |
                 cr8tor\.venv\Scripts\activate
-                cr8tor publish -a GithubAction -i ./resources
+
+                # run cr8tor publish and capture the error message
+                $errorMessage = cr8tor publish -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+                if ($LASTEXITCODE -ne 0) {
+                  echo "::error::Cr8tor publish failed: $errorMessage"
+                  echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+                }
+              continue-on-error: true
 
             - name: Create artifact for published RO-Crate
               uses: actions/upload-artifact@v4
@@ -315,7 +395,14 @@ jobs:
 
             - name: Merge Pull Request and delete temp branch
               run: |
+                # Merge PR and delete temp branch
                 gh pr merge --delete-branch --merge --admin
+
+                if ($env:CR8TOR_ERROR -eq "1") {
+                  $message = "Please analyse failures logged in the main branch."
+                  echo "::error::$message"
+                  exit 1
+                }
 
             - name: Send final message
               run: |
