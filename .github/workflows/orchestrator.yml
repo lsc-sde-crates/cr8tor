@@ -74,11 +74,13 @@ jobs:
 
                 # run cr8tor create and capture the error message
                 $errorMessage = cr8tor create -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-                if ($LASTEXITCODE -ne 0 -and $errorMessage -notlike "*Create command can only be run once on a project") {
+                if ($LASTEXITCODE -ne 0 -and $errorMessage -notlike "*can only be run once on a project*") {
+                  echo "here"
                   echo "::error::Cr8tor create failed: $errorMessage"
                   echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
                 }
                 else {
+                  echo "there"
                   # run cr8tor validate and capture the error message
                   $errorMessage = cr8tor validate -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
                   if ($LASTEXITCODE -ne 0) {
