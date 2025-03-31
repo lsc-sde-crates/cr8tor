@@ -83,7 +83,11 @@ def sign_off(
 
     current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
 
-    if not current_rocrate_graph.is_validated():
+    if not current_rocrate_graph.is_project_action_complete(
+        command_type=s.Cr8torCommandType.VALIDATE,
+        action_type=s.RoCrateActionType.ASSESS,
+        project_id=project_info.id,
+    ):
         cli_utils.close_assess_action_command(
             command_type=s.Cr8torCommandType.SIGN_OFF,
             start_time=start_time,

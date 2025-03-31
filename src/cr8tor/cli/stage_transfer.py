@@ -73,7 +73,11 @@ def stage_transfer(
 
     current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
 
-    if not current_rocrate_graph.is_signed():
+    if not current_rocrate_graph.is_project_action_complete(
+        command_type=schemas.Cr8torCommandType.SIGN_OFF,
+        action_type=schemas.RoCrateActionType.ASSESS,
+        project_id=project_info["project"]["id"],
+    ):
         cli_utils.close_create_action_command(
             command_type=schemas.Cr8torCommandType.STAGE_TRANSFER,
             start_time=start_time,

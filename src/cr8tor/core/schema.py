@@ -133,7 +133,8 @@ class CreateActionProps(ActionProps):
 class AssessActionProps(ActionProps):
     type: Literal["AssessAction"] = Field(default="AssessAction", alias="@type")
 
-    additional_type: str = Field(
+    additional_type: Optional[str] = Field(
+        default=None,
         description="Use to reference sub assessment actions (e.g. disclosure check)"
     )
 
@@ -143,17 +144,17 @@ class AffiliationProps(BaseRoCrateEntityProperties):
     url: str
 
 
-class RequestingAgentProps(BaseRoCrateEntityProperties):
+class AgentProps(BaseRoCrateEntityProperties):
     """
-    The individual person who is requesting the run MUST be indicated as an `agent` from the
-    `CreateAction`, which SHOULD have an `affiliation` to the organisation they are representing
-    for access control purposes
+    Model represents an individual person who is an agent triggering an cr8tor action,
+    which SHOULD have an `affiliation` to the organisation they are representing
+    for access control purposes. Based on the requesting-agent model in the 5S-Crate spec.
 
     https://trefx.uk/5s-crate/0.5-DRAFT/#requesting-agent
     """
 
     name: str
-    affiliation: OrganizationProps  # Mike to look at whether we should keep this pattern. Risks circular deps.
+    affiliation: OrganizationProps
 
 
 ###############################################################################

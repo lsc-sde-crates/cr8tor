@@ -66,7 +66,11 @@ def publish(
         )
 
     current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
-    if not current_rocrate_graph.is_disclosed():
+    if not current_rocrate_graph.is_project_action_complete(
+        command_type=schemas.Cr8torCommandType.DISCLOSURE_CHECK,
+        action_type=schemas.RoCrateActionType.ASSESS,
+        project_id=project_info["project"]["id"],
+    ):
         cli_utils.close_create_action_command(
             command_type=schemas.Cr8torCommandType.PUBLISH,
             start_time=start_time,

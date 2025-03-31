@@ -78,13 +78,18 @@ def create(
     governance = project_resources.read_resource(project_resource_path)
 
     if bagit_dir.exists():
-        current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
-        if current_rocrate_graph.is_created() and "id" in governance["project"]:
-            cli_utils.exit_command(
-                schemas.Cr8torCommandType.CREATE,
-                schemas.Cr8torReturnCode.ACTION_EXECUTION_ERROR,
-                "Create command can only be run once on a project",
-            )
+        if "id" in governance["project"]:
+            current_rocrate_graph = proj_graph.ROCrateGraph(bagit_dir)
+            if current_rocrate_graph.is_project_action_complete(
+                command_type=schemas.Cr8torCommandType.CREATE,
+                action_type=schemas.RoCrateActionType.CREATE,
+                project_id=governance["project"]["id"],
+            ):
+                cli_utils.exit_command(
+                    schemas.Cr8torCommandType.CREATE,
+                    schemas.Cr8torReturnCode.ACTION_EXECUTION_ERROR,
+                    "Create command can only be run once on a project",
+                )
 
     governance["project"].setdefault("id", project_uuid)
     governance["project"].setdefault(
