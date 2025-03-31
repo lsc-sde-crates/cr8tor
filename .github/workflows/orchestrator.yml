@@ -82,7 +82,7 @@ jobs:
                 else {
                   echo "there"
                   # run cr8tor validate and capture the error message
-                  $errorMessage = cr8tor validate -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+                  $errorMessage = cr8tor validate -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
                   if ($LASTEXITCODE -ne 0) {
                     echo "::error::Cr8tor validate failed: $errorMessage"
                     echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -161,7 +161,7 @@ jobs:
                 cr8tor\.venv\Scripts\activate
 
                 # run cr8tor sign-off and capture the error message
-                $errorMessage = cr8tor sign-off -a GithubAction -i ./resources -agreement ${{ needs.Validate.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver" 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+                $errorMessage = cr8tor sign-off -a GithubAction -i ./resources -agreement ${{ needs.Validate.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver" 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
                 if ($LASTEXITCODE -ne 0) {
                   echo "::error::Cr8tor sign-off failed: $errorMessage"
                   echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -223,7 +223,7 @@ jobs:
                 cr8tor\.venv\Scripts\activate
 
                 # run cr8tor stage-transfer and capture the error message
-                $errorMessage = cr8tor stage-transfer -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+                $errorMessage = cr8tor stage-transfer -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
                 if ($LASTEXITCODE -ne 0) {
                   echo "::error::Cr8tor stage-transfer failed: $errorMessage"
                   echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -299,7 +299,7 @@ jobs:
               cr8tor\.venv\Scripts\activate
 
               # run cr8tor disclosure and capture the error message
-              $errorMessage = cr8tor disclosure -a GithubAction -i ./resources -agreement ${{ needs.Workflow-Execution.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver" 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+              $errorMessage = cr8tor disclosure -a GithubAction -i ./resources -agreement ${{ needs.Workflow-Execution.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver" 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
               if ($LASTEXITCODE -ne 0) {
                 echo "::error::Cr8tor disclosure failed: $errorMessage"
                 echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -360,7 +360,7 @@ jobs:
                 cr8tor\.venv\Scripts\activate
 
                 # run cr8tor publish and capture the error message
-                $errorMessage = cr8tor publish -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+                $errorMessage = cr8tor publish -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
                 if ($LASTEXITCODE -ne 0) {
                   echo "::error::Cr8tor publish failed: $errorMessage"
                   echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
