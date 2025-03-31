@@ -7,6 +7,8 @@ end_time = 2025-03-26T14:30:54.981403
 action_status = "CompletedActionStatus"
 agent = "m.harding@lancaster.ac.uk"
 instrument = "cr8tor-cli"
+agent = "m.harding@lancaster.ac.uk"
+instrument = "cr8tor-cli"
 [[actions.result]]
 "@id" = "15a23742-647e-4c68-b2e6-1a8463053789"
 
@@ -19,6 +21,7 @@ start_time = 2025-03-26T14:40:43.009206
 end_time = 2025-03-26T14:40:43.628216
 action_status = "CompletedActionStatus"
 result = []
+agent = "m.harding@lancaster.ac.uk"
 agent = "m.harding@lancaster.ac.uk"
 instrument = "MetadataService"
 additional_type = "Semantic Validation"
@@ -44,6 +47,7 @@ name = "Stage-Transfer Data Project Action"
 start_time = 2025-03-26T14:43:02.735584
 end_time = 2025-03-26T14:43:03.295536
 action_status = "CompletedActionStatus"
+agent = "m.harding@lancaster.ac.uk"
 agent = "m.harding@lancaster.ac.uk"
 instrument = "PublishService"
 [[actions.result]]
