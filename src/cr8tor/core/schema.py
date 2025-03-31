@@ -133,7 +133,8 @@ class CreateActionProps(ActionProps):
 class AssessActionProps(ActionProps):
     type: Literal["AssessAction"] = Field(default="AssessAction", alias="@type")
 
-    additional_type: str = Field(
+    additional_type: Optional[str] = Field(
+        default=None,
         description="Use to reference sub assessment actions (e.g. disclosure check)"
     )
 
