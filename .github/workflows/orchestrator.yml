@@ -73,7 +73,18 @@ jobs:
                 cr8tor\.venv\Scripts\activate
 
                 # run cr8tor create and capture the error message
-                $errorMessage = cr8tor create -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+                $errorMessage = cr8tor create -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
+                $errorMessage2 = cr8tor create -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -match "^'Create' command failed" } | Select-Object -Last 1
+                echo "errorMessage: $errorMessage"
+                echo "errorMessage2: $errorMessage2"
+
+                if ($LASTEXITCODE -ne 0 -and $errorMessage -notlike "*can only be run once on a project*") {
+                  echo "here1"
+                }
+                if ($LASTEXITCODE -ne 0 -and $errorMessage2 -notlike "*can only be run once on a project*") {
+                  echo "here2"
+                }
+
                 if ($LASTEXITCODE -ne 0 -and $errorMessage -notlike "*can only be run once on a project*") {
                   echo "here"
                   echo "::error::Cr8tor create failed: $errorMessage"
