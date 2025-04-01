@@ -39,8 +39,8 @@ jobs:
             - name: Create a new temp branch
               id: create_branch
               run: |
-                git config --global user.name "LSCSDE Governance Actions"
-                git config --global user.email "lscsde-actions@github.com"
+                git config --global user.name "${{ github.repository_owner }} Governance Actions"
+                git config --global user.email "${{ github.repository_owner }}-actions@github.com"
 
                 $timestamp = "$((Get-Date).ToString('yyyyMMddHHmmss'))"
                 $branchName = "temp-$timestamp-validate"
@@ -57,12 +57,12 @@ jobs:
             - name: Clone cr8tor repository (specific branch)
               if: ${{ inputs.cr8tor_branch != '' }}
               run: |
-                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/lsc-sde-crates/cr8tor.git
+                git clone --branch ${{ inputs.cr8tor_branch }} https://github.com/${{ github.repository_owner }}/cr8tor.git
 
             - name: Clone cr8tor repository (default branch)
               if: ${{ inputs.cr8tor_branch == '' }}
               run: |
-                git clone --branch develop https://github.com/lsc-sde-crates/cr8tor.git
+                git clone --branch develop https://github.com/${{ github.repository_owner }}/cr8tor.git
 
             - name: Sync cr8tor repository
               run: |
@@ -91,8 +91,8 @@ jobs:
 
             - name: Push changes to repo
               run: |
-                git config --global user.name "LSCSDE Governance Actions"
-                git config --global user.email "lscsde-actions@github.com"
+                git config --global user.name "${{ github.repository_owner }} Governance Actions"
+                git config --global user.email "${{ github.repository_owner }}-actions@github.com"
 
                 git add ./bagit ./resources ./config.toml
                 git commit -m "Update after create and validate action"
@@ -209,8 +209,8 @@ jobs:
             - name: Create a new temp branch
               id: create_branch
               run: |
-                git config --global user.name "LSCSDE Governance Actions"
-                git config --global user.email "lscsde-actions@github.com"
+                git config --global user.name "${{ github.repository_owner }} Governance Actions"
+                git config --global user.email "${{ github.repository_owner }}-actions@github.com"
 
                 $branchName = "temp-${{ needs.Validate.outputs.timestamp }}-stagetransfer"
                 git checkout -B $branchName
@@ -346,8 +346,8 @@ jobs:
             - name: Create a new temp branch
               id: create_branch
               run: |
-                git config --global user.name "LSCSDE Governance Actions"
-                git config --global user.email "lscsde-actions@github.com"
+                git config --global user.name "${{ github.repository_owner }} Governance Actions"
+                git config --global user.email "${{ github.repository_owner }}-actions@github.com"
 
                 $branchName = "temp-${{ needs.Validate.outputs.timestamp }}-publish"
                 git checkout -B $branchName
