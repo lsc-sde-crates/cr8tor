@@ -46,8 +46,8 @@ jobs:
           uv sync
           source .venv/bin/activate
 
-          git config --global user.name "LSCSDE Governance Actions"
-          git config --global user.email "lscsde-actions@github.com"
+          git config --global user.name "${{ github.repository_owner }} Governance Actions"
+          git config --global user.email "${{ github.repository_owner }}-actions@github.com"
 
           ORG=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)
-          cr8tor initiate -t https://github.com/lsc-sde-crates/cr8-cookiecutter/ -chk "${{inputs.cookiecutter_branch}}" -cb "${{inputs.cr8tor_branch}}" -n "${{inputs.new_project_name}}" -org $ORG -e "${{inputs.environment}}" --push
+          cr8tor initiate -t https://github.com/${{ github.repository_owner }}/cr8-cookiecutter/ -chk "${{inputs.cookiecutter_branch}}" -cb "${{inputs.cr8tor_branch}}" -n "${{inputs.new_project_name}}" -org $ORG -e "${{inputs.environment}}" --push
