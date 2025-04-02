@@ -64,7 +64,7 @@ def validate(
     Validate the contents of a Bagit directory containing an RO-Crate data directory.
 
     Args:
-        bag_dir (Path): The Bagit directory containing the RO-Crate data directory.
+        bagit_dir (Path): The Bagit directory containing the RO-Crate data directory.
                         Defaults to "./bagit".
         resources_dir (Path): The directory containing resources to include in the RO-Crate.
                               Defaults to "./resources".

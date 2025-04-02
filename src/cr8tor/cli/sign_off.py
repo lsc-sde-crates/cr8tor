@@ -51,7 +51,7 @@ def sign_off(
     Args:
         review_url (str): URL to the project sign off event.
         agent (str): Label of the agent performing cr8tor sign-off execution.
-        bag_dir (Path): The Bagit directory containing the RO-Crate data directory.
+        bagit_dir (Path): The Bagit directory containing the RO-Crate data directory.
                         Defaults to "./bagit".
         resources_dir (Path): The directory containing resources to include in the RO-Crate.
                               Defaults to "./resources".
