@@ -13,4 +13,4 @@ Cr8tor Publisher is made up of three microservices which facilitate cr8tor Data 
 The Microservices are based on Docker container. They can be deployed to any Kubernetes service like Azure Kubernetes Service (AKS) that supports mounting volumes.
 
 ???+ note
-    For example, Lancashire and Cumbria Secure Data Enviornment department uses Azure Kubernetes to host and run the Microservices within their SDE enviornment. The specific Infrastructure and Kubernetes (K8S) configuration can be found here. (TODO Add link here)
+    For example, Lancashire and Cumbria Secure Data Enviornment department uses Azure Kubernetes to host and run the Microservices within their SDE enviornment. The specific Infrastructure and Kubernetes (K8S) configuration [can be found here](https://github.com/lsc-sde-crates/cr8tor-publisher/blob/main/docs/services.md#installation-onto-kubernetes).
