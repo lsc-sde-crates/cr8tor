@@ -4,19 +4,7 @@
 
 5s-crates are used to manage data ingress and egress out of LSC SDE's Kubernetes Research Analytics Platform.
 
-## Development
-
-See [Update DAR files](./docs/cr8tor-cli/development.md)
-
-## Usage
-
-A minimal example is provided in `examples/simple_project`.
-
-Run `cr8tor --help` for more information
-
-## Cr8tor Example
-
-See [example usage](./docs/cr8tor-cli/example_usage.md)
+For more information, including development and usage see [Documentation](./docs/cr8tor-cli/development.md).
 
 ## License
 

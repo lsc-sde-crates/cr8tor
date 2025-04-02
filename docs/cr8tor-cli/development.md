@@ -8,3 +8,9 @@
    2. MacOs/Linux: `source .venv/bin/activate`
 5. Run `uv pip install -e .[dev]` to install `cr8tor` in _editable_ mode.
 6. Run `pre-commit install` to enable pre-commit hooks.
+
+## Usage
+
+A minimal example is provided in `examples/simple_project`.
+
+Run `cr8tor --help` for more information
