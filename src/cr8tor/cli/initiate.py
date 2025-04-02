@@ -74,35 +74,27 @@ def initiate(
     ] = None,
 ):
     """
-
-    Initialize a new CR8 project using a specified cookiecutter template.
+    Initializes a new CR8 project using a specified cookiecutter template.
 
     Args:
-        template_path (Optional[str]): The GitHub URL or relative path to the cr8-cookiecutter template.
-                                       This is prompted from the user if not provided.
-        push_to_github (bool): Flag to indicate if the project should be pushed to GitHub.
-        git_org (Optional[str]): The target GitHub organization name.
-        checkout (Optional[str]): The branch, tag, or commit to checkout from the cookiecutter template.
-        project_name (Optional[str]): The name of the project to be created. If provided, cookiecutter will skip the prompt for other values.
-        environment (str): The environment to use (DEV, TEST, PROD). Defaults to "DEV".
-        cr8tor_branch (Optional[str]): For developing and debugging. Provide the GitHub cr8tor branch that should be used in orchestration layer.
+        template_path (str): The GitHub URL or relative path to the cr8-cookiecutter template.
+                             This is prompted from the user if not provided.
+        push_to_github (bool): Flag to indicate if the project should be pushed to GitHub. Defaults to False.
+        git_org (str, optional): The target GitHub organization name. Required if `push_to_github` is True.
+        checkout (str, optional): The branch, tag, or commit to checkout from the cookiecutter template.
+        project_name (str, optional): The name of the project to be created. If provided, cookiecutter will skip the prompt for other values.
+        environment (str): The target environment (DEV, TEST, PROD). Defaults to "PROD".
+        cr8tor_branch (str, optional): For development and debugging. Specifies the GitHub cr8tor branch to be used in the orchestration layer.
 
-
-    The function generates a new project by applying the specified cookiecutter template.
-    It also adds a timestamp to the context used by the template.
-
-    If `push_to_github` is True, it will also create a GitHub repository under the specified organization
-    and push the generated project to GitHub using the provided personal access token (os.getenv("GH_TOKEN"))
+    This command performs the following actions:
+    - Generates a new project by applying the specified cookiecutter template.
+    - Adds a timestamp to the context used by the template.
+    - If `push_to_github` is True, creates a GitHub repository under the specified organization and pushes the generated project to GitHub using the personal access token (retrieved from `os.getenv("GH_TOKEN")`).
 
     Example usage:
-
         cr8tor initiate -t https://github.com/lsc-sde-crates/cr8-cookiecutter
 
-        or
-
         cr8tor initiate -t path-to-local-cr8-cookiecutter-dir
-
-        or
 
         cr8tor initiate -t path-to-local-cr8-cookiecutter-dir -n "my-project" -org "lsc-sde-crates" --push
     """

@@ -64,18 +64,19 @@ def validate(
     Validate the contents of a Bagit directory containing an RO-Crate data directory.
 
     Args:
+        agent (str): The agent label triggering the validation. Defaults to None.
         bagit_dir (Path): The Bagit directory containing the RO-Crate data directory.
-                        Defaults to "./bagit".
+                          Defaults to "./bagit".
         resources_dir (Path): The directory containing resources to include in the RO-Crate.
                               Defaults to "./resources".
 
-    The function validates the contents of the specified access and governance metadata resources and rebuilds the
-    Bagit contents including the RO-Crate metadata.
+    This function performs the following:
+    - Validates the contents of the specified Bagit directory and its RO-Crate data directory.
+    - Validates access and governance metadata resources.
+    - Rebuilds the Bagit contents, including the RO-Crate metadata.
 
     Example usage:
-
-        cr8tor validate -b path-to-bagit-dir -i path-to-resources-dir
-
+        cr8tor validate -b <path-to-bagit-dir> -i <path-to-resources-dir>
     """
 
     if agent is None:

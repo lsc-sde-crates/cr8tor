@@ -46,22 +46,21 @@ def sign_off(
     ] = "./resources",
 ):
     """
-    Log sign-off metadata in RO-Crate and verify project sign-off in approvals management platform (i.e. github)
+    Logs sign-off metadata in the RO-Crate and verifies project sign-off in the approvals management platform (e.g., GitHub).
 
     Args:
-        review_url (str): URL to the project sign off event.
-        agent (str): Label of the agent performing cr8tor sign-off execution.
-        bagit_dir (Path): The Bagit directory containing the RO-Crate data directory.
-                        Defaults to "./bagit".
-        resources_dir (Path): The directory containing resources to include in the RO-Crate.
-                              Defaults to "./resources".
+        agreement_url (str): URL to the project sign-off event (e.g., PR event in the project's GitHub history).
+        signing_entity (str): The entity that agreed to sign off the project request.
+        agent (str): The agent label triggering the validation. Defaults to None.
+        bagit_dir (Path): Path to the Bagit directory containing the RO-Crate data directory. Defaults to "./bagit".
+        resources_dir (Path): Path to the directory containing resources to include in the RO-Crate. Defaults to "./resources".
 
-    This command updates the project approvals metadata
+    This command performs the following actions:
+    - Updates the project approvals metadata in the RO-Crate.
+    - Verifies the project sign-off in the approvals management platform.
 
     Example usage:
-
-        cr8tor sign-off -agreement <url_to_approved_policy> -signing-entity <entity_name>
-
+        cr8tor sign-off -agreement <url_to_approved_policy> -signing-entity <entity_name> -a <agent_label> -b <bagit_dir> -i <resources_dir>
     """
 
     if agent is None:

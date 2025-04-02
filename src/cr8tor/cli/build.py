@@ -58,6 +58,22 @@ def build(
     ] = "./config.toml",
     dryrun: Annotated[bool, typer.Option(default="--dryrun")] = False,
 ):
+    """
+    Builds the RO-Crate data crate for the target Cr8tor project using the specified metadata resources and configuration.
+
+    This command performs the following actions:
+    - Reads the configuration from the specified TOML file.
+    - Includes resources from the specified directory into the RO-Crate.
+    - If the `dryrun` option is provided, prints the crate details without writing to the "crate/" directory.
+
+    Args:
+        resources_dir (Path): Directory containing resources to include in the RO-Crate. Defaults to "./resources".
+        config_file (Path): Location of the configuration TOML file. Defaults to "./config.toml".
+        dryrun (bool): If True, prints the crate details without writing to the "crate/" directory. Defaults to False.
+
+    Example usage:
+        cr8tor build -i path-to-resources-dir -c path-to-config-file --dryrun
+    """
     ###############################################################################
     # 1 Validate project build materials (i.e. resources/ & config.toml)
     ###############################################################################
