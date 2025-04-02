@@ -37,22 +37,23 @@ def create(
     dryrun: Annotated[bool, typer.Option(default="--dryrun")] = False,
 ):
     """
-    Create generates the initial RO-Crate data crate within the target Cr8tor project from the specified metadata resources.
-    This function generates a uuid for the project and then builds a RO-Crate along with RO-Crate knowledge graph which is further packaged
-    as a non-serialised BagIt Archive in the "bagit/" directory. If the `dryrun` argument is provided, the function will print the crate
-    details without writing to the "crate/" directory.
+    Generates the initial RO-Crate data crate within the target Cr8tor project from the specified metadata resources.
+
+    This command performs the following actions:
+    - Generates a UUID for the project.
+    - Builds an RO-Crate along with an RO-Crate knowledge graph.
+    - Packages the crate as a non-serialized BagIt Archive in the "bagit/" directory.
+    - If the `dryrun` option is provided, prints the crate details without writing to the "crate/" directory.
 
     Args:
         agent (str): The agent label triggering the validation. Defaults to None.
-        resources_dir (Path): Directory containing resources to include in RO-Crate. Defaults to "./resources".
-        bagit_dir (Path): Bagit directory containing RO-Crate data directory. Defaults to "./bagit".
-        config_file (Path): Location of configuration TOML file. Defaults to "./config.toml".
-        dryrun (bool): If provided, the function will print the crate details without writing to the "crate/" directory. Defaults to False.
+        resources_dir (Path): Directory containing resources to include in the RO-Crate. Defaults to "./resources".
+        bagit_dir (Path): Bagit directory containing the RO-Crate data directory. Defaults to "./bagit".
+        config_file (Path): Location of the configuration TOML file. Defaults to "./config.toml".
+        dryrun (bool): If True, prints the crate details without writing to the "crate/" directory. Defaults to False.
 
     Example usage:
-
         cr8tor create -a agent_label -i path-to-resources-dir -b path-to-bagit-dir -c path-to-config-file --dryrun
-
     """
 
     if agent is None:

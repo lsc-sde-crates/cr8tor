@@ -84,7 +84,7 @@ The required fields for that type (DatabricksSQL) are validated by cr8tor and cr
 **[credentials]**
 
 Credentials fields are tied to the source we want to extract data from.
-Currently, for Databricks SQL endpoint, we use Databricks Service Principal (SPN). **See here how to create a new SPN and assign required roles and permissions. TODO**
+Currently, for Databricks SQL endpoint, we use Databricks Service Principal (SPN). [**See here how to create a new SPN and assign required roles and permissions.**](./../developer-guide/source-setup.md)
 
 | Field            | Description                                                                                     |
 | :--------------- | :---------------------------------------------------------------------------------------------- |

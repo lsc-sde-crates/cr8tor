@@ -33,7 +33,7 @@ Validate stage runs two cr8tor cli commands:
 
 Create command checks basic configuration and creates bagit and ro-crate metadata objects.
 
-Validate command initialises the connection to the source database (e.g. Databricks Unity Catalog), fetches the metadata of requested tables and columns and returns them back. Cr8tor makes here connections to the Approval Service endpoint project/validate (**TODO link to specific docs**).
+Validate command initialises the connection to the source database (e.g. Databricks Unity Catalog), fetches the metadata of requested tables and columns and returns them back. Cr8tor makes here connections to the Approval Service endpoint project/validate.
 
 The results of commands are committed to a temporary git branch (like *temp-20250305124305-validate*) and a Pull Request from the temp branch to the main branch is created.
 
@@ -77,7 +77,7 @@ Workflow-Execution stage runs
  cr8tor stage-transfer
 ```
 
-command which starts the data retrieval process. It makes a connection to the Approval Service project/package endpoint (**TODO link to specific docs**). Data is stored in the dedicated storage account in the **staging** container. **Data is not yet available for the researcher**, awaiting final approval in Disclosure process.
+command which starts the data retrieval process. It makes a connection to the Approval Service project/package endpoint. Data is stored in the dedicated storage account in the **staging** container. **Data is not yet available for the researcher**, awaiting final approval in Disclosure process.
 
 Similarly to Validate stage, a new temp branch (like *temp-20250305124305-stagetransfer*) is created as well as a Pull Request to the main branch.
 ![Workflow-Execution temp branch](./../assets/screenshots/project_temp_branch.png)
@@ -99,7 +99,7 @@ Publish stage runs
  cr8tor publish
 ```
 
-command which starts the publishing process. It makes a connection to the Approval Service project/publish endpoint (**TODO link to specific docs**).
+command which starts the publishing process. It makes a connection to the Approval Service project/publish endpoint.
 
 Similarly to previous stages, a new temp branch (like *temp-20250305124305-publish*) is created as well as a Pull Request to the main branch. Pull Request is automatically merged to the main branch.
 
