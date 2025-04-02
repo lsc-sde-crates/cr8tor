@@ -16,13 +16,13 @@ app.add_typer(cli_initiate)
 
 
 @app.command(name="read")
-def read_bag(bag_dir: Annotated[Path, typer.Option(default="-i")] = "./bagit"):
+def read_bag(bagit_dir: Annotated[Path, typer.Option(default="-i")] = "./bagit"):
     """
     Reads a Research Object Crate (RO-Crate) from the specified directory and prints its details in a table format.
     """
 
-    print_bagit(bag_dir)
-    crate = ROCrate(bag_dir / "data")
+    print_bagit(bagit_dir)
+    crate = ROCrate(bagit_dir / "data")
     print_crate(crate)
 
 

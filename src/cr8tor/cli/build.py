@@ -14,12 +14,12 @@ from cr8tor.cli.display import print_crate
 app = typer.Typer()
 
 
-def init_bag(project_id: str, bag_dir: Path, config: dict) -> bagit.Bag:
+def init_bag(project_id: str, bagit_dir: Path, config: dict) -> bagit.Bag:
     """
     Initializes a BagIt bag for a given project.
     Args:
         project_id (str): The unique identifier for the project.
-        bag_dir (Path): The directory where the bag will be created.
+        bagit_dir (Path): The directory where the bag will be created.
         config (dict): Configuration dictionary containing BagIt metadata.
     Returns:
         bagit.Bag: The created BagIt bag object.
@@ -28,9 +28,9 @@ def init_bag(project_id: str, bag_dir: Path, config: dict) -> bagit.Bag:
         bagit.BagError: If there is an error creating the bag.
     """
 
-    bag_dir.mkdir(parents=True, exist_ok=True)
+    bagit_dir.mkdir(parents=True, exist_ok=True)
 
-    bag: bagit.Bag = bagit.make_bag(bag_dir=bag_dir, checksums=["sha512"])
+    bag: bagit.Bag = bagit.make_bag(bagit_dir=bagit_dir, checksums=["sha512"])
 
     # bag.info.update(s.BagitInfo(**config["bagit-info"])) # ToDo: Fix serialisation alias issue
     bag.info.update(**config["bagit-info"])
@@ -58,6 +58,22 @@ def build(
     ] = "./config.toml",
     dryrun: Annotated[bool, typer.Option(default="--dryrun")] = False,
 ):
+    """
+    Builds the RO-Crate data crate for the target Cr8tor project using the specified metadata resources and configuration.
+
+    This command performs the following actions:
+    - Reads the configuration from the specified TOML file.
+    - Includes resources from the specified directory into the RO-Crate.
+    - If the `dryrun` option is provided, prints the crate details without writing to the "crate/" directory.
+
+    Args:
+        resources_dir (Path): Directory containing resources to include in the RO-Crate. Defaults to "./resources".
+        config_file (Path): Location of the configuration TOML file. Defaults to "./config.toml".
+        dryrun (bool): If True, prints the crate details without writing to the "crate/" directory. Defaults to False.
+
+    Example usage:
+        cr8tor build -i path-to-resources-dir -c path-to-config-file --dryrun
+    """
     ###############################################################################
     # 1 Validate project build materials (i.e. resources/ & config.toml)
     ###############################################################################
@@ -327,24 +343,26 @@ def build(
     # 7 Add Ro-crate meta to bagit directory structure
     ###############################################################################
     if not dryrun:
-        bag_dir = Path("./bagit")
+        bagit_dir = Path("./bagit")
 
-        if bag_dir.exists() and bag_dir.is_dir():
-            bag = bagit.Bag(str(bag_dir))
+        if bagit_dir.exists() and bagit_dir.is_dir():
+            bag = bagit.Bag(str(bagit_dir))
 
             # Update bag info from config.toml; This does not modify the External-Identifier.
             # Delete and recreate the bag if the External-Identifier needs to be changed.
             bag.info.update(**config["bagit-info"])
             log.info("Loaded existing bag")
         else:
-            bag = init_bag(project_id=project_props.id, bag_dir=bag_dir, config=config)
+            bag = init_bag(
+                project_id=project_props.id, bagit_dir=bagit_dir, config=config
+            )
 
-        crate.write(bag_dir / "data")
+        crate.write(bagit_dir / "data")
         bag.save(manifests=True)
 
         n_payload_files = len(list(bag.payload_files()))
         log.info(
-            f"[cyan]RO-Crate BagIt created at[/cyan] - [bold magenta]{bag_dir} with {n_payload_files} files.[/bold magenta]",
+            f"[cyan]RO-Crate BagIt created at[/cyan] - [bold magenta]{bagit_dir} with {n_payload_files} files.[/bold magenta]",
         )
     else:
         log.warning(

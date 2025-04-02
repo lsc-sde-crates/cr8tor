@@ -9,15 +9,15 @@ from rocrate.rocrate import ROCrate
 from cr8tor.utils import console
 
 
-def print_bagit(bag_dir: Path) -> None:
+def print_bagit(bagit_dir: Path) -> None:
     """
     Print the metadata and contents of a BagIt archive in a formatted table.
     Args:
-        bag_dir (Path): The directory path of the BagIt archive.
+        bagit_dir (Path): The directory path of the BagIt archive.
     Returns:
         None
     """
-    bag = bagit.Bag(str(bag_dir))
+    bag = bagit.Bag(str(bagit_dir))
 
     table = rich.table.Table()
     table.add_column("Field", justify="right", style="cyan", no_wrap=True)

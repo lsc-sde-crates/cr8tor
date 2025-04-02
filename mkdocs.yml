@@ -22,6 +22,9 @@ nav:
     - Source setup: developer-guide/source-setup.md
   - Cr8tor CLI App:
     - CLI Commands: cr8tor-cli/commands.md
+    - Development: cr8tor-cli/development.md
+    - Example Usage: cr8tor-cli/example_usage.md
+    - Branching Strategy: cr8tor-cli/branching-strategy.md
   - Cr8tor Publisher App:
     - Overview: cr8tor-publisher/overview.md
     - LSC SDE:
