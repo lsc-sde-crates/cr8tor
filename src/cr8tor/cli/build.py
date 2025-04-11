@@ -30,7 +30,7 @@ def init_bag(project_id: str, bagit_dir: Path, config: dict) -> bagit.Bag:
 
     bagit_dir.mkdir(parents=True, exist_ok=True)
 
-    bag: bagit.Bag = bagit.make_bag(bagit_dir=bagit_dir, checksums=["sha512"])
+    bag: bagit.Bag = bagit.make_bag(bag_dir=bagit_dir, checksums=["sha512"])
 
     # bag.info.update(s.BagitInfo(**config["bagit-info"])) # ToDo: Fix serialisation alias issue
     bag.info.update(**config["bagit-info"])
