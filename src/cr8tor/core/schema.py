@@ -200,7 +200,7 @@ class DatasetMetadata(BaseModel):
     description: Optional[str] = Field(
         description="A dataset comprising one or more tables"
     )
-    tables: List[TableMetadata]
+    tables: Optional[List[TableMetadata]] = None
     staging_path: Optional[dict] = None
     publish_path: Optional[dict] = None
 

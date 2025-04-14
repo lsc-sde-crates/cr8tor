@@ -31,6 +31,9 @@ def verify_tables_metadata(
             )
 
         remote_table_columns = remote_lookup[table_name]
+        if local_table.columns == None:
+            continue
+        
         for filter_col in local_table.columns:
             if filter_col.name not in remote_table_columns:
                 return (
