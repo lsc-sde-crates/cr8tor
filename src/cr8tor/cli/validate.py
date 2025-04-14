@@ -14,6 +14,60 @@ from datetime import datetime
 app = typer.Typer()
 
 
+def merge_metadata_into_dataset(
+    resource_path: Path, metadata: schemas.DatasetMetadata
+) -> None:
+    resource_data = project_resources.read_resource(resource_path)
+
+    if "tables" not in resource_data:
+        resource_data["tables"] = []
+
+    table_lookup = {table["name"]: table for table in resource_data["tables"]}
+
+    for meta_table in metadata.tables or []:
+        if meta_table.name in table_lookup:
+            existing_table = table_lookup[meta_table.name]
+            existing_columns = existing_table.setdefault("columns", [])
+            if meta_table.description:
+                existing_table["description"] = meta_table.description
+
+            existing_col_lookup = {col["name"]: col for col in existing_columns}
+
+            for meta_col in meta_table.columns or []:
+                if meta_col.name not in existing_col_lookup:
+                    new_col = {"name": meta_col.name}
+                    if meta_col.datatype:
+                        new_col["datatype"] = meta_col.datatype
+                    if meta_col.description:
+                        new_col["description"] = meta_col.description
+                    existing_columns.append(new_col)
+                else:
+                    existing_col = existing_col_lookup[meta_col.name]
+                    if meta_col.description and "description" not in existing_col:
+                        existing_col["description"] = meta_col.description
+                    if meta_col.datatype and "datatype" not in existing_col:
+                        existing_col["datatype"] = meta_col.datatype
+
+        else:
+            new_table = {"name": meta_table.name}
+            if meta_table.columns:
+                new_table["columns"] = []
+                for col in meta_table.columns:
+                    col_dict = {"name": col.name}
+                    if col.datatype:
+                        col_dict["datatype"] = col.datatype
+                    if col.description:
+                        col_dict["description"] = col.description
+                    new_table["columns"].append(col_dict)
+
+            resource_data["tables"].append(new_table)
+
+    if metadata.description:
+        resource_data["description"] = metadata.description
+
+    project_resources.update_resource(resource_path, resource_data)
+
+
 def verify_tables_metadata(
     remote_metadata: List[schemas.TableMetadata],
     local_metadata: List[schemas.TableMetadata],
@@ -22,21 +76,25 @@ def verify_tables_metadata(
         table.name: {col.name for col in table.columns} for table in remote_metadata
     }
 
-    for local_table in local_metadata:
-        table_name = local_table.name
-        if table_name not in remote_lookup:
-            return (
-                False,
-                f"Validation Error: Table '{table_name}' is missing from target schema metadata.",
-            )
-
-        remote_table_columns = remote_lookup[table_name]
-        for filter_col in local_table.columns:
-            if filter_col.name not in remote_table_columns:
+    if local_metadata is not None:
+        for local_table in local_metadata:
+            table_name = local_table.name
+            if table_name not in remote_lookup:
                 return (
                     False,
-                    f"Validation Error: Column '{filter_col.name}' is missing from target schema table '{table_name}' metadata.",
+                    f"Validation Error: Table '{table_name}' is missing from target schema metadata.",
                 )
+
+            remote_table_columns = remote_lookup[table_name]
+            if local_table.columns is None:
+                continue
+
+            for filter_col in local_table.columns:
+                if filter_col.name not in remote_table_columns:
+                    return (
+                        False,
+                        f"Validation Error: Column '{filter_col.name}' is missing from target schema table '{table_name}' metadata.",
+                    )
 
     return True, None
 
@@ -150,6 +208,7 @@ def validate(
             exit_code = schemas.Cr8torReturnCode.VALIDATION_ERROR
             break
 
+        merge_metadata_into_dataset(dataset_meta_file, validate_dataset_info)
     #
     # This assumes validate can be run multiple times on a project
     # Ensures previous run entities for this action are cleared in "actions" before
