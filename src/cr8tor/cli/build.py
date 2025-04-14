@@ -285,7 +285,7 @@ def build(
 
     access_source = s.DatabricksSourceConnection(**access["source"])
     crate.add_file(
-        source=project_resource_path,
+        source=access_resource_path,
         dest_path="access/access.toml",
         properties={"name": access_source.name},
     )
