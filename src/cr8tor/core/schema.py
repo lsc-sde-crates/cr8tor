@@ -135,7 +135,7 @@ class AssessActionProps(ActionProps):
 
     additional_type: Optional[str] = Field(
         default=None,
-        description="Use to reference sub assessment actions (e.g. disclosure check)"
+        description="Use to reference sub assessment actions (e.g. disclosure check)",
     )
 
 
@@ -187,11 +187,13 @@ class CrateMeta(StrEnum):
 class ColumnMetadata(BaseModel):
     name: str
     datatype: Optional[str] = None
+    description: Optional[str] = None
 
 
 class TableMetadata(BaseModel):
     name: str
     columns: Optional[List[ColumnMetadata]] = None
+    description: Optional[str] = None
 
 
 class DatasetMetadata(BaseModel):
