@@ -7,7 +7,7 @@
             "path": "../cr8-cookiecutter"
         },
         {
-            "path": "../cr8tor-examples"
+            "path": "../cr8-example-project"
         }
     ]
 }
