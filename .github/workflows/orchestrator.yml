@@ -71,7 +71,7 @@ jobs:
             - name: Cr8tor CLI Create & Validate
               run: |
                 cr8tor\.venv\Scripts\activate
-                $certPath = .\.venv\Scripts\python.exe -m certifi
+                $certPath = cr8tor\.venv\Scripts\python.exe -m certifi
                 $env:SSL_CERT_FILE = $certPath
 
                 # run cr8tor create and capture the error message
