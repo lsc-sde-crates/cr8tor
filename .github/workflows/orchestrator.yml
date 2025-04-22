@@ -67,10 +67,12 @@ jobs:
             - name: Sync cr8tor repository
               run: |
                 uv sync --directory cr8tor
+                uv run python -m certifi
 
             - name: Cr8tor CLI Create & Validate
               run: |
                 cr8tor\.venv\Scripts\activate
+                $env:SSL_CERT_FILE = python -m certifi
 
                 # run cr8tor create and capture the error message
                 $errorMessage = cr8tor create -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
