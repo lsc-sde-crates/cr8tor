@@ -160,6 +160,7 @@ jobs:
             - name: Cr8tor CLI Sign-Off
               run: |
                 cr8tor\.venv\Scripts\activate
+                $certPath = cr8tor\.venv\Scripts\python.exe -m certifi
 
                 # run cr8tor sign-off and capture the error message
                 $errorMessage = cr8tor sign-off -a GithubAction -i ./resources -agreement ${{ needs.Validate.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver" 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
@@ -222,6 +223,7 @@ jobs:
             - name: Cr8tor CLI Staging Data
               run: |
                 cr8tor\.venv\Scripts\activate
+                $certPath = cr8tor\.venv\Scripts\python.exe -m certifi
 
                 # run cr8tor stage-transfer and capture the error message
                 $errorMessage = cr8tor stage-transfer -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
@@ -298,6 +300,7 @@ jobs:
           - name: Cr8tor CLI Sign-Off
             run: |
               cr8tor\.venv\Scripts\activate
+              $certPath = cr8tor\.venv\Scripts\python.exe -m certifi
 
               # run cr8tor disclosure and capture the error message
               $errorMessage = cr8tor disclosure -a GithubAction -i ./resources -agreement ${{ needs.Workflow-Execution.outputs.pr_url }} -signing-entity "cr8-ALL-projects-approver" 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
@@ -359,6 +362,7 @@ jobs:
             - name: Cr8tor CLI Publish Data
               run: |
                 cr8tor\.venv\Scripts\activate
+                $certPath = cr8tor\.venv\Scripts\python.exe -m certifi
 
                 # run cr8tor publish and capture the error message
                 $errorMessage = cr8tor publish -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
