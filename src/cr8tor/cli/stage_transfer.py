@@ -108,6 +108,26 @@ def stage_transfer(
                 destination_format=project_info["project"]["destination_format"],
                 metadata=dataset_props,
             )
+
+            resp_dict = asyncio.run(api.stage_transfer(access_contract))
+            validate_resp = schemas.StageTransferPayload(**resp_dict)
+
+            # TODO: Handle multiple staging locations
+            # TODO: Add error response handler for action error property
+
+            if (
+                validate_resp.data_retrieved
+                and validate_resp.data_retrieved[0].file_path
+            ):
+                staging_location_dict = validate_resp.data_retrieved[0].model_dump()
+                staging_location_dict["@id"] = str(uuid.uuid4())
+
+                staging_results.append(staging_location_dict)
+
+                project_resources.create_resource_entity(
+                    dataset_meta_file, "staging_path", staging_location_dict
+                )
+
         except Exception as e:
             cli_utils.close_create_action_command(
                 command_type=schemas.Cr8torCommandType.STAGE_TRANSFER,
@@ -119,22 +139,6 @@ def stage_transfer(
                 exit_msg=f"{str(e)}",
                 exit_code=schemas.Cr8torReturnCode.UNKNOWN_ERROR,
                 instrument=os.getenv("PUBLISH_NAME"),
-            )
-
-        resp_dict = asyncio.run(api.stage_transfer(access_contract))
-        validate_resp = schemas.StageTransferPayload(**resp_dict)
-
-        # TODO: Handle multiple staging locations
-        # TODO: Add error response handler for action error property
-
-        if validate_resp.data_retrieved and validate_resp.data_retrieved[0].file_path:
-            staging_location_dict = validate_resp.data_retrieved[0].model_dump()
-            staging_location_dict["@id"] = str(uuid.uuid4())
-
-            staging_results.append(staging_location_dict)
-
-            project_resources.create_resource_entity(
-                dataset_meta_file, "staging_path", staging_location_dict
             )
 
     cli_utils.close_create_action_command(
