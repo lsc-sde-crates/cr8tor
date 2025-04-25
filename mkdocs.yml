@@ -27,12 +27,13 @@ nav:
     - Branching Strategy: cr8tor-cli/branching-strategy.md
   - Cr8tor Publisher App:
     - Overview: cr8tor-publisher/overview.md
-    - LSC SDE:
-      - Infrastructure: cr8tor-publisher/lscsde/infrastructure.md
-      - Deploy to Kubernetes: cr8tor-publisher/lscsde/deploy-to-kubernetes.md
   - CookieCutter Template:
     - Overview: cr8tor-cookiecutter/overview.md
     - Branching Strategy: cr8tor-cookiecutter/branching-strategy.md
+  - LSC SDE:
+    - Infrastructure: lscsde/infrastructure.md
+    - Azure Data Share: lscsde/azuredatashare.md
+    - Deploy to Kubernetes: lscsde/deployment-to-kubernetes.md
 
  # - Schema Reference: schema_reference.md
 theme:
@@ -64,6 +65,7 @@ theme:
     # - toc.integrate
 plugins:
   - search
+  - include-markdown
   - mkdocstrings:
       handlers:
         python:
