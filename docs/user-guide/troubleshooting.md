@@ -37,3 +37,11 @@ During Validation or WorkflowExecution(Stage-Transfer) jobs microservices and Cr
 - *Databricks API error: User does not have USE SCHEMA on <schema\>*
 
 The error means that serviceprincipal specified in the [access/access configuration](./update-resources-files.md#accessaccess) does not have correct permission on the given datasource. [Follow this guide](./../developer-guide/source-setup.md#databricks-unity-catalog) for how to set up and assign correct permissions.
+
+## Cr8tor Init Ro-Crate fails with 401 client error
+
+During Cr8tor Initiate command (init-project workflow) we use the GitHub Personal Access Token (PAT) to create new DAR project repository and create required GitHub Teams and set up repository settings.
+
+If the token expires, GitHub will return *401 Client Error: Unauthorized for url https://api.github.com/repos/my_organisation/cr8-my_repo*
+
+See [GitHub PAT token](./../developer-guide/orchestration-layer-setup.md#github-pat-token) how to recreate the token and update relevant GitHub secrets.

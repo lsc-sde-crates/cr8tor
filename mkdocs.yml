@@ -65,6 +65,8 @@ theme:
     # - toc.integrate
 plugins:
   - search
+  - glightbox:
+       width: 100%
   - include-markdown
   - mkdocstrings:
       handlers:
@@ -79,6 +81,9 @@ watch:
   - src/cr8tor
 markdown_extensions:
   - admonition
+  - attr_list
+  - toc:
+      permalink: true
   - pymdownx.details
   - pymdownx.superfences:
       custom_fences:

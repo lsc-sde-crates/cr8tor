@@ -42,7 +42,7 @@ Steps:
 
 ???+ warning
 
-    *--push* argument requires GitHub PAT token with the necessary organisation level permission. See [minimum PAT token permissions defined here](./../developer-guide/orchestration-layer-setup.md#cr8tor-repository-secrets) for token permission details. Store the token under GH_TOKEN Environment Variable (expected by *gh_rest_api_client* module)
+    *--push* argument requires GitHub PAT token with the necessary organisation level permission. See [minimum PAT token permissions defined here](./../developer-guide/orchestration-layer-setup.md#github-pat-token) for token permission details. Store the token under GH_TOKEN Environment Variable (expected by *gh_rest_api_client* module)
 
 
    On successful run, we should see the new project's folder with sample access, governance and metadata files. If it is not already linked to the remote GitHub repository, link it. If remote does not exist, create/request it following [below steps](#github-action-init-ro-crate-project).

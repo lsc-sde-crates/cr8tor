@@ -11,8 +11,8 @@ This section explains key setup up requirements for the Orchestration layer of C
   - [GitHub Organisation secrets](#github-organisation-secrets)
   - [GitHub Teams](#github-teams)
     - [Adding new members](#adding-new-members)
+  - [GitHub PAT token](#github-pat-token)
   - [DAR Project Repo settings](#dar-project-repo-settings)
-  - [CR8TOR Repository Secrets](#cr8tor-repository-secrets)
 
 ## GitHub Runners
 
@@ -67,22 +67,9 @@ The `cr8-ALL-projects-approver` and `devops_admin` teams must be created **manua
 
 Click on a chosen team `cr8-ALL-projects-approver`, `devops_admin` or `cr8-<project_name>-contributor`, then **Add a member**. Invitation to Organisation might be required.
 
-## DAR Project Repo settings
+## GitHub PAT token
 
-Each new DAR project is automatically created with two repository level environments:
-
-- `signoff`
-- `disclosure`
-
-Both of them have **protection rules** which requires `cr8-ALL-projects-approver` to review the workflow run.
-This is all **automatically set up** on DAR repository creation when [cr8tor initiate command is run](./../user-guide/create-new-dar-project.md).
-
-![project repo settings environments](./../assets/screenshots/project_repo_settings_env.png)
-![project repo settings environments protection rules](./../assets/screenshots/project_repo_settings_env_rules.png)
-
-## CR8TOR Repository Secrets
-
-[Cr8tor Initiate command](./../cr8tor-cli/commands.md#initiate-project) uses a Fine-grained Personal access token (PAT) to create a DAR project repository in GitHub, to create a new GitHub Team for DAR project's contributors and assigning other organisational and repository level settings.
+[Cr8tor Initiate command](./../cr8tor-cli/commands.md#initiate-project) uses a Fine-grained Personal access token (PAT) to create a DAR project repository in GitHub or to create a new GitHub Team for DAR project's contributors and assigning other organisational and repository level settings.
 
 The fine-grained PAT token needs to be created by GitHub Organisation administrator. It should have the following permissions:
 
@@ -98,6 +85,47 @@ The fine-grained PAT token needs to be created by GitHub Organisation administra
 
 - Members: Read and write
 
-The token should be stored in CR8TOR Repository Secret named **ORG_LVL_RW_REPOS_TEAMS**, so that it can be used by Init RO-Crate Project workflow and passed to cr8tor initiate command. **ORG_LVL_RW_REPOS_TEAMS is only at cr8tor repository level, not organisational level**.
+Steps:
+
+1. Go to GitHub Settings to generate PAT token (<https://github.com/settings/personal-access-tokens/>)
+<br />
+![github personal access token generate](./../assets/screenshots/github_pat_token_1.png){ width=75% }
+<br />
+2. Use following settings:
+**name**: provide the value that you will easily identify PAT's permissions for. e.g. LSC-Crates-Rocrate-Scope
+**resource owner**: restrict to the GitHub Organisation containing DAR repos, e.g. lsc-sde-crates
+**expiration**: eg 366 days or less
+**repository access**: set to ALL repositories, as we use PAT token to create new private repos
+**permissions** see the above list.
+<br />
+![cr8tor personal access token generate 2](./../assets/screenshots/github_pat_token_2.png){ width=75% }
+<br />
+Once the PAT token is created you should see below summary:
+![cr8tor personal access token generate 3](./../assets/screenshots/github_pat_token_3.png){ width=75% }
+<br />
+3. Go to the **CR8TOR Repository** and create/update the **repository secret** named **ORG_LVL_RW_REPOS_TEAMS**.
+  We use the secret in the Init RO-Crate Project workflow running cr8tor initate command using the Github runner.
+  If you want to run cr8tor commands locally, create/obtain the token with the same permission scope.
 ![cr8tor repo secrets](./../assets/screenshots/cr8tor_repo_secrets.png)
-![cr8tor workflow github token](./../assets/screenshots/cr8tor_workflow_init_token.png)
+![cr8tor workflow github token](./../assets/screenshots/cr8tor_workflow_init_token.png){ width=50% }
+
+???+ warning
+    **ORG_LVL_RW_REPOS_TEAMS is only at cr8tor repository level, not organisational level**.
+
+## DAR Project Repo settings
+
+Each new DAR project is automatically created with two repository level environments:
+
+- `signoff`
+- `disclosure`
+
+Both of them have **protection rules** which requires `cr8-ALL-projects-approver` to review the workflow run.
+This is all **automatically set up** on DAR repository creation when [cr8tor initiate command is run](./../user-guide/create-new-dar-project.md).
+
+Environments:
+<br />
+![project repo settings environments](./../assets/screenshots/project_repo_settings_env.png){ width=75% }
+<br />
+Protection rules:
+<br />
+![project repo settings environments protection rules](./../assets/screenshots/project_repo_settings_env_rules.png){ width=75% }
