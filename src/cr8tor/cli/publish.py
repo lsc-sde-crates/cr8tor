@@ -96,16 +96,16 @@ def publish(
             dataset_meta_file = f
             break
 
-        publish_req = schemas.DataContractProjectRequest(
+        publish_req = schemas.DataContractPublishRequest(
             project_name=project_info["project"]["project_name"],
             project_start_time=project_info["project"]["project_start_time"],
-            destination_type=project_info["project"]["destination_type"],
+            destination=project_info["project"]["destination"],
         )
 
         resp_dict = asyncio.run(api.publish(publish_req))
+        resp_dict["destination_type"] = project_info["project"]["destination"]["type"]
         validate_resp = schemas.PublishPayload(**resp_dict)
-
-        if validate_resp.data_published and validate_resp.data_published[0].file_path:
+        if validate_resp.data_published:
             publish_location_dict = validate_resp.data_published[0].model_dump()
             publish_location_dict["@id"] = str(uuid.uuid4())
 

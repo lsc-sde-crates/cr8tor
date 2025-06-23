@@ -192,8 +192,9 @@ def build(
     #     credentials=s.SourceAccessCredential(**access["credentials"]),
     #     project_name=governance["project"]["project_name"],
     #     project_start_time=governance["project"]["project_start_time"],
-    #     destination_type=governance["project"]["destination_type"],
-    #     destination_format=governance["project"]["destination_format"],
+    #     destination_type=governance["project"]["destination"]["type"],
+    #     destination_name=governance["project"]["destination"]["name"],
+    #     destination_format=governance["project"]["destination"]["format"],
     #     metadata=None
     # )
     # TODO: Identify and init any RC contextual entities for describing data access
@@ -283,11 +284,18 @@ def build(
     # Access resources
     #
 
-    access_source = s.DatabricksSourceConnection(**access["source"])
+    source_data = {}
+    source_data["source"] = access["source"].copy()
+    source_data["source"]["type"] = source_data["source"]["type"].lower()
+    source_data["source"]["credentials"] = access["credentials"]
+    source_data["extract_config"] = (
+        access["extract_config"] if "extract_config" in access else None
+    )
+    access_source = s.SourceConnectionModel(**source_data)
     crate.add_file(
         source=access_resource_path,
         dest_path="access/access.toml",
-        properties={"name": access_source.name},
+        properties={"name": access_source.source.type},
     )
 
     log.info(

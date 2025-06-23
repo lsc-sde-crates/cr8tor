@@ -5,10 +5,11 @@ from typing import Annotated
 from pathlib import Path
 
 import typer
+import sys
 import re
 
 from cookiecutter.main import cookiecutter
-from cookiecutter.exceptions import OutputDirExistsException
+from cookiecutter.exceptions import OutputDirExistsException, FailedHookException
 from cr8tor.utils import log
 import cr8tor.core.resourceops as project_resources
 import cr8tor.core.schema as schemas
@@ -132,6 +133,15 @@ def initiate(
             project_dir = cookiecutter(
                 template_path, checkout=checkout, extra_context=extra_context
             )
+        except FailedHookException as e:
+            # Extract error message from the exception
+            error_msg = str(e)
+            if "VALIDATION_ERROR:" in error_msg:
+                validation_error = error_msg.split("VALIDATION_ERROR:")[1].strip()
+                print(f"Validation failed: {validation_error}")
+            else:
+                print(f"Hook failed: {error_msg}")
+            sys.exit(1)
         except OutputDirExistsException as e:
             log.info("Project directory already exists. Skipping creation...")
             # Extract folder name from exception message

@@ -173,17 +173,21 @@ def validate(
         try:
             access = project_resources.read_resource(access_resource_path)
             dataset_meta = project_resources.read_resource(dataset_meta_file)
+            source_data = {}
+            source_data["source"] = access["source"].copy()
+            source_data["source"]["type"] = source_data["source"]["type"].lower()
+            source_data["source"]["credentials"] = access["credentials"]
+            source_data["extract_config"] = (
+                access["extract_config"] if "extract_config" in access else None
+            )
             access_contract = schemas.DataContractValidateRequest(
-                source=schemas.DatabricksSourceConnection(**access["source"]),
-                credentials=schemas.SourceAccessCredential(**access["credentials"]),
-                # TODO: Validate & select against porject pydantic model
                 project_name=project_dict["project_name"],
                 project_start_time=project_dict["project_start_time"],
-                destination_type=project_dict["destination_type"],
-                destination_format=project_dict["destination_format"],
+                destination=project_dict["destination"],
+                source=source_data["source"],
+                extract_config=source_data.get("extract_config"),
                 dataset=schemas.DatasetMetadata(**dataset_meta),
             )
-
             metadata = asyncio.run(api.validate_access(access_contract))
             validate_dataset_info = schemas.DatasetMetadata(**metadata)
 
