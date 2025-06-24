@@ -5,9 +5,9 @@ from typing import Optional, Union, Literal, Any, Dict
 from dotenv import load_dotenv, find_dotenv
 import json
 from cr8tor.core.schema import (
-    DataContractProjectRequest,
+    DataContractPublishRequest,
     DataContractValidateRequest,
-    DataContractStageTransferRequest,
+    DataContractTransferRequest,
 )
 
 
@@ -38,7 +38,9 @@ class APIClient:
         self.base_url = f"{base_url}:{port}" if port else base_url
         self.token = token
         # TODO: the micro service endpoints are http, not https yet. We need verify=False
-        self.client = httpx.AsyncClient(timeout=60 * 60, verify=False, follow_redirects=True)
+        self.client = httpx.AsyncClient(
+            timeout=60 * 60, verify=False, follow_redirects=True
+        )
 
     def get_headers(self) -> dict:
         return {
@@ -253,7 +255,7 @@ async def validate_access(access_info: DataContractValidateRequest) -> HTTPRespo
         return response.payload
 
 
-async def stage_transfer(access_info: DataContractStageTransferRequest) -> HTTPResponse:
+async def stage_transfer(access_info: DataContractTransferRequest) -> HTTPResponse:
     test = os.getenv("USE_TEST_DATA", "false").lower() == "true"
     if test:
         json_str = """{
@@ -277,10 +279,11 @@ async def stage_transfer(access_info: DataContractStageTransferRequest) -> HTTPR
             print("Success:", response)
         else:
             print("Error:", response)
+            raise Exception(response)
         return response.payload
 
 
-async def publish(access_info: DataContractProjectRequest) -> HTTPResponse:
+async def publish(access_info: DataContractPublishRequest) -> HTTPResponse:
     test = os.getenv("USE_TEST_DATA", "false").lower() == "true"
     if test:
         json_str = """{
@@ -306,6 +309,7 @@ async def publish(access_info: DataContractProjectRequest) -> HTTPResponse:
             print("Success:", response)
         else:
             print("Error:", response)
+            raise Exception(response)
         return response.payload
 
 
@@ -319,6 +323,7 @@ async def approve(project_url: str) -> HTTPResponse:
             print("Success:", response)
         else:
             print("Error:", response)
+            raise Exception(response)
         return response
 
 

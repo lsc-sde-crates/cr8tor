@@ -23,6 +23,9 @@ GitHub runners must:
 - be **Windows** type (if Unix based, then cr8tor orchestrator.yml workflow requires updates from pwsh commands to batch commands).
 
 - have a **tag** with pattern `<env>-cr8tor-vm`, e.g. `dev-cr8tor-vm`. Required by Orchestrator workflow.
+  1. `dev-cr8tor-vm`
+  2. `test-cr8tor-vm`
+  3. `prod-cr8tor-vm`
 
 - have **git** (<https://git-scm.com/downloads/win>) and **github cli** (<https://cli.github.com/>) installed.
 

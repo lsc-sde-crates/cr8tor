@@ -1,10 +1,12 @@
 """Pydantic models to validate properties of schema.org entities and other resources that will go within the RO-Crate"""
 
+from __future__ import annotations
+
 from enum import StrEnum, IntEnum
-from typing import List
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from typing import List, Annotated, Literal
+from pydantic import BaseModel, Field, HttpUrl, field_validator, Tag, model_validator
 from datetime import datetime
-from typing import Optional, Literal, Union
+from typing import Optional, Union
 
 
 ###############################################################################
@@ -184,29 +186,6 @@ class CrateMeta(StrEnum):
     Publisher: str = '<a href="https://github.com/lsc-sde-crates">LSC SDE</a>'
 
 
-class ColumnMetadata(BaseModel):
-    name: str
-    datatype: Optional[str] = None
-    description: Optional[str] = None
-
-
-class TableMetadata(BaseModel):
-    name: str
-    columns: Optional[List[ColumnMetadata]] = None
-    description: Optional[str] = None
-
-
-class DatasetMetadata(BaseModel):
-    name: str
-    schema_name: str
-    description: Optional[str] = Field(
-        description="A dataset comprising one or more tables"
-    )
-    tables: Optional[List[TableMetadata]] = None
-    staging_path: Optional[dict] = None
-    publish_path: Optional[dict] = None
-
-
 class AffiliationInfo(BaseModel):
     name: str = Field(description="Name of affiliation e.g. Lancaster University")
     url: str = Field(description="URL of affiliate organisation")
@@ -232,75 +211,145 @@ class BagitInfo(BaseModel):
 
 
 #
-# User-defined data 'access' information from resources/access toml
+# User-defined data 'dataset' information from resources/metadata toml
+# The models are also used by the cr8tor Publisher Metadata and Publish microservices
 #
 
 
-class DataSourceConnection(BaseModel):
-    name: Optional[str] = None
-    type: str = Field(description="Data source type")
+class ColumnMetadata(BaseModel):
+    name: str
+    datatype: Optional[str] = None
+    description: Optional[str] = None
 
 
-class DatabricksSourceConnection(DataSourceConnection):
-    host_url: str = Field(description="dbs workspace URL")
-    port: int = Field(
-        default=443, description="Port for the db cluster (defaults to 443)"
+class TableMetadata(BaseModel):
+    name: str
+    columns: Optional[List[ColumnMetadata]] = None
+    description: Optional[str] = None
+
+
+class DatasetMetadata(BaseModel):
+    name: str | None = Field(
+        default=None,
+        description="Name of the dataset",
     )
-    catalog: str = Field(description="Unity catalog name")
-    http_path: str = Field(description="Schema name in UC")
+    schema_name: str
+    description: Optional[str] = Field(
+        default=None, description="A dataset comprising one or more tables"
+    )
+    tables: Optional[List[TableMetadata]] = None
+    staging_path: Optional[dict] = None
+    publish_path: Optional[dict] = None
 
 
-class SourceAccessCredential(BaseModel):
+#
+# User-defined data 'access' information from resources/access toml
+# The models are also used by the cr8tor Publisher Metadata and Publish microservices
+#
+
+
+class SourceCredentials(BaseModel):
+    """Base model for source access credentials."""
+
     provider: str | None = Field(
         default=None,
         description="Service providing the secrets e.g. KeyVault",
     )
+    username_key: str = Field(
+        description="Key name in secrets provider for username/client ID",
+    )
+    password_key: str = Field(
+        description="Key name in secrets provider for password/secret",
+    )
+
+
+class DatabricksSourceAccessCredential(SourceCredentials):
+    """Model for Databricks source access credentials."""
+
     spn_clientid: str = Field(
-        description="Key name in secrets provider to access spn clientid ",
+        description="Key name in secrets provider to access spn clientid",
     )
     spn_secret: str = Field(
         description="Key name in secrets provider to access spn secret",
     )
 
-
-# class DataPublishContract(BaseModel):
-#     """Model required for all publish endpoints."""
-
-#     project_name: str = (
-#         Field(description="Project name (without whitespaces)", pattern=r"^\S+$"),
-#     )
-#     project_start_time: str = (
-#         Field(
-#             description="Start time of the LSC project action. Format: YYYYMMDD_HHMMSS",
-#             pattern=r"^\d{8}_\d{6}$",
-#         ),
-#     )
-#     destination_type: str = Field(
-#         description="Target SDE storage account where data should be loaded",
-#         enum=["LSC", "NW"],
-#     )
-#     destination_format: Optional[str] = Field(
-#         description="Target format for the data to be loaded",
-#         default=None,
-#     )
+    # Override the base fields to use Databricks-specific naming
+    username_key: str = Field(default="", description="Not used for Databricks")
+    password_key: str = Field(default="", description="Not used for Databricks")
 
 
-# class ValidateDataContractRequest(DataPublishContract):
-#     source: Union[DataSourceConnection, DatabricksSourceConnection] = Field(
-#         description="db connection details definition"
-#     )
-#     credentials: SourceAccessCredential = Field(
-#         description="Auth provider and secrets key"
-#     )
-#     dataset: DatasetMetadata = Field(
-#         description="Metadata for the requested tables",
-#     )
+class DatabricksSourceConnection(BaseModel):
+    """Model for Databricks source connection."""
+
+    type: Literal["databrickssql"] = Field(description="Databricks SQL type")
+    host_url: str = Field(description="Databricks host URL")
+    http_path: str = Field(description="HTTP path for Databricks SQL warehouse")
+    port: int = Field(description="Port number", default=443)
+    catalog: str = Field(description="Databricks catalog name")
+    credentials: DatabricksSourceAccessCredential = Field(
+        description="Databricks access credentials",
+    )
+
+
+class SQLSourceAccessCredential(SourceCredentials):
+    """Model for SQL source access credentials - inherits default behavior."""
+
+
+class SQLSourceConnection(BaseModel):
+    """Model for SQL source connection."""
+
+    type: Literal["mysql", "postgresql", "sqlserver", "mssql"] = Field(
+        description="SQL database type",
+    )
+    host_url: str = Field(
+        description="Database host URL, e.g. mysql-rfam-public.ebi.ac.uk",
+    )
+    database: str = Field(description="Database name")
+    port: int = Field(description="Database port")
+    credentials: SQLSourceAccessCredential = Field(
+        description="SQL database access credentials",
+    )
+
+
+SourceConnection = Annotated[
+    Annotated[SQLSourceConnection, Tag("postgresql")]
+    | Annotated[DatabricksSourceConnection, Tag("databrickssql")],
+    Field(discriminator="type"),
+]
 
 
 #
-# Service Request Models
+# User-defined data 'project' information from resources/governance toml
+# The models are also used by the cr8tor Publisher Metadata and Publish microservices
 #
-class DataContractProjectRequest(BaseModel):
+
+
+class BaseDestination(BaseModel):
+    name: str = Field(default="", description="Destination name")
+    format: str = Field(default="", description="Output format")
+
+
+class FilestoreDestination(BaseDestination):
+    type: Literal["filestore"] = Field(description="Filestore destination")
+    name: str = Field(
+        description="Name of the filestore destination. Must match the mount point name.",
+    )
+    format: Literal["csv", "duckdb"] = Field(description="Output file format")
+
+
+class PostgreSQLDestination(BaseDestination):
+    type: Literal["postgresql"] = Field(description="PostgreSQL database destination")
+    format: Literal["sql"] = Field(description="Output file format", default="sql")
+
+
+Destination = Annotated[
+    Annotated[FilestoreDestination, Tag("filestore")]
+    | Annotated[PostgreSQLDestination, Tag("postgresql")],
+    Field(discriminator="type"),
+]
+
+
+class DataContractBaseProjectRequest(BaseModel):
     project_name: str = (
         Field(description="Project name (without whitespaces)", pattern=r"^\S+$"),
     )
@@ -310,38 +359,44 @@ class DataContractProjectRequest(BaseModel):
             pattern=r"^\d{8}_\d{6}$",
         ),
     )
-    destination_type: str = Field(
-        description="Target SDE storage account where data should be loaded",
-        enum=["LSC", "NW"],
+
+
+class DataContractPublishRequest(DataContractBaseProjectRequest):
+    destination: Destination = Field(description="Target destination configuration")
+
+
+class ExtractConfig(BaseModel):
+    """Model for DLTHub data extraction configuration."""
+
+    backend_engine: str = Field(
+        description="DLTHub backend engine to use for data extraction",
+        enum=["pyarrow", "sqlalchemy", "pandas"],
+        default="pyarrow",
     )
 
 
-class DataContractAccessRequest(DataContractProjectRequest):
-    destination_format: str = Field(
-        description="Target format for the data to be loaded",
-        enum=["CSV", "DUCKDB"],
+class SourceConnectionModel(BaseModel):
+    extract_config: ExtractConfig | None = Field(
+        default_factory=ExtractConfig,
+        description="Optional configuration for the data extraction engine dltHub",
     )
-    source: Union[DataSourceConnection, DatabricksSourceConnection] = Field(
-        description="db connection details definition"
-    )
-    credentials: SourceAccessCredential = Field(
-        description="Auth provider and secrets key"
-    )
+    source: SourceConnection = Field(description="Source connection configuration")
 
 
-class DataContractValidateRequest(DataContractAccessRequest):
+class DataContractSourceAccessRequest(
+    DataContractPublishRequest, SourceConnectionModel
+):
+    pass
+
+
+class DataContractTransferRequest(DataContractSourceAccessRequest):
     dataset: DatasetMetadata = Field(
         description="Metadata for the requested tables",
     )
 
 
-#
-# TODO: Ask Piotr to make this 'dataset' not metadata like validate req
-#
-class DataContractStageTransferRequest(DataContractAccessRequest):
-    metadata: DatasetMetadata = Field(
-        description="Metadata for the requested tables",
-    )
+class DataContractValidateRequest(DataContractTransferRequest):
+    pass
 
 
 #
@@ -349,22 +404,73 @@ class DataContractStageTransferRequest(DataContractAccessRequest):
 #
 
 
-class StageTransferLocation(BaseModel):
+class StageTransferLocationFilestore(BaseModel):
     file_path: str
 
 
+class StageTransferLocationSqlDatabase(BaseModel):
+    table_name: str
+
+
 class StageTransferPayload(BaseModel):
-    data_retrieved: List[StageTransferLocation]
+    destination_type: Literal["filestore", "postgresql"]
+    data_retrieved: List[
+        Union[StageTransferLocationFilestore, StageTransferLocationSqlDatabase]
+    ]
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_data_retrieved_by_type(cls, values):
+        destination_type = values.get("destination_type")
+        data = values.get("data_retrieved", [])
+
+        if destination_type == "filestore":
+            values["data_retrieved"] = [
+                StageTransferLocationFilestore(**item) for item in data
+            ]
+        elif destination_type == "postgresql":
+            values["data_retrieved"] = [
+                StageTransferLocationSqlDatabase(**item) for item in data
+            ]
+        else:
+            raise ValueError(f"Unsupported destination_type: {destination_type}")
+        return values
 
 
-class PublishLocation(BaseModel):
+class PublishLocationFilestore(BaseModel):
     file_path: str
     hash_value: str
     total_bytes: int
 
 
+class PublishLocationSqlDatabase(BaseModel):
+    postgresql_table_name: str
+    opal_resource_name: str
+    opal_project_name: str
+    opal_group_name: str
+
+
 class PublishPayload(BaseModel):
-    data_published: List[PublishLocation]
+    destination_type: Literal["filestore", "postgresql"]
+    data_published: List[Union[PublishLocationFilestore, PublishLocationSqlDatabase]]
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_data_published_by_type(cls, values):
+        destination_type = values.get("destination_type")
+        data = values.get("data_published", [])
+
+        if destination_type == "filestore":
+            values["data_published"] = [
+                PublishLocationFilestore(**item) for item in data
+            ]
+        elif destination_type == "postgresql":
+            values["data_published"] = [
+                PublishLocationSqlDatabase(**item) for item in data
+            ]
+        else:
+            raise ValueError(f"Unsupported destination_type: {destination_type}")
+        return values
 
 
 class HTTPPayloadResponse(BaseModel):

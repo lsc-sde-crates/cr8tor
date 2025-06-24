@@ -98,27 +98,31 @@ def stage_transfer(
 
         try:
             access = project_resources.read_resource(access_resource_path)
-            access_contract = schemas.DataContractStageTransferRequest(
-                source=schemas.DatabricksSourceConnection(**access["source"]),
-                credentials=schemas.SourceAccessCredential(**access["credentials"]),
-                # TODO: Validate & select against porject pydantic model
+            source_data = {}
+            source_data["source"] = access["source"].copy()
+            source_data["source"]["type"] = source_data["source"]["type"].lower()
+            source_data["source"]["credentials"] = access["credentials"]
+            source_data["extract_config"] = (
+                access["extract_config"] if "extract_config" in access else None
+            )
+            access_contract = schemas.DataContractTransferRequest(
                 project_name=project_info["project"]["project_name"],
                 project_start_time=project_info["project"]["project_start_time"],
-                destination_type=project_info["project"]["destination_type"],
-                destination_format=project_info["project"]["destination_format"],
-                metadata=dataset_props,
+                destination=project_info["project"]["destination"],
+                source=source_data["source"],
+                dataset=dataset_props,
             )
 
             resp_dict = asyncio.run(api.stage_transfer(access_contract))
+            resp_dict["destination_type"] = project_info["project"]["destination"][
+                "type"
+            ]
             validate_resp = schemas.StageTransferPayload(**resp_dict)
 
             # TODO: Handle multiple staging locations
             # TODO: Add error response handler for action error property
 
-            if (
-                validate_resp.data_retrieved
-                and validate_resp.data_retrieved[0].file_path
-            ):
+            if validate_resp.data_retrieved:
                 staging_location_dict = validate_resp.data_retrieved[0].model_dump()
                 staging_location_dict["@id"] = str(uuid.uuid4())
 
@@ -132,7 +136,7 @@ def stage_transfer(
             cli_utils.close_create_action_command(
                 command_type=schemas.Cr8torCommandType.STAGE_TRANSFER,
                 start_time=start_time,
-                project_id={project_info["project"]["id"]},
+                project_id=project_info["project"]["id"],
                 agent=agent,
                 project_resource_path=project_resource_path,
                 resources_dir=resources_dir,

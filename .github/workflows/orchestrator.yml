@@ -228,7 +228,7 @@ jobs:
                 $env:SSL_CERT_FILE = $certPath
 
                 # run cr8tor stage-transfer and capture the error message
-                $errorMessage = cr8tor stage-transfer -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String
+                $errorMessage = cr8tor stage-transfer -a GithubAction -i ./resources 2>&1 | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | Out-String -Stream
                 if ($LASTEXITCODE -ne 0) {
                   echo "::error::Cr8tor stage-transfer failed: $errorMessage"
                   echo "CR8TOR_ERROR=1" | Out-File -FilePath $env:GITHUB_ENV -Append
