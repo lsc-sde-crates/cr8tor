@@ -212,6 +212,7 @@ class BagitInfo(BaseModel):
 
 #
 # User-defined data 'dataset' information from resources/metadata toml
+# The models are also used by the cr8tor Publisher Metadata and Publish microservices
 #
 
 
@@ -228,10 +229,13 @@ class TableMetadata(BaseModel):
 
 
 class DatasetMetadata(BaseModel):
-    name: str
+    name: str | None = Field(
+        default=None,
+        description="Name of the dataset",
+    )
     schema_name: str
     description: Optional[str] = Field(
-        description="A dataset comprising one or more tables"
+        default=None, description="A dataset comprising one or more tables"
     )
     tables: Optional[List[TableMetadata]] = None
     staging_path: Optional[dict] = None
@@ -240,6 +244,7 @@ class DatasetMetadata(BaseModel):
 
 #
 # User-defined data 'access' information from resources/access toml
+# The models are also used by the cr8tor Publisher Metadata and Publish microservices
 #
 
 
@@ -315,6 +320,7 @@ SourceConnection = Annotated[
 
 #
 # User-defined data 'project' information from resources/governance toml
+# The models are also used by the cr8tor Publisher Metadata and Publish microservices
 #
 
 

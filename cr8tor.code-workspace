@@ -8,6 +8,12 @@
         },
         {
             "path": "../cr8-example-project"
+        },
+        {
+            "path": "../cr8-example-project-azure-test"
+        },
+        {
+            "path": "../cr8-example-project-azure-prod"
         }
     ]
 }
