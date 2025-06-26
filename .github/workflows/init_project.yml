@@ -8,6 +8,7 @@ on:
             type: string
             required: true
         environment:
+          description: 'Target environment for the project'
           required: false
           default: 'PROD'
           type: choice
@@ -15,11 +16,21 @@ on:
             - 'PROD'
             - 'DEV'
             - 'TEST'
+        runner_os:
+          description: 'Target runner OS for GitHub Actions workflows'
+          required: false
+          default: 'Windows'
+          type: choice
+          options:
+            - 'Windows'
+            - 'Linux'
         cr8tor_branch:
+          description: 'CR8TOR branch to use'
           required: false
           default: 'main'
           type: string
         cookiecutter_branch:
+          description: 'Cookiecutter template branch to use'
           required: false
           default: 'main'
           type: string
@@ -50,4 +61,4 @@ jobs:
           git config --global user.email "${{ github.repository_owner }}-actions@github.com"
 
           ORG=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)
-          cr8tor initiate -t https://github.com/${{ github.repository_owner }}/cr8-cookiecutter/ -chk "${{inputs.cookiecutter_branch}}" -cb "${{inputs.cr8tor_branch}}" -n "${{inputs.new_project_name}}" -org $ORG -e "${{inputs.environment}}" --push
+          cr8tor initiate -t https://github.com/${{ github.repository_owner }}/cr8-cookiecutter/ -chk "${{inputs.cookiecutter_branch}}" -cb "${{inputs.cr8tor_branch}}" -n "${{inputs.new_project_name}}" -org $ORG -e "${{inputs.environment}}" -ros "${{inputs.runner_os}}" --push

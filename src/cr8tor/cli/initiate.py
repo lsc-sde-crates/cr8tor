@@ -73,6 +73,15 @@ def initiate(
             help="For developing and debugging. Provide the github cr8tor branch that should be used in orchestration layer.",
         ),
     ] = None,
+    runner_os: Annotated[
+        str,
+        typer.Option(
+            "-ros",
+            help="Target runner OS for GitHub Actions workflows. Must be one of: Windows, Linux.",
+            case_sensitive=False,
+            show_choices=True,
+        ),
+    ] = "Windows",
 ):
     """
     Initializes a new CR8 project using a specified cookiecutter template.
@@ -86,6 +95,7 @@ def initiate(
         project_name (str, optional): The name of the project to be created. If provided, cookiecutter will skip the prompt for other values.
         environment (str): The target environment (DEV, TEST, PROD). Defaults to "PROD".
         cr8tor_branch (str, optional): For development and debugging. Specifies the GitHub cr8tor branch to be used in the orchestration layer.
+        runner_os (str): The target runner OS for GitHub Actions workflows (Windows, Linux). Defaults to "Windows".
 
     This command performs the following actions:
     - Generates a new project by applying the specified cookiecutter template.
@@ -98,6 +108,8 @@ def initiate(
         cr8tor initiate -t path-to-local-cr8-cookiecutter-dir
 
         cr8tor initiate -t path-to-local-cr8-cookiecutter-dir -n "my-project" -org "lsc-sde-crates" --push
+
+        cr8tor initiate -t path-to-local-cr8-cookiecutter-dir -n "my-project" -org "lsc-sde-crates" -ros "Linux" --push
     """
     valid_environments = ["DEV", "TEST", "PROD"]
     if environment.upper() not in valid_environments:
@@ -105,11 +117,16 @@ def initiate(
             f"Invalid environment. Choose from {valid_environments}."
         )
 
+    valid_runner_os = ["Windows", "Linux"]
+    if runner_os not in valid_runner_os:
+        raise typer.BadParameter(f"Invalid runner OS. Choose from {valid_runner_os}.")
+
     extra_context = {
         "__timestamp": datetime.now().isoformat(timespec="seconds"),
         "__cr8_cc_template": template_path,
         "environment": environment.upper(),
         "__github_cr8tor_branch": cr8tor_branch,
+        "runner_os": runner_os,
     }
 
     # Generate the project with cookiecutter
