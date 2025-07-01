@@ -27,6 +27,9 @@ nav:
     - Branching Strategy: cr8tor-cli/branching-strategy.md
   - Cr8tor Publisher App:
     - Overview: cr8tor-publisher/overview.md
+    - Approval Service: cr8tor-publisher/approval-service.md
+    - Metadata Service: cr8tor-publisher/metadata-service.md
+    - Publish Service: cr8tor-publisher/publish-service.md
   - CookieCutter Template:
     - Overview: cr8tor-cookiecutter/overview.md
     - Branching Strategy: cr8tor-cookiecutter/branching-strategy.md

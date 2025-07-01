@@ -47,7 +47,7 @@ The secrets must be stored at Organisation level and follow the name pattern:
 
 - `APPROVALS_API_TOKEN_<DEV/TEST/PROD>`
 
-- `APPROVALS_HOST_<DEV/TEST/PROD>`
+- `APPROVALS_HOST_<DEV/TEST/PROD>`, for example *http://localhost*
 
 ![organisation secrets for approval service](./../assets/screenshots/organisation_environments_secrets.png)
 

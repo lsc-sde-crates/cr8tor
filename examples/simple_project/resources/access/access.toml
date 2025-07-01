@@ -1,6 +1,6 @@
 [source]
 name = "Cr8tor PoC Connection"
-type = "DatabricksSQL"
+type = "databrickssql"
 host_url = "https://adb-1868816176859647.7.azuredatabricks.net"
 port = 443
 catalog = "rde_dev"

@@ -1,0 +1,11 @@
+[source]
+name = "MSSQL Database Connection"
+type = "mssql"
+host_url = "mssql-server.example.com"
+database = "my_database"
+port = 1433
+
+[credentials]
+provider = "AzureKeyVault"
+username_key = "mssql-username-secret"
+password_key = "mssql-password-secret"
