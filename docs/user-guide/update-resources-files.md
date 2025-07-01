@@ -67,30 +67,69 @@ The `access/access` contains the following fields, which must be populated with 
 
 **[source]**
 
-The required source fields depends on the type of the source. Currently, the Solution supports extracting data from the Databricks SQL warehouse endpoint.
-The required fields for that type (DatabricksSQL) are validated by cr8tor and cr8tor-publisher app (using pydantic models).
+The required source fields depend on the type of the source. The Solution supports extracting data from multiple source types including Databricks SQL warehouse endpoints and various SQL databases.
+The required fields for each type are validated by cr8tor and cr8tor-publisher app (using pydantic models).
 
-**[source]**
+### Supported Source Types
+
+The following source types are currently supported:
+
+- `databrickssql` - Databricks Unity Catalog
+- `postgresql` - PostgreSQL databases
+- `mysql` - MySQL databases
+- `mssql` - Microsoft SQL Server databases
+- `sqlserver` - Microsoft SQL Server databases (alternative identifier)
+
+### Common Source Fields
 
 | Field         | Description                                                                                     |
 | :------------ | :---------------------------------------------------------------------------------------------- |
-| `name`        | Name of the data source, e.g., *`Cr8tor POC Connection`*.                                       |
-| `type`        | Must match `cr8tor-publisher` supported data types. Currently only: [*DatabricksSQL*].          |
-| `host_url`    | Host URL of the Databricks workspace, e.g., *`https://adb-1868816176859647.7.azuredatabricks.net`*. |
+| `name`        | Name of the data source, e.g., *`My Database Connection`*.                                     |
+| `type`        | Must match one of the supported source types listed above.                                     |
+| `host_url`    | Host URL of the database server.                                                               |
+
+### Databricks Unity Catalog (databrickssql)
+
+For Databricks Unity Catalog sources, the following additional fields are required:
+
+| Field         | Description                                                                                     |
+| :------------ | :---------------------------------------------------------------------------------------------- |
 | `http_path`   | HTTP path for the Databricks SQL Warehouse endpoint, e.g., `/sql/1.0/warehouses/0aec44b2e70e201d`. |
 | `port`        | Optional. Default is 443 for Databricks SQL endpoints.                                          |
 | `catalog`     | Databricks Unity Catalog name from which data will be extracted.                                |
 
+### SQL Databases (postgresql, mysql, mssql)
+
+For SQL database sources, the following additional fields are required:
+
+| Field         | Description                                                                                     |
+| :------------ | :---------------------------------------------------------------------------------------------- |
+| `database`    | Database name to connect to.                                                                    |
+| `port`        | Database connection port (varies by database type).                                            |
+
 **[credentials]**
 
-Credentials fields are tied to the source we want to extract data from.
-Currently, for Databricks SQL endpoint, we use Databricks Service Principal (SPN). [**See here how to create a new SPN and assign required roles and permissions.**](./../developer-guide/source-setup.md)
+Credentials fields are tied to the source type. Different source types require different credential configurations:
+
+### Databricks Unity Catalog Credentials
+
+For Databricks SQL endpoints, we use Databricks Service Principal (SPN). [**See here how to create a new SPN and assign required roles and permissions.**](./../developer-guide/source-setup.md)
 
 | Field            | Description                                                                                     |
 | :--------------- | :---------------------------------------------------------------------------------------------- |
 | `provider`       | Credential provider, e.g., *`AzureKeyVault`*.                                                   |
-| `spn_clientid`   | Service principal client ID, e.g., *`databricksspnclientid`*.                                   |
-| `spn_secret`     | Service principal secret, e.g., *`databricksspnsecret`*.                                        |
+| `spn_clientid`   | Key name in secrets provider containing Service Principal client ID, e.g., *`databricksspnclientid`*. |
+| `spn_secret`     | Key name in secrets provider containing Service Principal secret, e.g., *`databricksspnsecret`*. |
+
+### SQL Database Credentials
+
+For SQL database sources (PostgreSQL, MySQL, MSSQL), we use username/password authentication:
+
+| Field            | Description                                                                                     |
+| :--------------- | :---------------------------------------------------------------------------------------------- |
+| `provider`       | Credential provider, e.g., *`AzureKeyVault`*.                                                   |
+| `username_key`   | Key name in secrets provider containing database username, e.g., *`db-username`*.              |
+| `password_key`   | Key name in secrets provider containing database password, e.g., *`db-password`*.              |
 
 ## metadata/dataset
 

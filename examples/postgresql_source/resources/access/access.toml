@@ -1,0 +1,11 @@
+[source]
+name = "PostgreSQL Database Connection"
+type = "postgresql"
+host_url = "postgres-server.example.com"
+database = "my_database"
+port = 5432
+
+[credentials]
+provider = "AzureKeyVault"
+username_key = "postgres-username-secret"
+password_key = "postgres-password-secret"
