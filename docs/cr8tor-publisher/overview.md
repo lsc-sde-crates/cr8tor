@@ -85,10 +85,12 @@ When the project destination is configured as `postgresql`, the Publish Service:
 When the project destination is configured as `filestore`, the Publish Service:
 
 - **File-based Storage**: Loads data to the mounted filestore rather than a database
+- **Destination-Specific Storage**: Uses the destination name to determine the target storage location via environment variables (e.g., `TARGET_STORAGE_ACCOUNT_{DESTINATION_NAME}_SDE_MNT_PATH`)
 - **Two-stage Process**:
   1. **Staging Phase**: Data is first written to a staging container/filestore
   2. **Production Phase**: Data is then moved from staging to the production container/filestore
 - **Format Options**: Data can be packaged in multiple formats (CSV or DuckDB) for flexible consumption
+- **BagIt Packaging**: Files are organized following BagIt standards with checksums for integrity verification
 
 This destination-specific behavior ensures optimal data handling and access patterns for different target environments while maintaining consistent security and governance standards.
 
@@ -117,7 +119,36 @@ When using PostgreSQL as the destination, the following environment variables ar
 
 ### Filestore Destination Environment Variables
 
-When using filestore as the destination, the system uses mounted filesystem paths and doesn't require additional destination-specific environment variables beyond the standard storage mount configuration.
+When using filestore as the destination, the system requires destination-specific environment variables for storage mount paths:
+
+**Storage Mount Configuration:**
+
+- `TARGET_STORAGE_ACCOUNT_{DESTINATION_NAME}_SDE_MNT_PATH` - Base path to the mounted storage account for the specific destination
+
+Where `{DESTINATION_NAME}` is the uppercase version of the destination name specified in the project configuration. For example:
+
+- If destination name is "LSC", the environment variable would be `TARGET_STORAGE_ACCOUNT_LSC_SDE_MNT_PATH`
+- If destination name is "NW", the environment variable would be `TARGET_STORAGE_ACCOUNT_NW_SDE_MNT_PATH`
+
+The system creates the following directory structure within the mounted storage:
+
+```text
+{base_path}/
+├── staging/
+│   └── {project_name}/
+│       └── {project_start_time}/
+│           └── data/outputs/
+└── production/
+    └── {project_name}/
+        └── {project_start_time}/
+            └── data/outputs/
+```
+
+**Additional DLT Configuration:**
+
+- `DLTHUB_PIPELINE_WORKING_DIR` - Working directory for DLT Hub pipeline operations
+- `DATA_WRITER__FILE_MAX_BYTES` - Maximum file size in bytes (default: 100MB)
+- `DATA_WRITER__DISABLE_COMPRESSION` - Whether to disable compression for CSV files
 
 ### OPAL Integration Details
 
